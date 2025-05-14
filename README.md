@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Running React on Replit
 
 [React](https://reactjs.org/) is a popular JavaScript library for building user interfaces.
@@ -15,3 +16,7 @@ By default, Replit runs the `dev` script, but you can configure it by changing t
 ### Typescript
 
 Just rename any file from `.jsx` to `.tsx`. You can also try our [TypeScript Template](https://replit.com/@replit/React-TypeScript)
+=======
+# Proyecto-Final-BD-Uguee
+Bienvendio al proyecto final de base de datos
+>>>>>>> b07ab87e90033158fddb66b22f5c2b7b3d9307f3
