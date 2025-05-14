@@ -1,9 +1,63 @@
 // RegisterDialog.js
 import React, { useState, useEffect, useRef } from 'react';
 import './RegisterDialog.css';
+import supabase from '../../supabaseClient';
 
 export default function RegisterDialog({ open, onOpenChange }) {
   const [role, setRole] = useState('pasajero');
+
+  const [formData, setFormData] = useState({
+  nombre: '',
+  apellido: '',
+  universidad: '',
+  codigo_estudiantil: '',
+  correo_institucional: '',
+  direccion: '',
+  ciudad: '',
+  telefono: ''
+  });
+  
+  const [mensaje, setMensaje] = useState('');
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+
+    const errors = [];
+    if (role === 'pasajero') {
+      if (!nombre || !apellido || !codigoEstudiantil || !universidad || !correoInstitucional || !direccion || !ciudad || !telefono || !documentoIdentidad) {
+        errors.push('Completa todos los campos de pasajero');
+      }
+    } else {
+      if (!nombreUniversidad || !direccionUniversidad || !sede || !ciudadUniversidad || !codigoInstitucional || !colorPrimario || !colorSecundario || !logoUniversidad || !documentosAutorizacion) {
+        errors.push('Completa todos los campos de universidad');
+      }
+    }
+    if (errors.length > 0) {
+      alert(errors[0]);
+      return;
+    }
+    // Submit stub
+    console.log('Submitting', role === 'pasajero' ? { nombre, apellido } : { nombreUniversidad });
+    onOpenChange(false);
+
+    e.preventDefault();
+
+    const { data, error } = await supabase
+      .from('usuario')
+      .insert([formData]);
+
+    if (error) {
+      console.error('Error al guardar encuesta:', error);
+      setMensaje('Error al guardar');
+    } else {
+      setMensaje('Encuesta guardada con éxito');
+      setFormData({ nombre: '', edad: '', opinion: '' }); // limpiar
+    }
+  };
 
   // Pasajero fields
   const [nombre, setNombre] = useState('');
@@ -42,27 +96,6 @@ export default function RegisterDialog({ open, onOpenChange }) {
 
   const handleFileChange = (e, setter) => {
     if (e.target.files && e.target.files[0]) setter(e.target.files[0]);
-  };
-
-  const handleSubmit = () => {
-    // Simple validation
-    const errors = [];
-    if (role === 'pasajero') {
-      if (!nombre || !apellido || !codigoEstudiantil || !universidad || !correoInstitucional || !direccion || !ciudad || !telefono || !documentoIdentidad) {
-        errors.push('Completa todos los campos de pasajero');
-      }
-    } else {
-      if (!nombreUniversidad || !direccionUniversidad || !sede || !ciudadUniversidad || !codigoInstitucional || !colorPrimario || !colorSecundario || !logoUniversidad || !documentosAutorizacion) {
-        errors.push('Completa todos los campos de universidad');
-      }
-    }
-    if (errors.length > 0) {
-      alert(errors[0]);
-      return;
-    }
-    // Submit stub
-    console.log('Submitting', role === 'pasajero' ? { nombre, apellido } : { nombreUniversidad });
-    onOpenChange(false);
   };
 
   if (!open) return null;
