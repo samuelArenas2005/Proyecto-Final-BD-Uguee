@@ -129,16 +129,16 @@ export default function RegisterDialog({ open, onOpenChange }) {
               <div className="rd-two-col">
                 <div className="rd-field">
                   <label>Nombre</label>
-                  <input value={nombre} onChange={e => setNombre(e.target.value)} />
+                  <input value={formData.nombre} onChange={handleChange} />
                 </div>
                 <div className="rd-field">
                   <label>Apellido</label>
-                  <input value={apellido} onChange={e => setApellido(e.target.value)} />
+                  <input value={formData.apellido} onChange={handleChange} />
                 </div>
               </div>
               <div className="rd-field">
                 <label>Universidad</label>
-                <select value={universidad} onChange={e => setUniversidad(e.target.value)}>
+                <select value={formData.universidad} onChange={handleChange}>
                   <option value="">Selecciona...</option>
                   <option>Universidad del Valle</option>
                   <option>Universidad Nacional</option>
@@ -150,19 +150,19 @@ export default function RegisterDialog({ open, onOpenChange }) {
               </div>
               <div className="rd-field">
                 <label>Código estudiantil</label>
-                <input value={codigoEstudiantil} onChange={e => setCodigoEstudiantil(e.target.value)} />
+                <input value={formData.codigo_estudiantil} onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Correo institucional</label>
-                <input type="email" value={correoInstitucional} onChange={e => setCorreoInstitucional(e.target.value)} />
+                <input type="email" value={formData.correo_institucional} onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Dirección</label>
-                <input value={direccion} onChange={e => setDireccion(e.target.value)} />
+                <input value={formData.direccion} onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Ciudad</label>
-                <select value={ciudad} onChange={e => setCiudad(e.target.value)}>
+                <select value={formData.ciudad} onChange={handleChange}>
                   <option value="">Selecciona...</option>
                   <option>Bogotá</option>
                   <option>Medellín</option>
@@ -172,7 +172,7 @@ export default function RegisterDialog({ open, onOpenChange }) {
               </div>
               <div className="rd-field">
                 <label>Teléfono</label>
-                <input value={telefono} onChange={e => setTelefono(e.target.value)} />
+                <input value={formData.telefono} onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Documento identidad</label>
