@@ -3,10 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './RegisterDialog.css';
 import {supabase} from '../../supabaseClient';
 
-export default function RegisterDialog({ open, onOpenChange }) {
-  const [role, setRole] = useState('pasajero');
-
-  const [formData, setFormData] = useState({
+const initialFormData = {
   nombre: '',
   apellido: '',
   universidad: '',
@@ -15,49 +12,61 @@ export default function RegisterDialog({ open, onOpenChange }) {
   direccion: '',
   ciudad: '',
   telefono: ''
-  });
+};
+
+export default function RegisterDialog({ open, onOpenChange }) {
+  
+  
+  const [formData, setFormData] = useState(initialFormData);
+  const [role, setRole] = useState('pasajero');
+
+  
   
   const [mensaje, setMensaje] = useState('');
 
   const handleChange = (e) => {
+   e.preventDefault();
     const { name, value } = e.target;
+      console.log(`Nombre: ${name}, Valor: ${value}`);
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
+    
+  e.preventDefault();                         // ① prevención al inicio
 
-    const errors = [];
-    if (role === 'pasajero') {
-      if (!nombre || !apellido || !codigoEstudiantil || !universidad || !correoInstitucional || !direccion || !ciudad || !telefono || !documentoIdentidad) {
-        errors.push('Completa todos los campos de pasajero');
-      }
-    } else {
-      if (!nombreUniversidad || !direccionUniversidad || !sede || !ciudadUniversidad || !codigoInstitucional || !colorPrimario || !colorSecundario || !logoUniversidad || !documentosAutorizacion) {
-        errors.push('Completa todos los campos de universidad');
-      }
+  // ② validaciones
+  const errors = [];
+  if (role === 'pasajero') {
+    if (Object.values(formData).some(value => !value)) {
+  errors.push('Completa todos los campos de pasajero');
+}
+  } else {
+    if (!nombreUniversidad || !direccionUniversidad /* etc */) {
+      errors.push('Completa todos los campos de universidad');
     }
-    if (errors.length > 0) {
-      alert(errors[0]);
-      return;
-    }
-    // Submit stub
-    console.log('Submitting', role === 'pasajero' ? { nombre, apellido } : { nombreUniversidad });
-    onOpenChange(false);
+  }
+  if (errors.length) {
+    return alert(errors[0]);
+  }
 
-    e.preventDefault();
+   console.log(formData)
 
-    const { data, error } = await supabase
-      .from('usuario')
-      .insert([formData]);
+  
+  const { data, error } = await supabase
+    .from('usuario')
+    .insert([formData]);
 
-    if (error) {
-      console.error('Error al guardar encuesta:', error);
-      setMensaje('Error al guardar');
-    } else {
-      setMensaje('Encuesta guardada con éxito');
-      setFormData({ nombre: '', edad: '', opinion: '' }); // limpiar
-    }
-  };
+  if (error) {
+    console.error('Error al guardar usuario:', error);
+    setMensaje('Error al guardar');
+    return;
+  }
+
+  setMensaje('Usuario guardado con éxito');
+  setFormData(initialFormData);               // ⑤ limpiar todo el form
+  onOpenChange(false);                        // ⑥ cerrar modal *después* de la petición
+};
 
   // Pasajero fields
   const [nombre, setNombre] = useState('');
@@ -84,6 +93,7 @@ export default function RegisterDialog({ open, onOpenChange }) {
   const modalRef = useRef();
 
   useEffect(() => {
+    
     function handleClickOutside(e) {
       if (modalRef.current && !modalRef.current.contains(e.target)) {
         onOpenChange(false);
@@ -125,20 +135,20 @@ export default function RegisterDialog({ open, onOpenChange }) {
 
         <div className="rd-content">
           {role === 'pasajero' && (
-            <form className="rd-form" onSubmit={e => { e.preventDefault(); handleSubmit(); }}>
+            <form className="rd-form" onSubmit={e => { e.preventDefault(); handleSubmit(e); }}>
               <div className="rd-two-col">
                 <div className="rd-field">
                   <label>Nombre</label>
-                  <input value={formData.nombre} onChange={handleChange} />
+                  <input value={formData.nombre} name="nombre" onChange={handleChange} />
                 </div>
                 <div className="rd-field">
                   <label>Apellido</label>
-                  <input value={formData.apellido} onChange={handleChange} />
+                  <input value={formData.apellido} name="apellido" onChange={handleChange} />
                 </div>
               </div>
               <div className="rd-field">
                 <label>Universidad</label>
-                <select value={formData.universidad} onChange={handleChange}>
+                <select value={formData.universidad} name= "universidad" onChange={handleChange}>
                   <option value="">Selecciona...</option>
                   <option>Universidad del Valle</option>
                   <option>Universidad Nacional</option>
@@ -150,19 +160,19 @@ export default function RegisterDialog({ open, onOpenChange }) {
               </div>
               <div className="rd-field">
                 <label>Código estudiantil</label>
-                <input value={formData.codigo_estudiantil} onChange={handleChange} />
+                <input value={formData.codigo_estudiantil} name= "codigo_estudiantil" onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Correo institucional</label>
-                <input type="email" value={formData.correo_institucional} onChange={handleChange} />
+                <input type="email" value={formData.correo_institucional} name="correo_institucional" onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Dirección</label>
-                <input value={formData.direccion} onChange={handleChange} />
+                <input value={formData.direccion} name="direccion" onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Ciudad</label>
-                <select value={formData.ciudad} onChange={handleChange}>
+                <select value={formData.ciudad} name="ciudad" onChange={handleChange}>
                   <option value="">Selecciona...</option>
                   <option>Bogotá</option>
                   <option>Medellín</option>
@@ -172,7 +182,7 @@ export default function RegisterDialog({ open, onOpenChange }) {
               </div>
               <div className="rd-field">
                 <label>Teléfono</label>
-                <input value={formData.telefono} onChange={handleChange} />
+                <input value={formData.telefono} name="telefono" onChange={handleChange} />
               </div>
               <div className="rd-field">
                 <label>Documento identidad</label>
