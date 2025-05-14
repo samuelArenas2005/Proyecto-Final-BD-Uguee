@@ -79,19 +79,19 @@ body {
    padding-right: 0; 
 }
 
-.header-content {
+.header-content2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.header-title-section {
+.header-title-section2 {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.main-title {
+.main-title2 {
   font-size: 1.875rem; /* text-2xl */
   font-weight: 700;
   color: var(--primary-color);

@@ -94,9 +94,9 @@ const PasajeroDashboard = () => {
     <div className="pasajero-dashboard-container">
       {/* Header de la página */}
       <header className="pasajero-dashboard-header">
-        <div className="container-wrapper header-content">
-          <div className="header-title-section">
-            <h1 className="main-title">Panel de Pasajero</h1>
+        <div className="container-wrapper header-content2">
+          <div className="header-title-section2">
+            <h1 className="main-title2">Panel de Pasajero</h1>
             <a href="/" className="back-to-home-link">
               <Home size={16} /> <span>Volver al inicio</span>
             </a>
