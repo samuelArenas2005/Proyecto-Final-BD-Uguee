@@ -1,7 +1,7 @@
 // RegisterDialog.js
 import React, { useState, useEffect, useRef } from 'react';
 import './RegisterDialog.css';
-import supabase from '../../supabaseClient';
+import {supabase} from '../../supabaseClient';
 
 export default function RegisterDialog({ open, onOpenChange }) {
   const [role, setRole] = useState('pasajero');
