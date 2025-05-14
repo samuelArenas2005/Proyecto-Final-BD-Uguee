@@ -1,0 +1,41 @@
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.not-found-container h1 {
+  font-size: 6em; /* Tamaño grande para el 404 */
+  margin-bottom: 0.2em;
+  color: #333; /* Color oscuro */
+}
+
+.not-found-container h2 {
+  font-size: 2em;
+  margin-bottom: 0.5em;
+  color: #555;
+}
+
+.not-found-container p {
+  font-size: 1.2em;
+  margin-bottom: 1.5em;
+  color: #666;
+}
+
+.not-found-container a {
+  font-size: 1.2em;
+  color: #AA00FF; 
+  text-decoration: none; /* Sin subrayado */
+  border-bottom: 2px solid #AA00FF; /* Subrayado animado o simple */
+  padding-bottom: 2px;
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+}
+
+.not-found-container a:hover {
+  color: #7150B0; /* Color al pasar el mouse */
+  border-bottom-color: #7150B0;
+}

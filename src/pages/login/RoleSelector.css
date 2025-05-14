@@ -1,0 +1,54 @@
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .role-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .role-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.role-link {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+}
+.role-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+.role-card:hover {
+  border-color: #AA00FF;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+  transform: scale(1.05);
+  background: #f9f9f9;
+}
+.role-icon {
+  margin-bottom: 0rem;
+  padding-bottom; 0;
+  font-size: 3rem;
+  color: #AA00FF;
+}
+.role-title {
+  margin-top:0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333333;
+}
+.role-desc {
+  font-size: 0.875rem;
+  color: rgba(0,0,0,0.8);
+}

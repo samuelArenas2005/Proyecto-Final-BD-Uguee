@@ -1,0 +1,147 @@
+/* Variables de Color (simulando Tailwind) */
+:root {
+  --primary-color: #AA00FF; /* Morado principal de la imagen */
+  --primary-hover-color: #7150B0; /* Morado más oscuro para hover */
+  --text-gray-color: #6B7280; /* Gris para texto */
+  --text-gray-light-color: #9CA3AF; /* Gris más claro para texto secundario */
+  --background-gray-light-color: #F3F4F6; /* Gris claro para fondos */
+  --border-gray-color: #E5E7EB; /* Gris para bordes */
+  --white-color: #FFFFFF;
+  --body-bg-color: #F9FAFB; /* Fondo general del cuerpo si es necesario */
+}
+
+.header-container {
+  background-color: var(--white-color);
+  border-bottom: 1px solid var(--border-gray-color);
+  padding: 0 1rem; /* py-4 px-6 */
+}
+
+@media (min-width: 768px) { /* md: */
+  .header-container {
+    padding: 0 1.5rem;
+  }
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1280px; /* container */
+  margin-left: auto;
+  margin-right: auto;
+  height: 4rem; /* h-16 */
+}
+
+.logo-and-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* gap-6 */
+}
+
+.logo2 {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: bold;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.navigation{
+  display: none; /* hidden por defecto */
+}
+
+@media (min-width: 768px) { /* md:flex */
+  .navigation {
+    display: flex;
+  }
+}
+
+.nav-link2{
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  color: var(--text-gray-color);
+  text-decoration: none;
+  font-weight: 500; /* text-sm font-medium, ajusta según preferencia */
+  font-size: 0.875rem;
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.nav-link2:hover {
+  color: var(--primary-color);
+}
+
+.nav-link2.active {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* gap-3 */
+}
+
+.notification-button {
+  color: var(--text-gray-color);
+  background-color: transparent; /* variant="ghost" */
+  border: none;
+  padding: 0.5rem; /* size="icon" */
+  border-radius: 0.375rem; /* rounded-md */
+  cursor: pointer;
+}
+
+.notification-button:hover {
+  background-color: rgba(0, 0, 0, 0.05); /* Ligero hover para ghost */
+}
+
+.icon {
+  height: 1.25rem; /* h-5 */
+  width: 1.25rem; /* w-5 */
+}
+
+.user-profile-button {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  padding: 0.5rem 1rem; /* Ajusta según el tamaño deseado */
+  border-radius: 0.375rem; /* rounded-md */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* gap-2 */
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.user-profile-button:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.user-icon {
+  height: 1rem; /* Ajusta si es necesario */
+  width: 1rem;
+}
+
+/* Estilos para Button (simulados si no tienes la definición exacta de AuthUser/button) */
+/* Button component base styles (si no es importado) */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem; /* rounded-md */
+  font-weight: 500; /* font-medium */
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.button-ghost {
+  background-color: transparent;
+  border-color: transparent;
+}
+.button-ghost:hover {
+  background-color: var(--background-gray-light-color); /* O un gris muy sutil */
+}
+
+.button-icon {
+  padding: 0.5rem;
+}

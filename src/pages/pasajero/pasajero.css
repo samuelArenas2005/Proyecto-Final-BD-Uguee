@@ -1,0 +1,620 @@
+/* styles.css */
+
+/* Variables de Color (ajustar según el diseño de la imagen) */
+:root {
+  --primary-color: #AA00FF; /* Morado principal */
+  --primary-color-dark: #7150B0; /* Morado más oscuro para hover */
+  --secondary-color: #10B981; /* Verde para confirmaciones, etc. */
+  --background-color: #FFFFFF; /* Fondo principal de la página (si fuera necesario cambiarlo del default) */
+  --background-alt-color: #F3F4F6; /* Gris claro para el fondo de secciones o el body */
+  --card-bg-color: #FFFFFF; /* Fondo de las tarjetas */
+  --text-color: #1F2937; /* Gris oscuro para texto principal */
+  --text-secondary-color: #6B7280; /* Gris para texto secundario o labels */
+  --border-color: #E5E7EB; /* Color de bordes sutil */
+  --shadow-color: rgba(0, 0, 0, 0.05); /* Sombra más sutil para un look moderno */
+  --shadow-medium-color: rgba(0, 0, 0, 0.1);
+  --yellow-star-color: #F59E0B; /* Amarillo para estrellas de calificación */
+}
+
+/* Reset básico y estilos globales */
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* Asegura un modelo de caja consistente */
+}
+
+html {
+  height: 100%; /* Asegura que html ocupe toda la altura */
+}
+
+body {
+  margin: 0;
+  font-family: Poppins, sans-serif;
+  /* background-color: var(--background-alt-color); */ /* Esta es la línea que define el color de fondo general */
+  color: var(--text-color);
+  line-height: 1.6;
+  min-height: 100%; /* Clave para que el body ocupe al menos toda la altura */
+  display: flex;
+  flex-direction: column;
+  
+}
+
+/* Contenedor raíz de React (si tienes uno, ej. #root) */
+#root {
+  flex-grow: 1; /* Permite que el contenido de React crezca para llenar el espacio */
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* Contenedor Principal del Dashboard */
+.pasajero-dashboard-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--background-alt-color); 
+}
+
+/* Encabezado */
+.pasajero-dashboard-header {
+  background-color: var(--card-bg-color);
+  box-shadow: 0 1px 2px 0 var(--shadow-color); /* shadow-sm */
+  padding: 1.25rem 0; /* Ajustado ligeramente */
+  width: 100%; /* El header ocupa todo el ancho */
+}
+
+.container-wrapper {
+  width: 100%; /* El wrapper debe permitir fluidez */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem; /* Espacio en los lados */
+  padding-right: 1.5rem;
+}
+
+/* En tu archivo styles.css */
+.container-wrapper--full-width {
+  max-width: none; 
+  /padding-left: 0;
+   padding-right: 0; 
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.main-title {
+  font-size: 1.875rem; /* text-2xl */
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.back-to-home-link {
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+.back-to-home-link:hover {
+  color: var(--primary-color);
+}
+
+/* Contenido Principal */
+.main-content {
+  padding-top: 2rem;
+  padding-bottom: 2rem; /* Espacio al final del contenido */
+  flex-grow: 1; /* El main content debe crecer para llenar el espacio restante */
+  width: 100%;
+  padding-left: 5rem;  
+  padding-right: 5rem; 
+  
+}
+
+.main-grid {
+  /* No es necesario un grid aquí si .content-area maneja el flujo */
+}
+
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem; /* Aumenta el espacio entre secciones principales */
+}
+
+.driver-application-section {
+  display: flex; /* Ya es flex por defecto si solo tiene un botón */
+  align-items: flex-start; /* Alinea el botón a la izquierda */
+  margin-bottom: 1rem; /* Espacio debajo del botón/sección */
+}
+
+/* Botones */
+.button {
+  padding: 0.75rem 1.5rem; /* Aumenta un poco el padding */
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  text-decoration: none;
+  line-height: 1.25; /* Para mejor alineación vertical del texto */
+}
+.button:focus-visible { /* Mejoras de accesibilidad para el foco */
+  outline: 2px solid var(--primary-color-dark);
+  outline-offset: 2px;
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+.primary-button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.outline-button {
+  background-color: transparent;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.outline-button:hover {
+  background-color: rgba(79, 70, 229, 0.05);
+  border-color: var(--primary-color-dark);
+}
+
+.button-icon {
+  margin-right: 0.5rem;
+  height: 1.25rem;
+  width: 1.25rem;
+}
+.button-icon-small {
+ margin-right: 0.25rem;
+  height: 1rem;
+  width: 1rem;
+}
+.icon-only { /* Para el botón de filtro */
+  height: 1.25rem;
+  width: 1.25rem;
+  margin:0; /* Sin margen si es solo icono */
+}
+.filter-button { /* Ajuste para el botón de filtro */
+  padding: 0.75rem; /* Padding igual en todos lados para un botón cuadrado */
+}
+
+
+.small-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+/* Sección de Búsqueda */
+.search-section .section-title { /* Aplica solo a h2 dentro de search-section */
+  font-size: 1.5rem; /* text-xl */
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.custom-card {
+  background-color: var(--card-bg-color);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+  transition: box-shadow 0.2s ease-in-out;
+  width: 100%; /* Las tarjetas ocupan el ancho disponible */
+}
+.custom-card.search-card {
+    /* padding: 1.5rem; */ /* Redundante si .custom-card ya lo tiene */
+}
+.custom-card:hover {
+  box-shadow: 0 4px 8px -2px var(--shadow-medium-color), 0 2px 4px -2px var(--shadow-medium-color); /* hover:shadow-lg (ajustado) */
+}
+.trip-card.history-card:hover {
+   box-shadow: 0 2px 6px -1px var(--shadow-medium-color), 0 1px 3px -1px var(--shadow-medium-color); /* hover:shadow-md (ajustado) */
+}
+
+.search-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Por defecto una columna */
+  gap: 1.25rem; /* Espacio entre inputs */
+  margin-bottom: 1.5rem;
+}
+
+/* En pantallas medianas y grandes, 3 columnas para los inputs de búsqueda */
+@media (min-width: 768px) {
+  .search-inputs-grid {
+    grid-template-columns: repeat(3, 1fr); /* md:grid-cols-3, cada una toma 1fr */
+  }
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.375rem; /* mb-1.5 */
+  color: var(--text-secondary-color);
+}
+
+.form-input {
+  width: 100%; /* Inputs ocupan todo el ancho de su celda de grid */
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  box-shadow: inset 0 1px 2px 0 rgba(0,0,0,0.03);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus {
+  outline: none; /* Quitar outline default */
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* Sombra de foco tipo Tailwind */
+}
+
+.search-buttons {
+  display: flex;
+  gap: 0.75rem; /* Aumenta espacio entre botones de búsqueda */
+  margin-top: 0.5rem; /* Pequeño espacio arriba si los inputs colapsan */
+}
+
+.search-action-button {
+  flex-grow: 1; /* El botón de búsqueda puede crecer */
+}
+
+@media (min-width: 640px) { /* sm: */
+  .search-action-button {
+    flex-grow: 0; /* En pantallas más grandes, no necesita crecer tanto */
+    width: auto;
+  }
+}
+
+
+/* Tabs Personalizados */
+.custom-tabs {
+  margin-top: 1.5rem; /* Espacio arriba de los tabs */
+  width: 100%; /* Tabs ocupan el ancho */
+}
+
+.custom-tabs-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background-color: var(--background-alt-color);
+  border-radius: 0.375rem;
+  padding: 0.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color); /* Borde sutil para la lista */
+}
+
+.custom-tabs-trigger {
+  padding: 0.875rem 1rem;
+  font-weight: 500;
+  color: var(--text-secondary-color);
+  background-color: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.custom-tabs-trigger:hover {
+  color: var(--primary-color);
+  background-color: rgba(229, 231, 235, 0.5); /* Un hover sutil si no está activo */
+}
+.custom-tabs-trigger.active {
+  background-color: var(--card-bg-color);
+  color: var(--primary-color);
+  box-shadow: 0 1px 2px 0 var(--shadow-color);
+}
+
+.custom-tabs-content {
+  padding-top: 0; /* El padding ya está en la lista o en el contenido interno */
+}
+
+.tab-content-title {
+  font-size: 1.25rem; /* text-lg */
+  font-weight: 600; /* font-semibold (más fuerte) */
+  margin-bottom: 1.25rem;
+}
+.icon-title {
+  display: flex;
+  align-items: center;
+}
+.title-icon {
+  margin-right: 0.625rem;
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Una columna por defecto */
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) { /* md: */
+  .results-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive: ajusta columnas al contenido y espacio */
+                                                                /* Mínimo 300px por tarjeta, luego se distribuyen */
+  }
+}
+/* Si prefieres siempre 2 columnas en desktop, usa:
+@media (min-width: 768px) {
+  .results-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+*/
+
+
+.driver-card {
+  display: flex;
+  flex-direction: column; /* Para que los actions se vayan abajo */
+}
+
+.driver-info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.driver-photo-container {
+  width: 3.5rem; /* Ligeramente más grande */
+  height: 3.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 1rem;
+  flex-shrink: 0; /* Evita que la foto se encoja */
+}
+.driver-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.driver-name {
+  font-weight: 600; /* Más peso */
+  margin: 0;
+  font-size: 1.125rem; /* text-base o lg */
+}
+.driver-rating {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--yellow-star-color);
+}
+
+.driver-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem; /* space-y-2.5 */
+  margin-bottom: 1.25rem;
+  flex-grow: 1; /* Para empujar los botones hacia abajo si la tarjeta crece */
+}
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline; /* Mejor alineación si los textos tienen diferente altura */
+}
+.detail-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
+  margin-right: 0.5rem; /* Espacio entre label y value */
+}
+.detail-value {
+  font-weight: 500;
+  text-align: right; /* Alinea los valores a la derecha para mejor lectura */
+}
+.detail-value.price {
+  color: var(--primary-color);
+  font-weight: 600; /* Precio más destacado */
+}
+.detail-value-icon {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+.icon-inline {
+  margin-right: 0.375rem;
+  height: 1rem;
+  width: 1rem;
+}
+
+.driver-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto; /* Empuja las acciones al final de la tarjeta */
+}
+
+/* Próximos Viajes & Historial */
+.upcoming-trips-list,
+.trip-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.trip-card {
+  /* Estilos ya definidos en .custom-card */
+}
+.trip-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.trip-route {
+  font-weight: 600; /* Más peso */
+  margin: 0;
+  font-size: 1.125rem;
+}
+.trip-status {
+  padding: 0.375rem 0.875rem;
+  background-color: #D1FAE5;
+  color: #065F46;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500; /* Un poco más de peso */
+}
+
+.trip-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Columnas responsivas */
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+/* Si se prefiere fijar a 3 columnas en pantallas más grandes:
+@media (min-width: 640px) {
+  .trip-details-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+*/
+
+
+.trip-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem; /* Espacio arriba del footer de la tarjeta */
+}
+.trip-card-footer.history-footer {
+    align-items: center;
+}
+.history-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Más espacio en acciones de historial */
+}
+
+.trip-rating {
+  display: flex;
+  align-items: center;
+  font-size: 1rem; /* Calificación un poco más grande */
+}
+.rating-star {
+  color: var(--yellow-star-color);
+  margin-right: 0.25rem;
+}
+
+.empty-state-text {
+  text-align: center;
+  color: var(--text-secondary-color);
+  padding: 2rem 1rem; /* Más padding para estados vacíos */
+  font-style: italic; /* Opcional */
+}
+
+/* Dialog Personalizado */
+.custom-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(17, 24, 39, 0.6); /* bg-gray-900/60 - Un fondo más oscuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem; /* Padding para evitar que el diálogo toque los bordes en pantallas pequeñas */
+}
+
+.custom-dialog-content {
+  background-color: var(--card-bg-color);
+  padding: 1.75rem; /* Más padding interno */
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); /* Sombra más pronunciada */
+  width: 100%;
+  max-width: 32rem; /* max-w-lg - Un poco más ancho por defecto para formularios */
+  max-height: 90vh;
+  overflow-y: auto; /* Scroll si el contenido es muy largo */
+  display: flex; /* Para mejor control del contenido interno */
+  flex-direction: column;
+  gap: 1rem; /* Espacio entre elementos del diálogo */
+}
+
+.custom-dialog-header {
+  /* margin-bottom: 1rem; */ /* Eliminado, se maneja con el gap del flex container */
+  padding-bottom: 0.75rem; /* Espacio debajo del título/descripción */
+  border-bottom: 1px solid var(--border-color); /* Línea divisoria opcional */
+}
+.custom-dialog-title {
+  font-size: 1.375rem; /* Más grande */
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color);
+}
+.custom-dialog-description {
+  font-size: 0.925rem; /* Ligeramente más grande */
+  color: var(--text-secondary-color);
+  margin-top: 0.375rem;
+}
+
+/* QR Modal Específico */
+.qr-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+.qr-code-container {
+  background-color: var(--card-bg-color);
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.25rem;
+}
+.qr-code-placeholder {
+  width: 12rem;
+  height: 12rem;
+  background-color: #e9e9e9; /* Un gris un poco más visible para el placeholder */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem; /* Bordes redondeados para el placeholder */
+}
+.qr-code-icon {
+  height: 7rem; /* Icono más grande */
+  width: 7rem;
+  color: var(--primary-color); /* Usar color primario */
+  opacity: 0.8;
+}
+.qr-modal-instruction {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
+}
+
+/* Placeholders para componentes no definidos */
+.vehicle-type-selector-placeholder,
+.form-placeholder {
+  padding: 1rem;
+  border: 1px dashed var(--border-color);
+  border-radius: 0.25rem;
+  text-align: center;
+  color: var(--text-secondary-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espacio entre elementos del placeholder */
+}
+.form-placeholder .form-input {
+    margin-bottom: 0.5rem; /* Espacio debajo de inputs en placeholder */
+}
+.form-placeholder .form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}

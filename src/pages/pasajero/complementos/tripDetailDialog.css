@@ -1,0 +1,152 @@
+.td-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.td-modal {
+  background: #fff;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.td-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+.td-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.td-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.td-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.td-driver {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.td-photo-wrapper {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.td-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.td-driver-name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+.td-rating {
+  display: flex;
+  align-items: center;
+  color: #fbbf24;
+}
+.td-star {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.25rem;
+}
+.td-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+.td-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+.td-value {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0;
+}
+.td-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #8b00ff;
+}
+.td-price {
+  color: #8b00ff;
+}
+.td-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.td-seats {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.td-seat-available {
+  color: #8b00ff;
+}
+.td-seat-filled {
+  color: #d1d5db;
+}
+.td-seat-text {
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+  color: #374151;
+}
+.td-route {
+  margin: 0;
+  font-size: 0.875rem;
+}
+.td-route-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+.td-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+}
+.td-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.td-btn-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+}
+.td-btn-primary {
+  background: #8b00ff;
+  color: #fff;
+}

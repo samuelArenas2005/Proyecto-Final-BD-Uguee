@@ -1,0 +1,177 @@
+/* Variables de Color (similando Tailwind) */
+:root {
+  --primary-color: #AA00FF;
+  --primary-hover-color: #8A28A0;
+  --text-gray-color: #6B7280;
+  --text-gray-medium-color: #4B5563;
+  --text-gray-light-color: #9CA3AF;
+  --background-gray-50: #F9FAFB;
+  --background-gray-100: #F3F4F6;
+  --border-gray-200: #E5E7EB;
+  --white-color: #FFFFFF;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+.page-container-reportes {
+  min-height: 100vh;
+  background-color: var(--background-gray-50);
+}
+
+.main-content-wrapper-reportes {
+  padding: 2rem; /* py-8 */
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-title-reportes {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: bold;
+  margin-bottom: 2rem; /* mb-8 */
+  color: var(--text-gray-medium-color);
+}
+
+.controls-container-reportes {
+  display: flex;
+  flex-direction: column; /* flex-col */
+  align-items: stretch;
+  justify-content: space-between;
+  margin-bottom: 1.5rem; /* mb-6 */
+  gap: 1rem; /* gap-4 */
+}
+
+@media (min-width: 768px) { /* md:flex-row md:items-center */
+  .controls-container-reportes {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.search-bar-wrapper-reportes {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .search-bar-wrapper-reportes {
+    max-width: 36rem; /* max-w-xl */
+  }
+}
+
+.search-icon-reportes {
+  position: absolute;
+  left: 0.75rem; /* left-3 */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-gray-light-color); /* text-gray-400 */
+}
+
+.search-input-reportes {
+  padding-left: 2.5rem; /* pl-10 */
+  padding-right: 3rem; /* pr-4 más espacio para filtro */
+  padding-top: 0.5rem; /* py-2 */
+  padding-bottom: 0.5rem;
+  border-radius: 0.375rem; /* rounded-md */
+  border: 1px solid var(--border-gray-200);
+  width: 100%;
+  background-color: var(--background-gray-50);
+  color: var(--text-gray-medium-color);
+}
+.search-input-reportes::placeholder {
+  color: var(--text-gray-light-color);
+}
+
+.filter-button-inside-search-reportes {
+  position: absolute;
+  right: 0.25rem; /* right-1 */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-gray-color);
+  padding: 0.375rem;
+}
+.filter-button-inside-search-reportes:hover {
+    background-color: var(--background-gray-100);
+}
+
+
+.filter-tag-reportes {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem; /* px-3 py-1 */
+  border-radius: 9999px; /* rounded-full */
+  background-color: var(--background-gray-100); /* bg-gray-100 */
+  font-size: 0.875rem; /* text-sm */
+  color: var(--text-gray-medium-color);
+}
+
+.filter-tag-text-reportes {
+  margin-right: 0.5rem; /* mr-2 */
+}
+
+.filter-tag-icon-reportes {
+  height: 1rem; /* size-16 -> h-4 w-4 */
+  width: 1rem;
+  cursor: pointer;
+}
+
+.chart-container-reportes {
+  background-color: var(--white-color); /* bg-white */
+  padding: 1.5rem; /* p-6 */
+  border-radius: 0.5rem; /* rounded-lg */
+  box-shadow: 0 1px 2px 0 var(--shadow-color); /* shadow-sm */
+}
+
+.chart-placeholder-reportes {
+  height: 400px; /* h-[400px] */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-gray-light-color); /* text-gray-400 */
+  border: 1px dashed var(--border-gray-200); /* Opcional, para visualizar el área */
+  border-radius: 0.375rem;
+}
+
+.download-action-reportes {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem; /* mt-4 */
+}
+
+.download-report-button-reportes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* gap-2 */
+  background-color: var(--primary-color); /* bg-primary */
+  color: var(--white-color);
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+}
+
+.download-report-button-reportes:hover {
+  background-color: var(--primary-hover-color); /* hover:bg-accent1 */
+}
+
+.icon-extra-small-reportes {
+  height: 1rem; /* h-4 */
+  width: 1rem; /* w-4 */
+}
+
+/* Estilos para Button (simulados) */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.button-ghost {
+  background-color: transparent;
+}
+.button-ghost:hover {
+  background-color: var(--background-gray-100);
+}

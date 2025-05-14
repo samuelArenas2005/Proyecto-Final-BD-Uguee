@@ -1,0 +1,39 @@
+
+
+.btn {
+  font-size: 1rem;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-solid {
+  background: #AA00FF;
+  color: #fff;
+  border: none;
+}
+.btn-solid:hover {
+  background: #7000cc;
+}
+.btn-outline {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+}
+.btn-outline:hover {
+  border-color: #8b00ff;
+}
+.full-width {
+  width: 100%;
+}
+.google-btn {
+  margin-top: 0.5rem;
+  border-color: #ddd;
+}
+.google-btn svg {
+  font-size: 1.125rem;
+}

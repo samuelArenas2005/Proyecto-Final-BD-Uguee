@@ -1,2 +1,28 @@
-main {
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-primary: #AA00FF;
+  --color-secondary: #7150B0;
+  --color-accent: #5752B9;
+  --color-bg: #FFFFFF;
+  --color-bg-alt: #F3F3F3;
+  --color-gray: #2C2C2C;
+  --radius: 0.5rem;
+  --padding-base: 0.5rem;
+  --padding-container: 2rem;
 }
+
+/* Estilo global */
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  background-color: #fff;
+  color: #333;
+}
+
+h1, h2, h3, p, a, button, link {
+  font-family: 'Poppins', sans-serif;
+}
+
