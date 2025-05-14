@@ -113,7 +113,7 @@ const PasajeroDashboard = () => {
                 className="button primary-button driver-button"
                 onClick={() => setIsDriverModalOpen(true)}
               >
-                <Car className="button-icon" /> Quiero ser conductor
+                <Car className="button-icon2" /> Quiero ser conductor
               </button>
 
               {/* Modal de solicitud de conductor */}
@@ -216,7 +216,7 @@ const PasajeroDashboard = () => {
                     }
                     className="button primary-button search-action-button"
                   >
-                    <Car className="button-icon" /> Buscar
+                    <Car className="button-icon2" /> Buscar
                   </button>
                   <button
                     onClick={() => setIsFilterDialogOpen(true)}
@@ -369,7 +369,7 @@ const PasajeroDashboard = () => {
                               className="button primary-button"
                               onClick={() => setIsQRModalOpen(true)}
                             >
-                              <QrCode className="button-icon" /> Ver QR
+                              <QrCode className="button-icon2" /> Ver QR
                             </button>
                           </div>
 
