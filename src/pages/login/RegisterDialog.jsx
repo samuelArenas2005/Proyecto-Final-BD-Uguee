@@ -49,9 +49,6 @@ export default function RegisterDialog({ open, onOpenChange }) {
   if (errors.length) {
     return alert(errors[0]);
   }
-
-   console.log(formData)
-
   
   const { data, error } = await supabase
     .from('usuario')
@@ -64,20 +61,10 @@ export default function RegisterDialog({ open, onOpenChange }) {
   }
 
   setMensaje('Usuario guardado con éxito');
-  setFormData(initialFormData);               // ⑤ limpiar todo el form
-  onOpenChange(false);                        // ⑥ cerrar modal *después* de la petición
+  setFormData(initialFormData);              
+  onOpenChange(false);                      
 };
 
-  // Pasajero fields
-  const [nombre, setNombre] = useState('');
-  const [apellido, setApellido] = useState('');
-  const [codigoEstudiantil, setCodigoEstudiantil] = useState('');
-  const [universidad, setUniversidad] = useState('');
-  const [correoInstitucional, setCorreoInstitucional] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [ciudad, setCiudad] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [documentoIdentidad, setDocumentoIdentidad] = useState(null);
 
   // Universidad fields
   const [nombreUniversidad, setNombreUniversidad] = useState('');

@@ -1,0 +1,586 @@
+/* TravelPage.module.css */
+.travelPageContainer {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: #F9FAFB ;
+  padding: 10px 30px; /* Espacio alrededor */
+  gap: 40px; /* Espacio entre paneles */
+  box-sizing: border-box;
+  overflow: hidden; /* Para evitar barras de scroll innecesarias en la página */
+  align-items: center;
+}
+
+.leftPanel {
+  margin-left: 1rem;
+  max-height: 100%;
+  width: 550px; /* Ancho fijo para el panel izquierdo */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio entre las tarjetas del panel izquierdo */
+  flex-shrink: 0; /* Evita que el panel se encoja */
+}
+
+.tripRequestCard,
+.driverOptionsCard {
+  background-color: #ffffff;
+  border-radius: 20px; /* Bordes redondeados como en la imagen */
+  padding: 25px;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.tripRequestCard h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937; /* Gris oscuro */
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  background-color: #f3f4f6; /* Fondo gris claro para input */
+  border-radius: 12px;
+  padding: 0 15px;
+  margin-bottom: 15px;
+  height: 50px;
+}
+
+.inputIcon {
+  color: #6b7280; /* Icono gris */
+  margin-right: 10px;
+}
+
+.inputField {
+  flex-grow: 1;
+  border: none;
+  background-color: transparent;
+  font-size: 15px;
+  color: #1f2937;
+  outline: none;
+}
+
+.inputField::placeholder {
+  color: #9ca3af; /* Placeholder gris más claro */
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px; /* Espacio entre botón de búsqueda y filtro */
+  margin-top: 20px;
+}
+
+.searchButton {
+  flex-grow: 1;
+  background-color: #AA00FF; /* Morado principal */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  height: 48px;
+}
+
+.searchButton:hover {
+  background-color: #7150B0; /* Morado más oscuro */
+}
+
+.filterButton {
+  background-color: #E5E7EB; /* Gris claro para el botón de filtro */
+  color: #4B5563; /* Icono gris oscuro */
+  border: none;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  width: 48px;
+  height: 48px;
+}
+
+.filterButton:hover {
+  background-color: #D1D5DB; /* Gris más oscuro */
+}
+
+.driverOptionsCard h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.driverList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 450px); /* Ajusta esto según la altura del otro contenido */
+  overflow-y: auto;
+  padding-right: 8px; /* Espacio para la barra de scroll */
+}
+
+/* Estilo para la barra de scroll */
+.driverList::-webkit-scrollbar {
+  width: 6px;
+}
+.driverList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.driverList::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 10px;
+}
+.driverList::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
+}
+
+
+.driverItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f9fafb; /* Fondo muy claro para cada item */
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.driverInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.driverAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.driverAvatarDefault {
+  color: #9ca3af; /* Color para el icono de avatar por defecto */
+}
+
+.driverText {
+  display: flex;
+  flex-direction: column;
+}
+
+.driverName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.driverLocation {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
+
+.driverMoreButton {
+  background-color: transparent;
+  border: none;
+  color: #6b7280;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.driverMoreButton:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.rightPanelMap {
+  flex-grow: 1; /* El mapa toma el espacio restante */
+  height: 80%;
+  border-radius: 30px; /* Bordes redondeados para el contenedor del mapa */
+  overflow: hidden; /* Para que el mapa respete el borde redondeado */
+  box-shadow: 0px 8px 25px rgba(198, 117, 249, 0.263);
+}
+
+/* Estilo para los controles de Zoom de Leaflet (usando :global ya que son clases de Leaflet) */
+:global(.leaflet-control-zoom) {
+  border: 1px solid #BDBDBD !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.15) !important;
+  margin-bottom: 15px !important;
+  margin-right: 15px !important;
+}
+
+:global(.leaflet-control-zoom-in),
+:global(.leaflet-control-zoom-out) {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 22px !important;
+  color: #4B5563 !important;
+  background-color: #FFFFFF !important;
+  font-weight: normal !important;
+}
+
+:global(.leaflet-control-zoom-in) {
+  border-bottom: 1px solid #D6D6D6 !important;
+  border-radius: 10px 10px 0 0 !important;
+}
+
+:global(.leaflet-control-zoom-out) {
+  border-radius: 0 0 10px 10px !important;
+}
+
+:global(.leaflet-control-zoom-in:hover),
+:global(.leaflet-control-zoom-out:hover) {
+  background-color: #F4F4F4 !important;
+}
+
+
+.cardContainer {
+  background-color: #ffffff;
+  border-radius: 20px; /* Bordes redondeados como en la imagen */
+  padding: 20px;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.mainTitle {
+  font-weight: 600; /* Menos bold */
+  color: #333333;
+  text-align: center;
+  margin-top: 5px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937; /* Gris oscuro */
+  margin-bottom: 20px;
+}
+
+.driverSection {
+  background-color: #7952b3;
+  color: white;
+  padding: 15px; /* Padding ajustado */
+  border-radius: 25px; /* Bordes ajustados */
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Espacio ajustado */
+  margin-bottom: 20px;
+  border: 4px solid #cfacfdd8 ;
+}
+
+.driverAvatarBig {
+  width: 50px; /* Tamaño ajustado */
+  height: 50px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.45); /* Borde más sutil */
+}
+
+.driverInfoBig .driverNameBig {
+  font-size: 13px; /* Tamaño ajustado */
+  font-weight: 600;
+  margin: 0;
+}
+
+.locationRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.locationIcon {
+  color: #d1c4e9;
+}
+
+.driverInfoBig .driverLocation {
+  font-size: 13px; /* Tamaño ajustado */
+  color: #d1c4e9;
+  margin: 0;
+}
+
+.vehicleDetailsSectionWrapper {
+  background-color: #ffffff;
+  padding: 12px 10px; /* Padding ajustado para contenido interno */
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio reducido entre columnas internas */
+}
+
+.driverAvatarRatingColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px; /* Espacio entre avatar y rating badge */
+  flex-shrink: 0;
+}
+
+.driverAvatarSmall {
+  width: 48px; /* Tamaño ajustado */
+  height: 48px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  object-fit: cover;
+  border: 1px solid #dee2e6; /* Borde más sutil */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  display: block;
+}
+
+.ratingBadge {
+  background-color: #ffffff;
+  color: #343a40;
+  padding: 3px 7px; /* Padding ajustado */
+  border-radius: 8px; /* Bordes ajustados */
+  font-size: 10px; /* Fuente más pequeña */
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.ratingText {
+  line-height: 1;
+}
+
+.carImageColumn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.carImage {
+  width: 85px; /* Ancho ajustado para ser más estrecho */
+  height: auto;
+  max-height: 55px; /* Altura máxima ajustada */
+  object-fit: contain;
+}
+
+.vehicleTextInfoColumn {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 4px; /* Espacio ajustado */
+  min-width: 0; /* Para permitir que el texto se ajuste y la columna se encoja */
+  margin-left: 10rem;
+}
+
+.carPlate {
+  font-size: 17px; /* Tamaño ajustado, pero prominente */
+  font-weight: 700; /* Bastante bold */
+  color: #2c2c2c;
+  margin: 0 0 2px 0;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.carModel {
+  font-size: 12px; /* Fuente más pequeña para el modelo */
+  color: #454545; /* Color de texto ajustado */
+  margin: 0 0 2px 0;
+  line-height: 1.3;
+  /* El texto se ajustará si es necesario para crear dos líneas */
+}
+
+.priceInfo {
+  font-size: 12px; /* Fuente más pequeña */
+  color: #6c757d;
+  font-weight: 400; /* Menos énfasis */
+  margin: 0;
+  line-height: 1.3;
+}
+
+.etaSection {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espacio ajustado */
+  padding: 10px 12px; /* Padding ajustado */
+  background-color: #ffffff; /* Fondo muy claro, casi blanco */
+  border-radius: 10px; /* Bordes ajustados */
+}
+
+.clockIconDetails {
+  color: #555555;
+}
+
+.etaTextContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.etaTitle {
+  font-size: 13px; /* Tamaño ajustado */
+  color: #333333;
+  font-weight: 500;
+  margin: 0;
+}
+
+.etaTime {
+  font-size: 13px; /* Tamaño ajustado */
+  color: #666666;
+  margin: 0;
+  margin-top: 1px;
+}
+
+.messageButton {
+  margin: 15px auto;
+  margin-left: 35px;
+  width: 80%;
+  padding: 12px; /* Padding ajustado */
+  font-size: 15px; /* Tamaño ajustado */
+  font-weight: 500;
+  color: #adb5bd;
+  background-color: #f0f0f0; /* Ligeramente más claro */
+  border: 1px solid #e0e0e0; /* Borde más claro */
+  border-radius: 20px; /* Bordes consistentes con otros campos */
+  cursor: default;
+  text-align: center;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 10px; /* Espacio ajustado */
+  margin-top: 5px; /* Espacio superior ajustado */
+}
+
+.cancelButton,
+.qrButton {
+  flex-grow: 1;
+  padding: 12px; /* Padding ajustado */
+  font-size: 15px; /* Tamaño ajustado */
+  font-weight: 500; /* Menos bold que antes, pero legible */
+  border-radius: 20px; /* Bordes de píldora consistentes */
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px; /* Espacio del icono ajustado */
+}
+.cancelButton:active, .qrButton:active {
+    transform: scale(0.97);
+}
+
+.cancelButton {
+  background-color: #e9d8ff;
+  color: #5f27cd;
+}
+
+.cancelButton:hover {
+  background-color: #dcd0f0;
+}
+
+.qrButton {
+  background-color: #7952b3;
+  color: white;
+}
+.qrIcon {
+  /* Estilos heredados */
+}
+
+.qrButton:hover {
+  background-color: #6a429f;
+}
+
+/* Estilos del Modal (generalmente no necesitan muchos cambios para este ajuste visual del componente principal) */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 15px;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: fadeInModal 0.3s ease-out;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 12px;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0;
+}
+
+.closeModalButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #6c757d;
+  line-height: 1;
+}
+.closeModalButton:hover {
+  color: #343a40;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.qrImageModal {
+  max-width: 220px;
+  height: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  padding: 5px;
+}
+
+.qrHelpText {
+  font-size: 14px;
+  color: #495057;
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+

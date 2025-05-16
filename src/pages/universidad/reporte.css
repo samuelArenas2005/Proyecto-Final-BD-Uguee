@@ -1,177 +1,318 @@
-/* Variables de Color (similando Tailwind) */
+/* DashboardPage.css */
+
 :root {
-  --primary-color: #AA00FF;
-  --primary-hover-color: #8A28A0;
+  --primary-color: #7E00CB; /* Ajustado al morado de la imagen */
+  --primary-hover-color: #6A00A0; /* Un poco más oscuro para hover */
+  --primary-light-bg: #F2E7FE; /* Fondo muy claro para item activo en sidebar */
   --text-gray-color: #6B7280;
   --text-gray-medium-color: #4B5563;
   --text-gray-light-color: #9CA3AF;
-  --background-gray-50: #F9FAFB;
+  --background-gray-50: #F9FAFB; /* Fondo general del main content */
   --background-gray-100: #F3F4F6;
+  --background-gray-200: #E5E7EB;
+  --border-gray-100: #F3F4F6;
   --border-gray-200: #E5E7EB;
+  --border-gray-300: #D1D5DB;
   --white-color: #FFFFFF;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.08); /* Sombra más sutil */
+  --sidebar-text-color: var(--white-color);
+  --sidebar-width-open: 270px; /* Ancho del sidebar abierto, ajustado a la imagen */
+  --sidebar-width-closed: 80px; /* Ancho del sidebar cerrado */
+  --header-height: 60px; /* Asume una altura de header si necesitas calcular `calc(100vh - var(--header-height))` */
 }
 
-.page-container-reportes {
-  min-height: 100vh;
-  background-color: var(--background-gray-50);
-}
-
-.main-content-wrapper-reportes {
-  padding: 2rem; /* py-8 */
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.main-title-reportes {
-  font-size: 1.5rem; /* text-2xl */
-  font-weight: bold;
-  margin-bottom: 2rem; /* mb-8 */
-  color: var(--text-gray-medium-color);
-}
-
-.controls-container-reportes {
+/* Estilo base para el contenedor del cuerpo del dashboard */
+.dashboard-body-container {
   display: flex;
-  flex-direction: column; /* flex-col */
-  align-items: stretch;
-  justify-content: space-between;
-  margin-bottom: 1.5rem; /* mb-6 */
-  gap: 1rem; /* gap-4 */
+  /* Importante: Para que el sidebar y el contenido no se solapen con un header fijo externo,
+     debes gestionar el `padding-top` o `margin-top` en el layout que contiene
+     tanto el Header como este DashboardPage.
+     Por ejemplo, si tu Header tiene 60px de alto:
+     .layout-con-header-fijo .dashboard-body-container {
+       padding-top: 60px;
+     }
+     O, si el Header no es fijo, no necesitas esto aquí.
+  */
+  height: calc(100vh - var(--header-height)); /* Ajusta la altura para que no se salga de la pantalla si hay un header fijo */
+  /* Si el header NO es fijo, puedes usar simplemente: height: 100vh; y el scroll será natural */
 }
 
-@media (min-width: 768px) { /* md:flex-row md:items-center */
-  .controls-container-reportes {
-    flex-direction: row;
-    align-items: center;
-  }
+.sidebar {
+  width: var(--sidebar-width-open);
+  background-color: var(--primary-color);
+  color: var(--sidebar-text-color);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición más suave */
+  position: fixed; /* Lo hacemos fijo */
+  left: 0;
+  top: var(--header-height); /* Comienza justo debajo del header global */
+  bottom: 0;
+  z-index: 999; /* Debajo de un header global que podría tener z-index 1000 */
+  border-top-right-radius: 16px; /* Redondeo superior derecho como en la imagen */
+  padding-top: 10px; /* Espacio superior interno */
 }
 
-.search-bar-wrapper-reportes {
-  position: relative;
-  width: 100%;
+.dashboard-body-container.sidebar-closed .sidebar {
+  width: var(--sidebar-width-closed);
+  border-top-right-radius: 0px; /* Sin redondeo cuando está cerrado para que se vea como parte del borde */
 }
 
-@media (min-width: 768px) {
-  .search-bar-wrapper-reportes {
-    max-width: 36rem; /* max-w-xl */
-  }
+.sidebar-header-local { /* Nombre ajustado */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Centro el título cuando no está el botón o viceversa */
+  padding: 15px 20px; /* Padding ajustado */
+  height: 50px;
+  box-sizing: border-box;
+  margin-bottom: 10px; /* Espacio antes de los items */
 }
 
-.search-icon-reportes {
-  position: absolute;
-  left: 0.75rem; /* left-3 */
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-gray-light-color); /* text-gray-400 */
+.dashboard-body-container.sidebar-closed .sidebar-header-local {
+  justify-content: center; /* Centra el botón cuando el sidebar está cerrado */
+  padding: 15px 10px;
 }
 
-.search-input-reportes {
-  padding-left: 2.5rem; /* pl-10 */
-  padding-right: 3rem; /* pr-4 más espacio para filtro */
-  padding-top: 0.5rem; /* py-2 */
-  padding-bottom: 0.5rem;
-  border-radius: 0.375rem; /* rounded-md */
-  border: 1px solid var(--border-gray-200);
-  width: 100%;
+.sidebar-title {
+  font-size: 1.4rem; /* Tamaño de "Análisis" */
+  font-weight: 500; /* Más ligero que bold */
+  color: var(--white-color);
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+.dashboard-body-container.sidebar-closed .sidebar-title {
+  opacity: 0;
+  width: 0; /* Oculta el título cuando está cerrado */
+}
+
+
+.sidebar-toggle-button {
+  background: rgba(255, 255, 255, 0.15); /* Botón con fondo semitransparente */
+  border: none;
+  color: var(--white-color);
+  width: 36px; /* Tamaño fijo */
+  height: 36px;
+  border-radius: 8px; /* Bordes redondeados */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.3s ease-in-out;
+  flex-shrink: 0; /* Evita que el botón se encoja */
+}
+
+.sidebar-toggle-button:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 25px; /* Padding ajustado para más espacio */
+  cursor: pointer;
+  color: var(--sidebar-text-color);
+  transition: background-color 0.25s ease, color 0.25s ease;
+  margin: 4px 15px; /* Margen ajustado */
+  border-radius: 10px; /* Bordes redondeados para items */
+  overflow: hidden; /* Para que el texto no se salga */
+  position: relative; /* Para el tooltip si se necesita fuera del :title */
+}
+.dashboard-body-container.sidebar-closed .sidebar-item {
+  justify-content: center; /* Centra el icono cuando está cerrado */
+  padding: 14px 10px; /* Menos padding horizontal cuando cerrado */
+  margin: 4px 8px;
+}
+
+
+.sidebar-item:hover {
+  background-color: var(--primary-hover-color);
+  color: var(--white-color);
+}
+
+.sidebar-item.active {
+  background-color: var(--white-color); /* Fondo blanco para el activo */
+  color: var(--primary-color); /* Texto morado para el activo */
+  font-weight: 600; /* Letra en negrita para el activo */
+}
+
+.sidebar-item.active .sidebar-item-icon {
+  color: var(--primary-color); /* Icono morado cuando está activo */
+}
+
+.sidebar-item-icon {
+  margin-right: 18px; /* Espacio entre icono y texto */
+  display: flex;
+  align-items: center;
+  color: inherit; /* Hereda el color del padre (.sidebar-item) */
+  transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-body-container.sidebar-closed .sidebar-item-icon {
+  margin-right: 0; /* Sin margen cuando está cerrado */
+}
+
+
+.sidebar-item-text {
+  font-size: 1rem; /* Tamaño de texto de los items */
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out 0.1s; /* Pequeño delay para la aparición del texto */
+}
+
+.dashboard-body-container.sidebar-closed .sidebar-item-text {
+  opacity: 0;
+  width: 0; /* Efectivamente oculta el texto */
+  display: none; /* Asegura que no ocupe espacio */
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 25px 30px;
+  margin-left: var(--sidebar-width-open); /* Espacio para el sidebar abierto */
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: var(--background-gray-50);
+  overflow-y: auto; /* Permite scroll solo en el contenido principal si es necesario */
+  height: 100%; /* Ocupa toda la altura del dashboard-body-container */
+}
+.dashboard-body-container.sidebar-closed .main-content {
+  margin-left: var(--sidebar-width-closed); /* Espacio para el sidebar cerrado */
+}
+
+/* --- Estilos para FrecuenciaDeUsoView (ajustados) --- */
+.view-content {
+  background-color: var(--white-color);
+  padding: 25px 30px; /* Más padding horizontal */
+  border-radius: 12px; /* Bordes más redondeados */
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px; /* Más espacio */
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.view-header h2 {
+  margin: 0;
+  color: var(--text-gray-medium-color);
+  font-size: 1.7rem; /* Ligeramente más pequeño */
+  font-weight: 600;
+}
+
+.view-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Espacio reducido */
+}
+
+.search-bar-minimal {
+  display: flex;
+  align-items: center;
+  background-color: var(--background-gray-100); /* Fondo sutil */
+  padding: 10px 15px; /* Más padding */
+  border-radius: 8px;
+  min-width: 280px;
+  border: 1px solid var(--border-gray-200); /* Borde sutil */
+}
+
+.search-bar-minimal input {
+  flex-grow: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
   color: var(--text-gray-medium-color);
 }
-.search-input-reportes::placeholder {
+.search-bar-minimal input::placeholder {
   color: var(--text-gray-light-color);
 }
 
-.filter-button-inside-search-reportes {
-  position: absolute;
-  right: 0.25rem; /* right-1 */
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-gray-color);
-  padding: 0.375rem;
+.search-icon-minimal {
+  color: var(--primary-color);
+  margin-right: 8px; /* Espacio antes del input */
 }
-.filter-button-inside-search-reportes:hover {
-    background-color: var(--background-gray-100);
+.filter-icon-minimal {
+  color: var(--primary-color);
+  cursor: pointer;
+  margin-left: 8px; /* Espacio después del input o del icono de búsqueda */
 }
 
 
-.filter-tag-reportes {
-  display: inline-flex;
+.user-filter-dropdown {
+  display: flex;
   align-items: center;
-  padding: 0.25rem 0.75rem; /* px-3 py-1 */
-  border-radius: 9999px; /* rounded-full */
-  background-color: var(--background-gray-100); /* bg-gray-100 */
-  font-size: 0.875rem; /* text-sm */
+  gap: 8px;
+  padding: 10px 15px; /* Más padding */
+  border: 1px solid var(--border-gray-200); /* Borde sutil */
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: var(--white-color);
+  transition: background-color 0.2s;
+}
+
+.user-filter-dropdown:hover {
+  background-color: var(--background-gray-100);
+}
+
+.user-filter-dropdown span {
+  font-size: 0.9rem;
   color: var(--text-gray-medium-color);
 }
 
-.filter-tag-text-reportes {
-  margin-right: 0.5rem; /* mr-2 */
+.user-filter-dropdown .lucide-users,
+.user-filter-dropdown .lucide-chevron-down {
+  color: var(--text-gray-color);
 }
 
-.filter-tag-icon-reportes {
-  height: 1rem; /* size-16 -> h-4 w-4 */
-  width: 1rem;
-  cursor: pointer;
+.chart-container {
+  width: 100%;
+  /* height: 350px; definida en el JS con ResponsiveContainer */
+  margin-bottom: 30px;
 }
 
-.chart-container-reportes {
-  background-color: var(--white-color); /* bg-white */
-  padding: 1.5rem; /* p-6 */
-  border-radius: 0.5rem; /* rounded-lg */
-  box-shadow: 0 1px 2px 0 var(--shadow-color); /* shadow-sm */
-}
-
-.chart-placeholder-reportes {
-  height: 400px; /* h-[400px] */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-gray-light-color); /* text-gray-400 */
-  border: 1px dashed var(--border-gray-200); /* Opcional, para visualizar el área */
-  border-radius: 0.375rem;
-}
-
-.download-action-reportes {
+.view-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem; /* mt-4 */
+  margin-top: 20px;
 }
 
-.download-report-button-reportes {
+.download-report-button {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  border: none;
+  padding: 12px 22px; /* Padding ajustado */
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* gap-2 */
-  background-color: var(--primary-color); /* bg-primary */
-  color: var(--white-color);
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
+  gap: 8px;
+  transition: background-color 0.2s ease;
 }
 
-.download-report-button-reportes:hover {
-  background-color: var(--primary-hover-color); /* hover:bg-accent1 */
+.download-report-button:hover {
+  background-color: var(--primary-hover-color);
 }
 
-.icon-extra-small-reportes {
-  height: 1rem; /* h-4 */
-  width: 1rem; /* w-4 */
+/* Estilos para Leyenda de Recharts */
+.recharts-legend-wrapper {
+  padding-top: 20px !important; /* Ajusta según sea necesario */
 }
-
-/* Estilos para Button (simulados) */
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  transition: background-color 0.2s, color 0.2s;
-  cursor: pointer;
-  border: 1px solid transparent;
+.recharts-legend-item {
+  margin-right: 20px !important; /* Espacio entre items de la leyenda */
 }
-
-.button-ghost {
-  background-color: transparent;
-}
-.button-ghost:hover {
-  background-color: var(--background-gray-100);
+.recharts-surface { /* Para evitar que los puntos del gráfico se corten */
+  overflow: visible !important;
 }
