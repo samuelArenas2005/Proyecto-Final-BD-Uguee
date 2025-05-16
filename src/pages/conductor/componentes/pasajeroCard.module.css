@@ -1,0 +1,108 @@
+/* src/components/PassengerCard/PassengerCard.module.css */
+.card {
+  display: flex;
+  align-items: center; /* Alinea verticalmente los items al centro */
+  background-color: #fff;
+  border-radius: 10px; /* Bordes redondeados como en la imagen */
+  padding: 15px 20px; /* Ajusta el padding para más semejanza */
+  margin-bottom: 15px;
+  /* Sombra más sutil o acorde a la nueva imagen */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07); 
+  gap: 15px; /* Espacio entre avatar, info y mas info */
+}
+
+.avatarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px; /* Ancho del contenedor del avatar */
+  height: 50px; /* Altura del contenedor del avatar */
+  border-radius: 50%;
+  background-color: #f0f0f0; /* Fondo para el icono si no hay imagen */
+  overflow: hidden; /* Para que la imagen respete el círculo */
+  flex-shrink: 0; /* Evita que el avatar se encoja */
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarIcon {
+  color: #909090; /* Color del icono por defecto */
+}
+
+.passengerInfo {
+  flex-grow: 1; /* Ocupa el espacio disponible en el medio */
+  display: flex;
+  flex-direction: column; /* Nombre arriba, detalles de locación abajo */
+  justify-content: center; /* Centra el contenido verticalmente si hay espacio extra */
+  gap: 4px; /* Espacio entre nombre y detalles de locación */
+}
+
+.passengerName {
+  font-size: 1.1rem; /* Un poco más grande */
+  font-weight: bold; /* Negrita como en la imagen */
+  color: #222; /* Negro o gris muy oscuro */
+  margin: 0;
+}
+
+.locationDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Espacio entre partida y destino */
+}
+
+.locationItem {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem; /* Más pequeño */
+  color: #666; /* Gris para el texto de locación */
+}
+
+.locationIcon {
+  margin-right: 8px;
+  color: #888; /* Color del icono de MapPin */
+  flex-shrink: 0;
+}
+
+.moreInfo {
+  display: flex;
+  flex-direction: column; /* Título arriba, línea de llegada, valor de llegada */
+  align-items: flex-start; /* Alinea el contenido a la izquierda dentro de esta sección */
+  text-align: left;
+  flex-shrink: 0; /* Evita que esta sección se encoja */
+  min-width: 110px; /* Ancho mínimo para evitar que se desorganice */
+}
+
+.moreInfoTitle {
+  font-size: 0.75rem; /* Pequeño y gris */
+  color: #888;
+  margin: 0 0 4px 0;
+}
+
+.arrivalTimeLine {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px; /* Pequeño espacio antes de la hora */
+}
+
+.clockIcon {
+  margin-right: 6px;
+  color: #888; /* Color del icono de reloj */
+  flex-shrink: 0;
+}
+
+.arrivalLabel {
+  font-size: 0.85rem; /* Tamaño normal para "Hora de llegada" */
+  color: #666; /* Gris para el texto */
+}
+
+.arrivalTimeValue {
+  font-size: 1rem; /* Tamaño de la hora */
+  font-weight: bold; /* Negrita */
+  color: #333; /* Color oscuro para la hora */
+  margin: 0;
+  padding-left: 22px; /* Alinea la hora debajo del texto "Hora de llegada" (ajustar según tamaño de icono + margen) */
+}

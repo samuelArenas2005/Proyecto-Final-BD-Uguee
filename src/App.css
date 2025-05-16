@@ -26,3 +26,13 @@ h1, h2, h3, p, a, button, link {
   font-family: 'Poppins', sans-serif;
 }
 
+.leaflet-routing-container.leaflet-bar.leaflet-control{
+  display: none;
+}
+
+.leaflet-control{
+    font-family: 'Poppins';
+  font-size: 10px;
+  color: #2C2C2C !important;
+}
+

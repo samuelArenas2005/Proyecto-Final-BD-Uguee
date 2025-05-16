@@ -10,6 +10,10 @@ import Pasajero from "./pages/pasajero/pasajero";
 import UniversidadPage from "./pages/universidad/universidad";
 import ReportesPage from "./pages/universidad/reportes";
 import MonitoreoPage from "./pages/universidad/monitoreo";
+import ConductorPage from "./pages/conductor/conductor";
+import ConductorPageViaje from "./pages/conductor/viajeConductor";
+import ConductorPageReporteVia from "./pages/conductor/reporteVia";
+
 import NotFoundPage from "./pages/notFound";
 
 import "./App.css";
@@ -47,6 +51,30 @@ const App = () => {
           element={
             <Layout2>
               <Pasajero />
+            </Layout2>
+          }
+        />
+        <Route
+          path="/conductor"
+          element={
+            <Layout2>
+              <ConductorPage />
+            </Layout2>
+          }
+        />
+        <Route
+          path="/conductor/viaje"
+          element={
+            <Layout2>
+              <ConductorPageViaje />
+            </Layout2>
+          }
+        />
+        <Route
+          path="/conductor/reporte"
+          element={
+            <Layout2>
+              <ConductorPageReporteVia />
             </Layout2>
           }
         />

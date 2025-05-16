@@ -6,7 +6,7 @@ import TripDetailDialog from "./complementos/tripDetailDialog";
 import styles from './pasajero.module.css'
 import car from "../../../public/car.png";
 import carIcono from "../../../public/carIcono.png";
-import { renderToStaticMarkup } from 'react-dom/server';
+
 
 
 const mockDrivers = [
@@ -112,9 +112,13 @@ const TravelPage = () => {
   };
 
   return (
+    
     <div className={styles.travelPageContainer}>
+          
       <div className={styles.leftPanel}>
+
         <div className={styles.tripRequestCard}>
+          
           <h2>Solicita tu viaje</h2>
           <div className={styles.inputGroup}>
             <MapPin size={20} className={styles.inputIcon} />
