@@ -36,3 +36,8 @@ h1, h2, h3, p, a, button, link {
   color: #2C2C2C !important;
 }
 
+.leaflet-control-container .leaflet-top,
+.leaflet-control-container .leaflet-bottom {
+  z-index: 10 !important; /* O un valor menor que el z-index de tu modalOverlay */
+}
+

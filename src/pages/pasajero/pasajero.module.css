@@ -212,6 +212,7 @@
   border-radius: 30px; /* Bordes redondeados para el contenedor del mapa */
   overflow: hidden; /* Para que el mapa respete el borde redondeado */
   box-shadow: 0px 8px 25px rgba(198, 117, 249, 0.263);
+  z-index: 0;
 }
 
 /* Estilo para los controles de Zoom de Leaflet (usando :global ya que son clases de Leaflet) */

@@ -61,7 +61,7 @@ export default function Login() {
                 </button>
               </p>
               <div className="admin-access">
-                <Link to="/auth/admin" className="admin-link">
+                <Link to="/authUser/admin" className="admin-link">
                   <ShieldUser className="admin-icon" />
                   <span>Acceso Administrador</span>
                 </Link>

@@ -13,6 +13,8 @@ import MonitoreoPage from "./pages/universidad/monitoreo";
 import ConductorPage from "./pages/conductor/conductor";
 import ConductorPageViaje from "./pages/conductor/viajeConductor";
 import ConductorPageReporteVia from "./pages/conductor/reporteVia";
+import AdminPage from "./pages/admin/adminPage"
+import HistorialPasajero from "./pages/pasajero/historialPasajeros/HistorialPasajerosPage";
 
 import NotFoundPage from "./pages/notFound";
 
@@ -51,6 +53,14 @@ const App = () => {
           element={
             <Layout2>
               <Pasajero />
+            </Layout2>
+          }
+        />
+        <Route
+          path="/pasajero/actividad"
+          element={
+            <Layout2>
+              <HistorialPasajero />
             </Layout2>
           }
         />
@@ -100,6 +110,14 @@ const App = () => {
             <LayoutUni>
               <MonitoreoPage />
             </LayoutUni>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <Layout1>
+              <AdminPage />
+            </Layout1>
           }
         />
         <Route
