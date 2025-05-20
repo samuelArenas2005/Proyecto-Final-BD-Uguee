@@ -3,172 +3,184 @@
   display: flex;
   height: 100vh;
   width: 100%;
-  background: #F9FAFB ;
-  padding: 10px 30px; /* Espacio alrededor */
-  gap: 40px; /* Espacio entre paneles */
+  background: #F9FAFB;
+  padding: 8px 20px; /* Espacio alrededor reducido */
+  gap: 30px; /* Espacio entre paneles reducido */
   box-sizing: border-box;
-  overflow: hidden; /* Para evitar barras de scroll innecesarias en la página */
+  overflow: hidden;
   align-items: center;
+  z-index: 3;
 }
 
+.waveBg {
+  position: absolute;
+  top:0;
+  left: 0;
+  width: 100%;        /* que ocupe todo el ancho del padre */
+  height: auto;       /* mantiene proporción */
+  z-index: 0;         /* debajo de todo */
+  pointer-events: none;/* que no interfiera clicks */
+}
+
+
 .leftPanel {
+  z-index: 3;
   margin-left: 1rem;
   max-height: 100%;
-  width: 550px; /* Ancho fijo para el panel izquierdo */
+  width: 480px; /* Ancho fijo para el panel izquierdo reducido */
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Espacio entre las tarjetas del panel izquierdo */
-  flex-shrink: 0; /* Evita que el panel se encoja */
+  gap: 15px; /* Espacio entre las tarjetas del panel izquierdo reducido */
+  flex-shrink: 0;
 }
 
 .tripRequestCard,
 .driverOptionsCard {
   background-color: #ffffff;
-  border-radius: 20px; /* Bordes redondeados como en la imagen */
-  padding: 25px;
-  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 16px; /* Bordes redondeados reducidos */
+  padding: 20px; /* Padding reducido */
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.07);
 }
 
 .tripRequestCard h2 {
-  font-size: 20px;
+  font-size: 18px; /* Tamaño de fuente reducido */
   font-weight: 600;
-  color: #1f2937; /* Gris oscuro */
+  color: #1f2937;
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 15px; /* Margen inferior reducido */
 }
 
 .inputGroup {
   display: flex;
   align-items: center;
-  background-color: #f3f4f6; /* Fondo gris claro para input */
-  border-radius: 12px;
-  padding: 0 15px;
-  margin-bottom: 15px;
-  height: 50px;
+  background-color: #f3f4f6;
+  border-radius: 10px; /* Bordes redondeados reducidos */
+  padding: 0 12px; /* Padding reducido */
+  margin-bottom: 12px; /* Margen inferior reducido */
+  height: 44px; /* Altura reducida */
 }
 
 .inputIcon {
-  color: #6b7280; /* Icono gris */
-  margin-right: 10px;
+  color: #6b7280;
+  margin-right: 8px; /* Margen derecho reducido */
 }
 
 .inputField {
   flex-grow: 1;
   border: none;
   background-color: transparent;
-  font-size: 15px;
+  font-size: 14px; /* Tamaño de fuente reducido */
   color: #1f2937;
   outline: none;
 }
 
 .inputField::placeholder {
-  color: #9ca3af; /* Placeholder gris más claro */
+  color: #9ca3af;
 }
 
 .buttonGroup {
   display: flex;
-  gap: 10px; /* Espacio entre botón de búsqueda y filtro */
-  margin-top: 20px;
+  gap: 8px; /* Espacio entre botón de búsqueda y filtro reducido */
+  margin-top: 15px; /* Margen superior reducido */
 }
 
 .searchButton {
   flex-grow: 1;
-  background-color: #AA00FF; /* Morado principal */
+  background-color: #AA00FF;
   color: #ffffff;
   border: none;
-  border-radius: 12px;
-  padding: 12px 15px;
-  font-size: 15px;
+  border-radius: 10px; /* Bordes redondeados reducidos */
+  padding: 10px 12px; /* Padding reducido */
+  font-size: 14px; /* Tamaño de fuente reducido */
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
-  height: 48px;
+  height: 42px; /* Altura reducida */
 }
 
 .searchButton:hover {
-  background-color: #7150B0; /* Morado más oscuro */
+  background-color: #7150B0;
 }
 
 .filterButton {
-  background-color: #E5E7EB; /* Gris claro para el botón de filtro */
-  color: #4B5563; /* Icono gris oscuro */
+  background-color: #E5E7EB;
+  color: #4B5563;
   border: none;
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 10px; /* Bordes redondeados reducidos */
+  padding: 8px; /* Padding reducido */
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
-  width: 48px;
-  height: 48px;
+  width: 42px; /* Ancho reducido */
+  height: 42px; /* Altura reducida */
 }
 
 .filterButton:hover {
-  background-color: #D1D5DB; /* Gris más oscuro */
+  background-color: #D1D5DB;
 }
 
 .driverOptionsCard h3 {
-  font-size: 18px;
+  font-size: 16px; /* Tamaño de fuente reducido */
   font-weight: 600;
   color: #1f2937;
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 12px; /* Margen inferior reducido */
 }
 
 .driverList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-height: calc(100vh - 450px); /* Ajusta esto según la altura del otro contenido */
+  gap: 10px; /* Espacio reducido */
+  max-height: calc(100vh - 380px); /* Ajustado según la altura del otro contenido reducido */
   overflow-y: auto;
-  padding-right: 8px; /* Espacio para la barra de scroll */
+  padding-right: 6px; /* Espacio para la barra de scroll reducido */
 }
 
-/* Estilo para la barra de scroll */
 .driverList::-webkit-scrollbar {
-  width: 6px;
+  width: 5px; /* Ancho reducido */
 }
 .driverList::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 10px;
+  border-radius: 8px; /* Radio reducido */
 }
 .driverList::-webkit-scrollbar-thumb {
   background: #c7c7c7;
-  border-radius: 10px;
+  border-radius: 8px; /* Radio reducido */
 }
 .driverList::-webkit-scrollbar-thumb:hover {
   background: #a3a3a3;
 }
 
-
 .driverItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f9fafb; /* Fondo muy claro para cada item */
-  padding: 12px 15px;
-  border-radius: 12px;
+  background-color: #f9fafb;
+  padding: 10px 12px; /* Padding reducido */
+  border-radius: 10px; /* Bordes redondeados reducidos */
   border: 1px solid #e5e7eb;
 }
 
 .driverInfo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px; /* Espacio reducido */
 }
 
 .driverAvatar {
-  width: 36px;
-  height: 36px;
+  width: 32px; /* Tamaño reducido */
+  height: 32px; /* Tamaño reducido */
   border-radius: 50%;
   object-fit: cover;
 }
+
 .driverAvatarDefault {
-  color: #9ca3af; /* Color para el icono de avatar por defecto */
+  color: #9ca3af;
 }
 
 .driverText {
@@ -177,13 +189,13 @@
 }
 
 .driverName {
-  font-size: 14px;
+  font-size: 13px; /* Tamaño de fuente reducido */
   font-weight: 500;
   color: #1f2937;
 }
 
 .driverLocation {
-  font-size: 12px;
+  font-size: 11px; /* Tamaño de fuente reducido para el texto */
   color: #6b7280;
   display: flex;
   align-items: center;
@@ -193,7 +205,7 @@
   background-color: transparent;
   border: none;
   color: #6b7280;
-  padding: 5px;
+  padding: 4px; /* Padding reducido */
   cursor: pointer;
   border-radius: 50%;
   display: flex;
@@ -207,29 +219,28 @@
 }
 
 .rightPanelMap {
-  flex-grow: 1; /* El mapa toma el espacio restante */
-  height: 80%;
-  border-radius: 30px; /* Bordes redondeados para el contenedor del mapa */
-  overflow: hidden; /* Para que el mapa respete el borde redondeado */
-  box-shadow: 0px 8px 25px rgba(198, 117, 249, 0.263);
+  flex-grow: 1;
+  height: 75%; /* Altura del mapa reducida */
+  border-radius: 24px; /* Bordes redondeados reducidos */
+  overflow: hidden;
+  box-shadow: 0px 6px 20px rgba(198, 117, 249, 0.23);
   z-index: 0;
 }
 
-/* Estilo para los controles de Zoom de Leaflet (usando :global ya que son clases de Leaflet) */
 :global(.leaflet-control-zoom) {
   border: 1px solid #BDBDBD !important;
-  border-radius: 10px !important;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.15) !important;
-  margin-bottom: 15px !important;
-  margin-right: 15px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
+  margin-bottom: 12px !important;
+  margin-right: 12px !important;
 }
 
 :global(.leaflet-control-zoom-in),
 :global(.leaflet-control-zoom-out) {
-  width: 36px !important;
-  height: 36px !important;
-  line-height: 36px !important;
-  font-size: 22px !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  font-size: 20px !important;
   color: #4B5563 !important;
   background-color: #FFFFFF !important;
   font-weight: normal !important;
@@ -237,11 +248,11 @@
 
 :global(.leaflet-control-zoom-in) {
   border-bottom: 1px solid #D6D6D6 !important;
-  border-radius: 10px 10px 0 0 !important;
+  border-radius: 8px 8px 0 0 !important;
 }
 
 :global(.leaflet-control-zoom-out) {
-  border-radius: 0 0 10px 10px !important;
+  border-radius: 0 0 8px 8px !important;
 }
 
 :global(.leaflet-control-zoom-in:hover),
@@ -249,49 +260,46 @@
   background-color: #F4F4F4 !important;
 }
 
-
 .cardContainer {
   background-color: #ffffff;
-  border-radius: 20px; /* Bordes redondeados como en la imagen */
-  padding: 20px;
-  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+  border-radius: 16px; /* Bordes redondeados reducidos */
+  padding: 16px; /* Padding reducido */
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.07);
+  margin-bottom: 15px; /* Margen inferior reducido */
 }
 
 .mainTitle {
-  font-weight: 600; /* Menos bold */
+  font-weight: 600;
   color: #333333;
   text-align: center;
   margin-top: 5px;
-  font-size: 20px;
-  font-weight: 600;
-  color: #1f2937; /* Gris oscuro */
-  margin-bottom: 20px;
+  font-size: 18px; /* Tamaño de fuente reducido */
+  margin-bottom: 15px; /* Margen inferior reducido */
 }
 
 .driverSection {
   background-color: #7952b3;
   color: white;
-  padding: 15px; /* Padding ajustado */
-  border-radius: 25px; /* Bordes ajustados */
+  padding: 12px; /* Padding ajustado y reducido */
+  border-radius: 20px; /* Bordes ajustados y reducidos */
   display: flex;
   align-items: center;
-  gap: 20px; /* Espacio ajustado */
-  margin-bottom: 20px;
-  border: 4px solid #cfacfdd8 ;
+  gap: 15px; /* Espacio ajustado y reducido */
+  margin-bottom: 15px; /* Margen inferior reducido */
+  border: 3px solid #cfacfdd8; /* Borde reducido */
 }
 
 .driverAvatarBig {
-  width: 50px; /* Tamaño ajustado */
-  height: 50px;
+  width: 44px; /* Tamaño ajustado y reducido */
+  height: 44px; /* Tamaño ajustado y reducido */
   border-radius: 50%;
   background-color: #f0f0f0;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.45); /* Borde más sutil */
+  border: 2px solid rgba(255, 255, 255, 0.45);
 }
 
 .driverInfoBig .driverNameBig {
-  font-size: 13px; /* Tamaño ajustado */
+  font-size: 12px; /* Tamaño ajustado y reducido */
   font-weight: 600;
   margin: 0;
 }
@@ -299,8 +307,8 @@
 .locationRow {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 4px;
+  gap: 4px; /* Espacio reducido */
+  margin-top: 3px; /* Margen superior reducido */
 }
 
 .locationIcon {
@@ -308,34 +316,34 @@
 }
 
 .driverInfoBig .driverLocation {
-  font-size: 13px; /* Tamaño ajustado */
+  font-size: 12px; /* Tamaño ajustado y reducido */
   color: #d1c4e9;
   margin: 0;
 }
 
 .vehicleDetailsSectionWrapper {
   background-color: #ffffff;
-  padding: 12px 10px; /* Padding ajustado para contenido interno */
+  padding: 10px 8px; /* Padding ajustado y reducido */
   display: flex;
   align-items: center;
-  gap: 8px; /* Espacio reducido entre columnas internas */
+  gap: 6px; /* Espacio reducido entre columnas internas */
 }
 
 .driverAvatarRatingColumn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px; /* Espacio entre avatar y rating badge */
+  gap: 4px; /* Espacio entre avatar y rating badge reducido */
   flex-shrink: 0;
 }
 
 .driverAvatarSmall {
-  width: 48px; /* Tamaño ajustado */
-  height: 48px;
+  width: 42px; /* Tamaño ajustado y reducido */
+  height: 42px; /* Tamaño ajustado y reducido */
   border-radius: 50%;
   background-color: #e9ecef;
   object-fit: cover;
-  border: 1px solid #dee2e6; /* Borde más sutil */
+  border: 1px solid #dee2e6;
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
   display: block;
 }
@@ -343,13 +351,13 @@
 .ratingBadge {
   background-color: #ffffff;
   color: #343a40;
-  padding: 3px 7px; /* Padding ajustado */
-  border-radius: 8px; /* Bordes ajustados */
-  font-size: 10px; /* Fuente más pequeña */
+  padding: 2px 6px; /* Padding ajustado y reducido */
+  border-radius: 6px; /* Bordes ajustados y reducidos */
+  font-size: 9px; /* Fuente más pequeña para el texto del badge */
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px; /* Espacio reducido */
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   border: 1px solid #e0e0e0;
   white-space: nowrap;
@@ -367,9 +375,9 @@
 }
 
 .carImage {
-  width: 85px; /* Ancho ajustado para ser más estrecho */
+  width: 75px; /* Ancho ajustado y reducido */
   height: auto;
-  max-height: 55px; /* Altura máxima ajustada */
+  max-height: 48px; /* Altura máxima ajustada y reducida */
   object-fit: contain;
 }
 
@@ -378,14 +386,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-left: 4px; /* Espacio ajustado */
-  min-width: 0; /* Para permitir que el texto se ajuste y la columna se encoja */
-  margin-left: 10rem;
+  padding-left: 4px;
+  min-width: 0;
+  margin-left: 0.5rem; /* Margen izquierdo drásticamente reducido */
 }
 
 .carPlate {
-  font-size: 17px; /* Tamaño ajustado, pero prominente */
-  font-weight: 700; /* Bastante bold */
+  font-size: 15px; /* Tamaño ajustado y reducido */
+  font-weight: 700;
   color: #2c2c2c;
   margin: 0 0 2px 0;
   line-height: 1.15;
@@ -393,17 +401,16 @@
 }
 
 .carModel {
-  font-size: 12px; /* Fuente más pequeña para el modelo */
-  color: #454545; /* Color de texto ajustado */
+  font-size: 11px; /* Fuente más pequeña para el modelo */
+  color: #454545;
   margin: 0 0 2px 0;
   line-height: 1.3;
-  /* El texto se ajustará si es necesario para crear dos líneas */
 }
 
 .priceInfo {
-  font-size: 12px; /* Fuente más pequeña */
+  font-size: 11px; /* Fuente más pequeña */
   color: #6c757d;
-  font-weight: 400; /* Menos énfasis */
+  font-weight: 400;
   margin: 0;
   line-height: 1.3;
 }
@@ -411,10 +418,11 @@
 .etaSection {
   display: flex;
   align-items: center;
-  gap: 10px; /* Espacio ajustado */
-  padding: 10px 12px; /* Padding ajustado */
-  background-color: #ffffff; /* Fondo muy claro, casi blanco */
-  border-radius: 10px; /* Bordes ajustados */
+  gap: 8px; /* Espacio ajustado y reducido */
+  padding: 8px 10px; /* Padding ajustado y reducido */
+  background-color: #ffffff;
+  border-radius: 8px; /* Bordes ajustados y reducidos */
+  margin-top: 10px;
 }
 
 .clockIconDetails {
@@ -427,57 +435,58 @@
 }
 
 .etaTitle {
-  font-size: 13px; /* Tamaño ajustado */
+  font-size: 12px; /* Tamaño ajustado y reducido */
   color: #333333;
   font-weight: 500;
   margin: 0;
 }
 
 .etaTime {
-  font-size: 13px; /* Tamaño ajustado */
+  font-size: 12px; /* Tamaño ajustado y reducido */
   color: #666666;
   margin: 0;
   margin-top: 1px;
 }
 
 .messageButton {
-  margin: 15px auto;
-  margin-left: 35px;
-  width: 80%;
-  padding: 12px; /* Padding ajustado */
-  font-size: 15px; /* Tamaño ajustado */
+  margin: 12px auto; /* Margen reducido */
+  margin-left: 25px; /* Margen izquierdo reducido */
+  width: calc(80% - 10px); /* Ancho ajustado */
+  padding: 10px; /* Padding ajustado y reducido */
+  font-size: 14px; /* Tamaño ajustado y reducido */
   font-weight: 500;
   color: #adb5bd;
-  background-color: #f0f0f0; /* Ligeramente más claro */
-  border: 1px solid #e0e0e0; /* Borde más claro */
-  border-radius: 20px; /* Bordes consistentes con otros campos */
+  background-color: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px; /* Bordes consistentes y reducidos */
   cursor: default;
   text-align: center;
+  margin-top: 12px;
 }
 
 .actionButtons {
   display: flex;
-  gap: 10px; /* Espacio ajustado */
-  margin-top: 5px; /* Espacio superior ajustado */
+  gap: 8px; /* Espacio ajustado y reducido */
+  margin-top: 10px; /* Espacio superior ajustado */
 }
 
 .cancelButton,
 .qrButton {
   flex-grow: 1;
-  padding: 12px; /* Padding ajustado */
-  font-size: 15px; /* Tamaño ajustado */
-  font-weight: 500; /* Menos bold que antes, pero legible */
-  border-radius: 20px; /* Bordes de píldora consistentes */
+  padding: 10px; /* Padding ajustado y reducido */
+  font-size: 14px; /* Tamaño ajustado y reducido */
+  font-weight: 500;
+  border-radius: 16px; /* Bordes de píldora consistentes y reducidos */
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px; /* Espacio del icono ajustado */
+  gap: 5px; /* Espacio del icono ajustado y reducido */
 }
 .cancelButton:active, .qrButton:active {
-    transform: scale(0.97);
+  transform: scale(0.97);
 }
 
 .cancelButton {
@@ -493,15 +502,15 @@
   background-color: #7952b3;
   color: white;
 }
+
 .qrIcon {
-  /* Estilos heredados */
+  /* Estilos heredados o el ícono se maneja internamente */
 }
 
 .qrButton:hover {
   background-color: #6a429f;
 }
 
-/* Estilos del Modal (generalmente no necesitan muchos cambios para este ajuste visual del componente principal) */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -513,19 +522,19 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 15px;
+  padding: 12px; /* Padding reducido */
 }
 
 .modalContent {
   background-color: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+  padding: 20px; /* Padding reducido */
+  border-radius: 10px; /* Radio reducido */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.20); /* Sombra ajustada */
   width: 100%;
-  max-width: 380px;
+  max-width: 340px; /* Ancho máximo reducido */
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 15px; /* Espacio reducido */
   animation: fadeInModal 0.3s ease-out;
 }
 
@@ -539,11 +548,11 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e9ecef;
-  padding-bottom: 12px;
+  padding-bottom: 10px; /* Padding inferior reducido */
 }
 
 .modalTitle {
-  font-size: 20px;
+  font-size: 18px; /* Tamaño de fuente reducido */
   font-weight: 600;
   color: #343a40;
   margin: 0;
@@ -553,7 +562,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
+  padding: 4px; /* Padding reducido */
   color: #6c757d;
   line-height: 1;
 }
@@ -565,23 +574,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 12px; /* Espacio reducido */
 }
 
 .qrImageModal {
-  max-width: 220px;
+  max-width: 180px; /* Ancho máximo reducido */
   height: auto;
   border: 1px solid #dee2e6;
-  border-radius: 8px;
+  border-radius: 6px; /* Radio reducido */
   background-color: #f8f9fa;
-  padding: 5px;
+  padding: 4px; /* Padding reducido */
 }
 
 .qrHelpText {
-  font-size: 14px;
+  font-size: 13px; /* Tamaño de fuente reducido */
   color: #495057;
   text-align: center;
   margin: 0;
   line-height: 1.5;
 }
-

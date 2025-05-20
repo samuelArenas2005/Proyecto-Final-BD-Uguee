@@ -7,7 +7,7 @@
   z-index: 99;
   padding: 15px 30px; /* Ajusta el padding según necesites */
   background-color: #ffffff; /* Fondo blanco */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+  box-shadow:  0 2px 20px rgba(253, 55, 227, 0.268); /* Sombra sutil */
   height: 70px; /* Altura fija para el header */
 }
 
