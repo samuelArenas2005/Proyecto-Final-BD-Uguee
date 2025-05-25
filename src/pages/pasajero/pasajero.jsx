@@ -6,7 +6,7 @@ import TripDetailDialog from "./complementos/tripDetailDialog";
 import styles from './pasajero.module.css'
 import car from "../../../public/car.png";
 import carIcono from "../../../public/carIcono.png";
-import wave from "../../../public/wave.svg";
+import wave from "../../../public/wave2.svg";
 
 
 
@@ -115,7 +115,7 @@ const TravelPage = () => {
   return (
     
     <div className={styles.travelPageContainer}>
-       <img src={wave} alt="Descripción del ícono" width={50} height={50} className={styles.waveBg} />
+
           
       <div className={styles.leftPanel}>
 
