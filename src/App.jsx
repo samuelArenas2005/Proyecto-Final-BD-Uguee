@@ -16,6 +16,9 @@ import ConductorPageReporteVia from "./pages/conductor/reporteVia";
 import AdminPage from "./pages/admin/adminPage"
 import HistorialPasajero from "./pages/pasajero/historialPasajeros/HistorialPasajerosPage";
 
+
+import Prueba from "./pages/prueba/prueba"
+
 import NotFoundPage from "./pages/notFound";
 
 import "./App.css";
@@ -38,6 +41,12 @@ const App = () => {
             <Layout1>
               <Login />
             </Layout1>
+          }
+        />
+        <Route
+          path="/prueba"
+          element={
+            <Prueba />
           }
         />
         <Route

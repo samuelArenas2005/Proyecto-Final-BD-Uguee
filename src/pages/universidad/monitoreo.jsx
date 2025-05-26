@@ -53,10 +53,7 @@ const mockTrips = [
   }
 ];
 
-// --- Icono Personalizado para el Vehículo ---
-// La clase 'customCarMarker' ahora está definida en UserMonitoring.module.css
-// y es globalmente accesible debido a su uso en HTML inyectado.
-// Si quisieras que fuera module-scoped, el DivIcon tendría que ser un componente React.
+
 const carIconHtml = `<div class="${styles.customCarMarker}"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#3C0078" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car-taxi-front"><path d="M10 2h4"/><path d="m21 8-2 7-1.5 3.5A2 2 0 0 1 15.64 20H8.36a2 2 0 0 1-1.86-1.5L5 15l-2-7Z"/><path d="M12 12V7H5l2 5Z"/><path d="M12 12V7h7l-2 5Z"/><path d="M12 12h-2.5"/><path d="M12 12h2.5"/><path d="M5 15h14"/><path d="M6.2 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/><path d="M17.8 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/></svg></div>`;
 
 const carIcon = new L.DivIcon({

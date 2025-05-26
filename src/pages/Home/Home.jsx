@@ -1,5 +1,6 @@
 // src/pages/Home/HomePage.jsx
 import React from 'react';
+import { Link, useLocation } from "react-router-dom";
 import styles from './Home.module.css';
 import homeImage from "../../../public/homeImage.png";
 
@@ -19,6 +20,11 @@ const Home= () => {
         <p className={styles.sectionText}>
           Ugüee es el servicio de transporte colaborativo que conecta estudiantes para facilitar sus desplazamientos dentro del campus universitario.
         </p>
+        <Link to="/prueba">
+            <button>
+              ir a prueba
+            </button>
+        </Link>
       </section>
 
       <section id="services" className={styles.section}>

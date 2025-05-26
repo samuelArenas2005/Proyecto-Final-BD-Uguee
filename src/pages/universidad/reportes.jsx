@@ -85,7 +85,15 @@ const FrecuenciaDeUsoView = () => (
 );
 
 const InformeHorariosView = () => (
-  <div className="view-content"><h2>Informe de Horarios</h2><p>Contenido...</p></div>
+  <div className="view-content">
+    <h2>Informe de Horarios</h2>
+    <p>Contenido...</p>
+    <input type="text" />
+
+    <b>Estoy cambiando cosas</b>
+  
+  </div>
+  
 );
 const InformeRutasView = () => (
   <div className="view-content"><h2>Informe de Rutas</h2><p>Contenido...</p></div>
@@ -114,7 +122,7 @@ const DashboardPage = () => {
     { name: 'Reporte de Conductores', icon: <AlertTriangle size={24} /> },
   ];
 
-  const renderView = () => {
+  function renderView() {
     switch (activeView) {
       case 'Frecuencia de uso': return <FrecuenciaDeUsoView />;
       case 'Informe de horarios': return <InformeHorariosView />;

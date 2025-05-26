@@ -85,7 +85,12 @@ const TravelPage = () => {
   const [mapCenter, setMapCenter] = useState([3.399206, -76.522093]); // Centro aproximado (Valle de Lili, Cali)
   const [mapZoom, setMapZoom] = useState(14);
 
+
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+
+
+
+
   const [isTripDetailDialogOpen, setIsTripDetailDialogOpen] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState(null);
 

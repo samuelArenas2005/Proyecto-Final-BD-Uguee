@@ -8,6 +8,7 @@ const Layout = ({ children }) => {
     <>
       <NavbarUni />
       <main className="layout-content">{children}</main>
+      
       <Footer />
     </>
   );

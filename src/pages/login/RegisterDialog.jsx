@@ -14,6 +14,7 @@ const initialFormData = {
   telefono: ''
 };
 
+
 export default function RegisterDialog({ open, onOpenChange }) {
   
   
@@ -32,8 +33,9 @@ export default function RegisterDialog({ open, onOpenChange }) {
   };
 
   const handleSubmit = async (e) => {
+    console.log("entre aqui")
     
-  e.preventDefault();                         // ① prevención al inicio
+  e.preventDefault();                        
 
   // ② validaciones
   const errors = [];
@@ -51,7 +53,7 @@ export default function RegisterDialog({ open, onOpenChange }) {
   }
   
   const { data, error } = await supabase
-    .from('usuario')
+    .from('estudiantes')
     .insert([formData]);
 
   if (error) {
