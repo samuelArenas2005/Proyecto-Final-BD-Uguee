@@ -1,0 +1,256 @@
+/* src/pages/DetailedTravelPage/DetailedTravelPage.module.css */
+
+:root {
+  --primary-purple: #73299A;
+  --light-purple-icon: #8A3DB8;
+  --text-dark: #333333;
+  --text-medium: #555555;
+  --text-light: #757575;
+  --background-modal: #FFFFFF;
+  --border-color: #E0E0E0;
+  --link-purple: #73299A;
+}
+
+.pageOverlay {
+  padding: 20px;
+  background-color: #f0f2f5;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContainer {
+  background-color: var(--background-modal);
+  border-radius: 20px;
+  box-shadow: 0 10px V30px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 1250px; /* Aumentado de 1100px */
+  display: flex;
+  flex-direction: column;
+  margin-top: -100px;
+}
+
+/* Estilos para la imagen de la ola */
+.waveBg {
+  position: absolute;
+  top:0;
+  left: 0;
+  width: 100%;        /* que ocupe todo el ancho del padre */
+  height: auto;       /* mantiene proporción */
+  z-index: 0;         /* debajo de todo */
+  pointer-events: none;/* que no interfiera clicks */
+}
+
+
+.closeButton {
+  position: absolute;
+  /* Menos espacio arriba: ajustando 'top' */
+  top: 15px; /* Reducido de 20px */
+  right: 20px; /* Reducido de 25px */
+  color: var(--text-medium);
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: var(--text-dark);
+}
+
+.contentWrapper {
+  display: flex;
+  /* Menos espacio arriba: ajustando 'padding-top' */
+  padding-top: 40px;    /* Reducido de 30px */
+  padding-bottom: 30px; /* Mantenemos o ajustamos padding inferior */
+  padding-right: 30px;
+  /* Ajusta padding-left según el ancho visible de tu .waveBg */
+  padding-left: 80px;  /* Reducido ligeramente, ajusta esto! */
+  position: relative;
+  z-index: 1;
+  flex-grow: 1;
+}
+
+.leftColumn {
+  flex: 0 0 38%;
+  padding-right: 35px; /* Espacio entre columnas ligeramente aumentado */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.rightColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tripInfoSection {
+  /* Intencionalmente vacío */
+}
+
+.mainTitle {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-top: 0; /* Importante para el espacio superior */
+  margin-bottom: 25px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+  font-size: 15px;
+  color: var(--text-medium);
+}
+
+.infoIcon {
+  color: var(--light-purple-icon);
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.qrSection {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.qrTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.qrCodeContainer {
+  margin-bottom: 15px;
+  display: inline-block;
+}
+.qrIcon {
+  color: var(--light-purple-icon);
+}
+
+.qrText {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+  line-height: 1.5;
+  max-width: 250px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.appLink {
+  font-size: 14px;
+  color: var(--link-purple);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.appLink:hover {
+  text-decoration: underline;
+}
+
+.reportsButton {
+  background-color: var(--primary-purple);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  align-self: flex-start;
+  transition: background-color 0.2s ease;
+}
+
+.reportsButton:hover {
+  /* No se puede usar darken directamente en CSS variables sin JS o preprocesador */
+  background-color: #5e207b; /* Un morado un poco más oscuro */
+}
+
+.reportIcon {
+ /* No necesita estilo extra */
+}
+
+.mapView {
+  flex-grow: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  min-height: 400px; /* Mantenemos altura mínima o ajustamos según diseño */
+}
+
+.mapContainer {
+  height: 100%;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .contentWrapper {
+    flex-direction: column;
+    padding-left: 30px; 
+    padding-right: 30px;
+  }
+  .waveBg {
+    /* Podrías querer ocultar o simplificar la imagen en móviles */
+    left: -50px; /* Ajustar si se mantiene */
+    width: 80px; /* Más pequeña */
+  }
+  .leftColumn {
+    padding-right: 0;
+    margin-bottom: 30px;
+    flex-basis: auto;
+  }
+  .rightColumn {
+    flex-basis: auto;
+  }
+  .reportsButton {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageOverlay {
+    padding: 0;
+    align-items: stretch;
+  }
+  .modalContainer {
+    border-radius: 0;
+    max-width: 100%;
+    height: 100%;
+    /* Para el waveBg con img, puede ser mejor ocultarlo en móvil si no se adapta bien */
+  }
+  .waveBg {
+     display: none; /* Ocultar la imagen de ola en pantallas muy pequeñas */
+  }
+  .contentWrapper {
+    padding: 20px; /* Restaurar padding uniforme si la ola se oculta */
+  }
+  .mainTitle {
+    font-size: 22px;
+  }
+  .infoItem, .appLink, .qrText {
+    font-size: 14px;
+  }
+  .qrTitle {
+    font-size: 16px;
+  }
+  .reportsButton {
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+}

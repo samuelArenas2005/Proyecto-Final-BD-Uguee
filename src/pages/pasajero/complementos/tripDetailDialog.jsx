@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from '../../AuthUser/Button';
-import { Car, MessageSquare, MapPin, CalendarIcon, Clock, Star, User } from 'lucide-react';
+import { Car, MessageSquare, MapPin, CalendarIcon, Clock, Star, User, QrCode } from 'lucide-react';
 import './tripDetailDialog.css';
 
 const mockTrip = {
@@ -23,9 +23,10 @@ const mockTrip = {
   routeDescription: 'Ruta por la Avenida Principal, pasando por el Parque Central',
 };
 
-export default function TripDetailDialog({ open, onOpenChange, tripId }) {
+export default function TripDetailDialog({ open, onOpenChange, tripId, onAcceptTrip }) {
   if (!open) return null;
   const trip = mockTrip; // In real use, fetch by tripId
+  const driverId = tripId
 
   return (
     <div className="td-overlay">
@@ -112,11 +113,12 @@ export default function TripDetailDialog({ open, onOpenChange, tripId }) {
         </div>
 
         <footer className="td-footer">
-          <Button variant="outline" className="td-btn" onClick={() => {/* message action */}}>
+          <Button variant="outline" className="td-btn" onClick={() => {
+            }}>
             <MessageSquare className="td-btn-icon" />Mensaje al conductor
           </Button>
-          <Button className="td-btn td-btn-primary" onClick={() => {/* reserve action */}}>
-            <Car className="td-btn-icon" />Reservar viaje
+          <Button className="td-btn td-btn-primary" onClick={() => onAcceptTrip(driverId)}>
+            <Car className="td-btn-icon" />Aceptar Viaje
           </Button>
         </footer>
       </div>

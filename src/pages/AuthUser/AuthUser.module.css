@@ -1,0 +1,246 @@
+/* AuthUser.module.css */
+
+/* General Styles */
+.authPage {
+  display: flex;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f8f9fa; /* Light grey background for the page, similar to new image */
+}
+
+.formSide {
+  flex-basis: 50%; /* Form side takes up 40% of the width */
+  background-color: #ffffff; /* White background for the form panel */
+  display: flex;
+  justify-content: center; /* Center formContent horizontally */
+  align-items: center; /* Center formContent vertically */
+  padding: 40px; /* General padding around the form content area */
+  position: relative;
+  /* Subtle shadow for a slight lift and separation from the image panel */
+  box-shadow: 4px 0px 15px rgba(0, 0, 0, 0.06);
+  z-index: 1;
+}
+
+.formContent {
+  width: 100%;
+  max-width: 370px; /* Max width for the form elements container */
+  text-align: left; /* Content within is left-aligned */
+  /* "Air" at the bottom: additional padding below the last form element */
+  padding-bottom: 30px;
+}
+
+.logoText {
+  font-size: 38px; /* Adjusted for a professional, clean look */
+  font-weight: bold;
+  color: #AA00FF; /* Ugūee in brand color */
+  margin-bottom: 8px;
+}
+
+.tagline {
+  font-size: 15px;
+  color: #495057; /* Slightly softer text color for tagline */
+  margin-bottom: 35px; /* Space before the main form title */
+}
+
+.formTitle {
+  font-size: 22px; /* Clear and professional title size */
+  font-weight: 600; /* Slightly bolder for emphasis */
+  color: #2c2c2c;
+  margin-bottom: 30px;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Spacing between form groups/buttons */
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  background-color: #f1f3f5; /* Very light grey for input background */
+  border-radius: 8px; /* Rounded corners for inputs */
+  padding: 13px 15px; /* Comfortable padding for inputs */
+  border: 1px solid transparent; /* Placeholder for focus state */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.inputGroup:focus-within {
+  border-color: #AA00FF; /* Highlight with brand color on focus */
+  box-shadow: 0 0 0 2px rgba(170, 0, 255, 0.15);
+}
+
+.icon {
+  color: #AA00FF; /* Icons in brand color */
+  margin-right: 12px;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.inputField {
+  border: none;
+  background: transparent;
+  outline: none;
+  flex-grow: 1;
+  font-size: 15px;
+  color: #2c2c2c;
+}
+
+.inputField::placeholder {
+  color: #6c757d; /* Softer placeholder color */
+}
+
+.submitButton {
+  background-color: #AA00FF;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px; /* Slightly larger font for primary action */
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.submitButton:hover {
+  background-color: #9900DD;
+}
+
+.googleButton {
+  background-color: #ffffff;
+  color: #2c2c2c;
+  border: 1px solid #ced4da; /* Standard border color */
+  padding: 13px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.googleButton:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.googleIconPlaceholder {
+  color: #AA00FF; /* As requested, icon in brand color */
+  flex-shrink: 0;
+  /* For actual Google icon, you'd likely use an SVG with its own colors */
+}
+
+.forgotPasswordContainer {
+  text-align: center;
+  margin-top: 15px; /* Space above the forgot password link */
+}
+
+.forgotPasswordLink {
+  color: #495057; /* Softer color for less emphasis */
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgotPasswordLink:hover {
+  color: #AA00FF;
+  text-decoration: underline;
+}
+
+.imageSide {
+  flex-basis: 50%; /* Image side takes up 60% of the width */
+  background-image: url('../../../public/imageLogin.png'); /* Your image path */
+  background-size: cover;
+  background-position: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) { /* Tablet and smaller */
+  .authPage {
+    flex-direction: column-reverse; /* Image on top, form below */
+  }
+
+  .formSide {
+    flex-basis: auto;
+    width: 100%;
+    box-shadow: none; /* Remove shadow when stacked */
+    padding: 40px 30px; /* Adjust padding for stacked view */
+  }
+
+  .imageSide {
+    flex-basis: auto;
+    width: 100%;
+    min-height: 280px; /* Ensure image has some height */
+    max-height: 45vh;
+  }
+
+  .formContent {
+    max-width: 450px; /* Allow form to be a bit wider on tablets */
+    margin-left: auto; /* Center formContent if formSide padding is asymmetrical */
+    margin-right: auto;
+    padding-bottom: 20px; /* Adjust "air" for stacked view */
+  }
+
+  .logoText {
+    font-size: 36px;
+  }
+
+  .tagline {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .formTitle {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+}
+
+@media (max-width: 480px) { /* Mobile */
+  .formSide {
+    padding: 30px 20px;
+  }
+
+  .formContent {
+    max-width: 100%; /* Full width within padding */
+  }
+
+  .logoText {
+    font-size: 32px;
+  }
+
+  .tagline {
+    font-size: 13px;
+    margin-bottom: 25px;
+  }
+
+  .formTitle {
+    font-size: 19px;
+  }
+
+  .inputField,
+  .submitButton,
+  .googleButton {
+    font-size: 14px;
+  }
+
+  .submitButton, .googleButton {
+    padding: 13px; /* Consistent button padding on mobile */
+  }
+
+  .inputGroup {
+    padding: 12px 14px;
+  }
+
+  .icon, .googleIconPlaceholder {
+    margin-right: 10px;
+  }
+
+  .forgotPasswordLink {
+    font-size: 13px;
+  }
+}

@@ -1,112 +1,88 @@
-import React, { useState } from "react";
-import Button from "./Button";
-import "./AuthUser.css";
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import styles from "./AuthUser.module.css";
+import { Mail, Lock, LockKeyhole } from 'lucide-react'; 
+import google from "../../../public/googleicon.svg";
 
 
-export default function AuthUser({ hideRegistration = false }) {
-   const { role } = useParams();
-   console.log('Rol seleccionado:', role);
+export default function AuthUser() {
+  const { role} = useParams(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoginMode, setIsLoginMode] = useState(true);
 
-  const getTitle = () => (isLoginMode ? "Iniciar Sesión" : "Registro");
+ 
+  const isLoginMode = true;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación o registro
+    // Authentication or registration logic would go here
     console.log(isLoginMode ? "Login" : "Register", role, { email, password });
+    // Example: navigate(`/${role}/dashboard`); after successful login
   };
 
-
   return (
-    <div className="auth-page">
-      <main className="auth-container">
-        <div className="auth-card">
-          <h1 className="auth-title">
-            {getTitle()} como {role}
-          </h1>
-          <p className="auth-subtitle">
-            {isLoginMode
-              ? "Ingresa tus credenciales para acceder a tu cuenta"
-              : "Crea una nueva cuenta para acceder a la plataforma"}
-          </p>
+    <div className={styles.authPage}>
+      <div className={styles.formSide}>
+        <div className={styles.formContent}>
+          <h1 className={styles.logoText}>Ugüee</h1>
+          <p className={styles.tagline}>De casa a clase sin complicaciones</p>
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="field">
-              <label htmlFor="email">Correo electrónico</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="usuario@ejemplo.com"
-                required
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="password">Contraseña</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            {isLoginMode && (
-              <div className="forgot-password">
-                <a href="#">¿Olvidaste tu contraseña?</a>
+          <div className={styles.authCard}>
+            <h2 className={styles.formTitle}>
+              Iniciar Sesión como {role}
+            </h2>
+
+            <form onSubmit={handleSubmit} className={styles.authForm}>
+              <div className={styles.inputGroup}>
+                <Mail className={styles.icon} size={20} />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  required
+                  className={styles.inputField}
+                />
               </div>
-            )}
 
-            <Link to={`/${role}`} >
-                <Button type="submit" className="full-width">
-                  {getTitle()}
-                </Button>
+              <div className={styles.inputGroup}>
+                <LockKeyhole className={styles.icon} size={20} />
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Contraseña"
+                  required
+                  className={styles.inputField}
+                />
+              </div>
+
+              <Link to={`/${role}`} >
+              <button type="submit" className={styles.submitButton}>
+                Iniciar Sesión
+              </button>
               </Link>
-           
+              <button type="button" className={styles.googleButton}>
+                <img src={google} alt="" className={styles.googleIconPlaceholder} width={20} height={20}/>
+                Iniciar sesión con Google
+              </button>
 
-            {role === "pasajero" && isLoginMode && (
-              <div className="separator">O continuar con</div>
-            )}
-
-            {role === "pasajero" && isLoginMode && (
-              <Button variant="outline" className="google-btn">
-                {/* Icono de Google inline */}
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 488 512"
-                  fill="currentColor"
-                >
-                  <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 ..." />
-                </svg>
-                <span>Iniciar con Google</span>
-              </Button>
-            )}
-          </form>
-
-          {!hideRegistration && (
-            <div className="toggle-mode">
-              <p>
-                {isLoginMode
-                  ? "¿No tienes una cuenta? "
-                  : "¿Ya tienes una cuenta? "}
-                <button
-                  type="button"
-                  className="link-btn"
-                  onClick={() => setIsLoginMode(!isLoginMode)}
-                >
-                  {isLoginMode ? "Regístrate aquí" : "Inicia sesión"}
-                </button>
-              </p>
-            </div>
-          )}
+              {isLoginMode && (
+                <div className={styles.forgotPasswordContainer}>
+                  <a href="#" className={styles.forgotPasswordLink}>
+                    Olvidé mi contraseña
+                  </a>
+                </div>
+              )}
+            </form>
+          </div>
         </div>
-      </main>
+      </div>
+      <div className={styles.imageSide}>
+        
+      </div>
     </div>
   );
 }

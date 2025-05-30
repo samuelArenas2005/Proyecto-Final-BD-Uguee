@@ -1,0 +1,97 @@
+/* Header.module.css */
+.appHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position:sticky;
+  z-index: 99;
+  padding: 15px 30px; /* Ajusta el padding según necesites */
+  background-color: #ffffff; /* Fondo blanco */
+  box-shadow:  0 2px 10px rgba(170, 0, 255, 0.137); /* Sombra sutil */
+  height: 70px; /* Altura fija para el header */
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 28px; /* Tamaño de fuente del logo */
+}
+
+.logoU {
+  color: #000000; /* Color negro para la 'U' */
+}
+
+.logoGuee {
+  color: #AA00FF; /* Color morado para 'güee' */
+  margin-left: 2px; /* Pequeño ajuste si es necesario */
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Espacio entre los botones */
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px; /* Bordes bien redondeados */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.navButton .icon {
+  margin-right: 8px;
+}
+
+.conductorButton {
+  background-color: #AA00FF; /* Morado */
+  color: #ffffff; /* Texto blanco */
+}
+
+.conductorButton:hover {
+  background-color: #7150B0; /* Morado un poco más oscuro al hacer hover */
+  box-shadow: 0 2px 8px rgba(122, 0, 255, 0.3);
+}
+
+.activityButton {
+  background-color: #E0E0E0; /* Gris claro */
+  color: #333333; /* Texto oscuro */
+}
+
+.activityButton:hover {
+  background-color: #D0D0D0; /* Gris un poco más oscuro al hacer hover */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profileButton {
+  background-color: #F0F0F0; /* Fondo gris muy claro para el círculo */
+  color: #AA00FF; /* Icono morado */
+  border-radius: 50%; /* Círculo perfecto */
+  width: 44px; /* Ancho y alto iguales */
+  height: 44px;
+  padding: 0; /* Quitamos padding para centrar el icono */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.profileButton .iconProfile {
+  /* No necesita margen si el botón es solo para el icono y está centrado */
+}
+
+.profileButton:hover {
+  background-color: #E5E5E5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #AA00FF;
+  text-decoration: none;
+}

@@ -1,0 +1,204 @@
+/* src/components/RutasPage/RutasPage.module.css */
+.pageContainer {
+  min-height: 100vh;
+  /* background-color: #f4f7fc; Eliminado para que la ola funcione bien con el body */
+}
+
+.topSectionWave {
+  background-color: #ffffff; /* Morado principal */
+  padding: 40px 20px 80px 20px; /* Padding superior e inferior para dar espacio a la curva */
+  position: relative;
+  color: white;
+}
+
+
+.contentWrapper {
+  display: flex;
+  flex-wrap: wrap; /* Para que en pantallas pequeñas el mapa se mueva abajo */
+  gap: 50px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative; /* Para que el contenido esté sobre la ola */
+  z-index: 1;
+}
+
+.waveBg {
+  position: absolute;
+  top:0;
+  left: 0;
+  width: 100%;        /* que ocupe todo el ancho del padre */
+  height: auto;       /* mantiene proporción */
+  z-index: 0;         /* debajo de todo */
+  pointer-events: none;/* que no interfiera clicks */
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px; /* Espacio entre botón de búsqueda y filtro */
+  margin-top: 20px;
+}
+
+
+.filterButton {
+  background-color: #E5E7EB; /* Gris claro para el botón de filtro */
+  color: #4B5563; /* Icono gris oscuro */
+  border: none;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  width: 48px;
+  height: 48px;
+}
+
+.filterButton:hover {
+  background-color: #D1D5DB; /* Gris más oscuro */
+}
+
+.routeSetupSection {
+  flex: 1;
+  min-width: 350px; /* Ancho mínimo antes de que el mapa baje */
+  background-color: rgba(255, 255, 255, 0.95); /* Tarjeta blanca semi-transparente */
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  color: #333; /* Texto oscuro para la tarjeta */
+}
+
+.greeting {
+  font-size: 20px;
+  font-weight: 600;
+  color: #AA00FF; /* Morado oscuro */
+  margin-top: 0;
+  margin-bottom: 25px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 25px;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  background-color: #f0f3f7; /* Fondo gris claro para inputs */
+  border-radius: 8px;
+  padding: 0 12px;
+  border: 1px solid #dde2e9;
+}
+
+.inputIcon {
+  color: #845EC2; /* Morado claro para iconos */
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.inputField {
+  flex-grow: 1;
+  padding: 12px 0; /* Padding vertical, el horizontal lo da el wrapper */
+  border: none;
+  background-color: transparent;
+  font-size: 15px;
+  color: #333;
+  outline: none;
+}
+.inputField::placeholder {
+  color: #888;
+}
+/* Estilos para el icono de calendario en datetime-local */
+.inputField[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24"><path fill="%23845EC2" d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>');
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+
+.filterButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  margin-left: 8px;
+  color: #845EC2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.filterButton:hover {
+  opacity: 0.8;
+}
+
+.submitButton {
+  background-color: #AA00FF; /* Morado principal */
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.submitButton:hover {
+  background-color: #4A148C; /* Morado más oscuro */
+}
+
+.mapSection {
+  flex: 1.5; /* El mapa toma más espacio */
+  min-width: 300px;
+  min-height: 350px; /* Altura mínima para el mapa */
+  border-radius: 12px;
+  overflow: hidden; /* Para que el mapa respete el border-radius */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+  min-height: 350px; /* Asegura que el contenedor del mapa tenga altura */
+}
+
+.previousRoutesSection {
+  padding: 0px 20px 20px 20px; /* Espacio arriba (después de la ola) y abajo */
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .contentWrapper {
+    flex-direction: column;
+  }
+  .routeSetupSection, .mapSection {
+    min-width: 100%; /* Ocupan todo el ancho */
+  }
+  .topSectionWave {
+    padding-bottom: 60px; /* Menos espacio para la ola en móvil */
+  }
+  .topSectionWave::after {
+    height: 50px; /* Ola más pequeña */
+    /* Ajustar border-radius para móvil si es necesario */
+  }
+}

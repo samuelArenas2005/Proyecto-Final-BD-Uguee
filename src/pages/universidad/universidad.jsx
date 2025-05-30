@@ -1,425 +1,274 @@
-import React, { useState } from "react";
-// import { Link } from 'react-router-dom'; // No es necesario aquí si la navegación es solo por header
-import Button from "../AuthUser/Button";
-import {
-  Search,
-  Filter,
-  Download,
-  Check,
-  X,
-  MoreVertical,
-  UserPlus,
-} from "lucide-react";
-import "./universidad.css";
+import React, { useState } from 'react';
+import { ChevronDown, Search, Filter, MoreVertical, UserCircle, CheckCircle2, XCircle, Download, Check, X } from 'lucide-react';
+import "./universidad.css"
 
-// Mock data (sin cambios respecto a la versión anterior)
-const studentRequestsData = [
+// Datos de ejemplo para las solicitudes (puedes reemplazarlos con datos de una API)
+const initialRequests = [
   {
-    id: "1",
-    name: "Nicolas Arenas",
-    avatar: "https://i.pravatar.cc/150?img=32",
-    type: "Solicitud de conducción",
-    status: "Pendiente de confirmar usuario",
+    id: 1,
+    name: 'Nicolas Arenas',
+    requestType: 'solicitud de conducción',
+    status: 'Pendiente de confirmar usuario',
+    avatar: <UserCircle size={40} />, // Icono por defecto
+    details: {
+      fullName: 'Nicolas David Arenas Castillo',
+      studentCode: '20224398-3743',
+      university: 'Universidad del Valle',
+      institutionalEmail: 'nicolas.arenas@correounivalle.edu.co',
+      address: 'Calle 3a #47-118, Cali',
+      phoneNumber: '3187835344',
+      documentLink: '#', // Enlace al documento
+    }
   },
   {
-    id: "2",
-    name: "Miguel Andrade",
-    avatar: "https://i.pravatar.cc/150?img=12",
-    type: "Solicitud de conducción",
-    status: "Pendiente de confirmar vehículo",
+    id: 2,
+    name: 'Miguel Andrade',
+    requestType: 'solicitud de conducción',
+    status: 'Pendiente de confirmar vehiculo',
+    avatar: <UserCircle size={40} color="#4B5563" />, // Otro icono o color
+    details: {
+      fullName: 'Miguel Angel Andrade',
+      studentCode: '20215432-1098',
+      university: 'Universidad del Valle',
+      institutionalEmail: 'miguel.andrade@correounivalle.edu.co',
+      address: 'Av Siempre Viva #123, Cali',
+      phoneNumber: '3109876543',
+      documentLink: '#',
+    }
   },
   {
-    id: "3",
-    name: "Juliana Rincon",
-    avatar: "https://i.pravatar.cc/150?img=24",
-    type: "Solicitud de conducción",
-    status: "Usuario aceptado",
+    id: 3,
+    name: 'Juliana Rincon',
+    requestType: 'solicitud de conducción',
+    status: 'Usuario aceptado',
+    avatar: <UserCircle size={40} color="#16A34A" />,
+    details: {
+      fullName: 'Juliana Maria Rincon',
+      studentCode: '20231234-5678',
+      university: 'Universidad del Valle',
+      institutionalEmail: 'juliana.rincon@correounivalle.edu.co',
+      address: 'Carrera 100 #5-20, Cali',
+      phoneNumber: '3151234567',
+      documentLink: '#',
+    }
   },
   {
-    id: "4",
-    name: "Juan Manuel Sierra",
-    avatar: "https://i.pravatar.cc/150?img=4",
-    type: "Solicitud de conducción",
-    status: "Usuario denegado",
-  },
+    id: 4,
+    name: 'Juan Manuel Sierra',
+    requestType: 'solicitud de conducción',
+    status: 'Usuario denegado',
+    avatar: <UserCircle size={40} color="#DC2626" />,
+    details: {
+      fullName: 'Juan Manuel Sierra Lopez',
+      studentCode: '20209876-0011',
+      university: 'Universidad del Valle',
+      institutionalEmail: 'juan.sierra@correounivalle.edu.co',
+      address: 'Calle Falsa #123, Cali',
+      phoneNumber: '3178765432',
+      documentLink: '#',
+    }
+  }
 ];
 
-const studentDetailData = {
-  id: "1",
-  name: "Nicolas David",
-  lastName: "Arenas Castillo",
-  avatar: "https://i.pravatar.cc/150?img=32",
-  studentId: "20224398-3743",
-  address: "Calle 3a #47-118, Cali",
-  university: "Universidad del Valle",
-  phone: "3187835344",
-  email: "nicolas.arenas@correo.univalle.edu.co",
-  requestType: "Solicitud de conducción",
-};
-
 const UniversidadPage = () => {
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [activeSubTab, setActiveSubTab] = useState("pasajeros");
-  const [studentRequests, setStudentRequests] = useState(studentRequestsData);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
+  const [activeTab, setActiveTab] = useState('Conductores');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [requests, setRequests] = useState(initialRequests);
+  const [openMenuId, setOpenMenuId] = useState(null); // Para controlar el menú de acciones
+  const [selectedRequest, setSelectedRequest] = useState(null); // Para el modal de detalles
 
-  const handleUserAction = (action) => {
-    console.log(`Acción: ${action} para el usuario ${selectedUser.name}`);
-    setStudentRequests((requests) =>
-      requests.map((request) =>
-        request.id === selectedUser.id
-          ? {
-              ...request,
-              status:
-                action === "approve" ? "Usuario aceptado" : "Usuario denegado",
-            }
-          : request,
-      ),
+  const handleTabClick = (tabName) => {
+    setActiveTab(tabName);
+    // Aquí podrías filtrar las solicitudes si "Pasajeros" y "Conductores" tienen datos diferentes
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const toggleActionMenu = (requestId) => {
+    setOpenMenuId(openMenuId === requestId ? null : requestId);
+  };
+
+  const handleAcceptUser = (requestId) => {
+    setRequests(prevRequests =>
+      prevRequests.map(req =>
+        req.id === requestId ? { ...req, status: 'Usuario aceptado' } : req
+      )
     );
-    setSelectedUser(null);
+    setOpenMenuId(null); // Cerrar menú
+    setSelectedRequest(null); // Cerrar modal si está abierto
   };
 
-  const currentStudentDetail = selectedUser
-    ? studentRequests.find((s) => s.id === selectedUser.id) || studentDetailData
-    : studentDetailData;
-
-  const filteredRequests = studentRequests.filter((request) => {
-    if (activeSubTab === "pasajeros") {
-      return (
-        !request.status.includes("aceptado") &&
-        !request.status.includes("denegado")
-      );
-    } else if (activeSubTab === "conductores") {
-      return (
-        request.status.includes("aceptado") ||
-        request.status.includes("denegado")
-      );
-    }
-    return true;
-  });
-
-  const openDesignateDriverModal = () => {
-    setIsModalOpen(true);
+  const handleDenyUser = (requestId) => {
+    setRequests(prevRequests =>
+      prevRequests.map(req =>
+        req.id === requestId ? { ...req, status: 'Usuario denegado' } : req
+      )
+    );
+    setOpenMenuId(null); // Cerrar menú
+    setSelectedRequest(null); // Cerrar modal si está abierto
   };
 
-  const closeDesignateDriverModal = () => {
-    setIsModalOpen(false);
+  const openDetailsModal = (request) => {
+    setSelectedRequest(request);
+    setOpenMenuId(null); // Cierra el menú de acciones si está abierto
   };
 
-  const handleDesignateDriverSubmit = (event) => {
-    event.preventDefault();
-    // Aquí iría la lógica para enviar los datos del formulario
-    console.log("Formulario de designar conductor enviado");
-    closeDesignateDriverModal();
+  const closeDetailsModal = () => {
+    setSelectedRequest(null);
   };
 
-  return (
-    <div className="page-container">
-      <main className="main-content-wrapper">
-        {selectedUser ? (
-          <div className="user-detail-container">
-            {/* ... (contenido del detalle de usuario sin cambios) ... */}
-            <div className="user-detail-header">
-              <div className="user-info-block">
-                <img
-                  src={currentStudentDetail.avatar}
-                  alt={currentStudentDetail.name}
-                  className="user-avatar-large"
-                />
-                <div>
-                  <h2 className="user-name-large">
-                    {currentStudentDetail.name}{" "}
-                    {currentStudentDetail.lastName || ""}
-                  </h2>
-                  <p className="user-request-type">
-                    {currentStudentDetail.requestType ||
-                      studentDetailData.requestType}
-                  </p>
+  const filteredRequests = requests.filter(request =>
+    request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (request.details && request.details.studentCode.includes(searchTerm)) // Asumiendo que quieres buscar por código también
+  );
+
+  const getStatusColor = (status) => {
+    if (status === 'Usuario aceptado') return 'var(--text-green-600)';
+    if (status === 'Usuario denegado') return 'var(--text-red-600)';
+    return 'var(--text-blue-600)'; // Para "Pendiente..."
+  };
+
+  const getStatusIcon = (status) => {
+    if (status === 'Usuario aceptado') return <CheckCircle2 size={20} className="status-icon" />;
+    if (status === 'Usuario denegado') return <XCircle size={20} className="status-icon" />;
+    return null;
+  }; 
+
+    return (
+       <div className="universidad-page">
+
+<h1 className="page-title">SOLICITUDES DE INGRESO A <span>UGÜEE</span> UNIVALE</h1>
+
+      <div className="search-filter-container">
+        <div className="search-input-wrapper">
+          <Search size={20} />
+          <input
+            type="text"
+            placeholder="BUSCAR ESTUDIANTE POR NOMBRE, CÓDIGO"
+            className="search-input"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
+        <Filter size={24} className="filter-icon" />
+      </div>
+
+      <div className="tabs">
+        <div
+          className={`tab ${activeTab === 'Pasajeros' ? 'active' : ''}`}
+          onClick={() => handleTabClick('Pasajeros')}
+        >
+          Pasajeros
+        </div>
+        <div
+          className={`tab ${activeTab === 'Conductores' ? 'active' : ''}`}
+          onClick={() => handleTabClick('Conductores')}
+        >
+          Conductores
+        </div>
+      </div>
+
+      <div className="requests-list">
+        {filteredRequests.map((request) => (
+          <div key={request.id} className="request-card">
+            <div className="request-info">
+              <div className="avatar-icon">{request.avatar}</div>
+              <div className="request-details">
+                <span className="request-name">{request.name}</span>
+                <span className="request-type">{request.requestType}</span>
+              </div>
+            </div>
+            <div className="request-status" style={{ color: getStatusColor(request.status) }}>
+              {request.status}
+              {getStatusIcon(request.status)}
+            </div>
+            <div className="actions-menu-container">
+              <button
+                className="more-options-button"
+                onClick={() => toggleActionMenu(request.id)}
+              >
+                <MoreVertical size={24} />
+              </button>
+              {openMenuId === request.id && (
+                <div className="action-menu">
+                  <div className="action-menu-item" onClick={() => openDetailsModal(request)}>
+                    Ver detalles
+                  </div>
+                  <div className="action-menu-item accept" onClick={() => handleAcceptUser(request.id)}>
+                    <Check size={16} /> Aceptar usuario
+                  </div>
+                  <div className="action-menu-item deny" onClick={() => handleDenyUser(request.id)}>
+                    <X size={16} /> Denegar usuario
+                  </div>
                 </div>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={() => setSelectedUser(null)}
-                className="close-button"
-              >
-                <X className="icon-small" />
-              </Button>
-            </div>
-
-            <div className="user-detail-grid">
-              <div>
-                <h3 className="detail-label">Nombre Completo</h3>
-                <p className="detail-value">{currentStudentDetail.name}</p>
-              </div>
-              <div>
-                <h3 className="detail-label">Código Estudiantil</h3>
-                <p className="detail-value">{studentDetailData.studentId}</p>
-              </div>
-              <div>
-                <h3 className="detail-label">Apellido Completo</h3>
-                <p className="detail-value">
-                  {currentStudentDetail.lastName || studentDetailData.lastName}
-                </p>
-              </div>
-              <div>
-                <h3 className="detail-label">Dirección y Ciudad</h3>
-                <p className="detail-value">{studentDetailData.address}</p>
-              </div>
-              <div>
-                <h3 className="detail-label">Universidad</h3>
-                <p className="detail-value">{studentDetailData.university}</p>
-              </div>
-              <div>
-                <h3 className="detail-label">N° Celular</h3>
-                <p className="detail-value">{studentDetailData.phone}</p>
-              </div>
-              <div>
-                <h3 className="detail-label">Correo Institucional</h3>
-                <p className="detail-value">{studentDetailData.email}</p>
-              </div>
-              <div>
-                <h3 className="detail-label">Documento</h3>
-                <Button variant="outline" className="download-button">
-                  <Download className="icon-extra-small" />
-                  Descargar
-                </Button>
-              </div>
-            </div>
-
-            <div className="action-buttons-container">
-              <Button
-                variant="outline"
-                className="deny-button"
-                onClick={() => handleUserAction("deny")}
-              >
-                <X className="icon-extra-small" />
-                Denegar
-              </Button>
-              <Button
-                className="approve-button"
-                onClick={() => handleUserAction("approve")}
-              >
-                <Check className="icon-extra-small" />
-                Admitir
-              </Button>
+              )}
             </div>
           </div>
-        ) : (
-          <>
-            <div className="requests-section">
-              <h1 className="main-title">
-                SOLICITUDES DE INGRESO A UGÜEE UNIVALLE
-              </h1>
+        ))}
+      </div>
 
-              <div className="controls-container">
-                <div className="search-bar-wrapper">
-                  <Search className="search-icon" size={18} />
-                  <input
-                    type="text"
-                    placeholder="BUSCAR ESTUDIANTE POR NOMBRE, CÓDIGO"
-                    className="search-input"
-                  />
-                  <Button
-                    variant="ghost"
-                    className="filter-button-inside-search"
-                  >
-                    <Filter size={18} />
-                  </Button>
-                </div>
-                <Button
-                  className="designate-driver-button"
-                  onClick={openDesignateDriverModal}
-                >
-                  {" "}
-                  {/* onClick añadido */}
-                  <UserPlus size={18} className="button-icon-designate" />
-                  Designar conductor
-                </Button>
-              </div>
-
-              <div className="requests-list-container">
-                <div className="subtabs-bar">
-                  <button
-                    className={`subtab-button ${activeSubTab === "pasajeros" ? "active" : ""}`}
-                    onClick={() => setActiveSubTab("pasajeros")}
-                  >
-                    Pasajeros
-                  </button>
-                  <button
-                    className={`subtab-button ${activeSubTab === "conductores" ? "active" : ""}`}
-                    onClick={() => setActiveSubTab("conductores")}
-                  >
-                    Conductores
-                  </button>
-                </div>
-
-                <div className="requests-list-content">
-                  {filteredRequests.length > 0 ? (
-                    filteredRequests.map((student) => (
-                      <div
-                        key={student.id}
-                        className="student-request-item"
-                        onClick={() => setSelectedUser(student)}
-                      >
-                        <div className="student-info">
-                          <img
-                            src={student.avatar}
-                            alt={student.name}
-                            className="student-avatar"
-                          />
-                          <div>
-                            <h3 className="student-name">{student.name}</h3>
-                            <p className="student-request-type-small">
-                              {student.type}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="student-status-section">
-                          <span
-                            className={`status-text ${
-                              student.status.includes("Pendiente")
-                                ? "status-pending"
-                                : student.status.includes("aceptado")
-                                  ? "status-accepted"
-                                  : "status-denied"
-                            }`}
-                          >
-                            {student.status}
-                            {student.status.includes("aceptado") && (
-                              <Check className="status-icon" size={16} />
-                            )}
-                            {student.status.includes("denegado") && (
-                              <X className="status-icon" size={16} />
-                            )}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="more-options-button"
-                          >
-                            <MoreVertical size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="no-requests-message">
-                      No hay solicitudes pendientes.
-                    </div>
-                  )}
-                </div>
+      {/* Modal de Detalles */}
+      {selectedRequest && (
+        <div className="modal-overlay" onClick={closeDetailsModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}> {/* Evita que el modal se cierre al hacer clic dentro */}
+            <button className="modal-close-button" onClick={closeDetailsModal}>
+              <X size={28} />
+            </button>
+            <div className="modal-header">
+              <div className="modal-avatar">{selectedRequest.avatar}</div>
+              <div className="modal-user-info">
+                <h2>{selectedRequest.name}</h2>
+                <p>{selectedRequest.requestType}</p>
               </div>
             </div>
-          </>
-        )}
-      </main>
 
-      {/* Modal para Designar Conductor */}
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={closeDesignateDriverModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">Designar Nuevo Conductor</h2>
-              <button
-                onClick={closeDesignateDriverModal}
-                className="modal-close-button"
-              >
-                <X size={20} />
+            <div className="modal-details-grid">
+              <div className="detail-item">
+                <strong>Nombre Completo</strong>
+                <span>{selectedRequest.details.fullName}</span>
+              </div>
+              <div className="detail-item">
+                <strong>Código Estudiantil</strong>
+                <span>{selectedRequest.details.studentCode}</span>
+              </div>
+              <div className="detail-item">
+                <strong>Apellido Completo</strong> {/* Asumo que este campo también debe mostrarse */}
+                <span>{selectedRequest.details.fullName.split(' ').slice(2).join(' ')}</span> {/* Lógica simple para apellido */}
+              </div>
+              <div className="detail-item">
+                <strong>Dirección y Ciudad</strong>
+                <span>{selectedRequest.details.address}</span>
+              </div>
+              <div className="detail-item">
+                <strong>Universidad</strong>
+                <span>{selectedRequest.details.university}</span>
+              </div>
+              <div className="detail-item">
+                <strong>N° Celular</strong>
+                <span>{selectedRequest.details.phoneNumber}</span>
+              </div>
+              <div className="detail-item">
+                <strong>Correo Institucional</strong>
+                <span>{selectedRequest.details.institutionalEmail}</span>
+              </div>
+              <div className="detail-item">
+                <strong>Documento</strong>
+                <a href={selectedRequest.details.documentLink} target="_blank" rel="noopener noreferrer" className="modal-document-button">
+                  <Download size={18} /> Descargar
+                </a>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button className="modal-action-button deny" onClick={() => { handleDenyUser(selectedRequest.id); }}>
+                 <X size={20} /> Denegar
+              </button>
+              <button className="modal-action-button accept" onClick={() => { handleAcceptUser(selectedRequest.id); }}>
+                <Check size={20} /> Admitir
               </button>
             </div>
-            <form onSubmit={handleDesignateDriverSubmit} className="modal-form">
-              <div className="form-group">
-                <label htmlFor="vehicleType" className="form-label">
-                  Tipo de vehículo
-                </label>
-                <select
-                  id="vehicleType"
-                  name="vehicleType"
-                  className="form-select"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Selecciona un tipo
-                  </option>
-                  <option value="car">Automóvil</option>
-                  <option value="motorcycle">Motocicleta</option>
-                  <option value="van">Camioneta</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="fullName" className="form-label">
-                  Nombre completo
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  placeholder="Nombre del conductor"
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email" className="form-label">
-                  Correo electrónico
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="correo@ejemplo.com"
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="idNumber" className="form-label">
-                  Número de identificación
-                </label>
-                <input
-                  type="text"
-                  id="idNumber"
-                  name="idNumber"
-                  placeholder="Ej: 1234567890"
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="contactPhone" className="form-label">
-                  Teléfono de contacto
-                </label>
-                <input
-                  type="tel"
-                  id="contactPhone"
-                  name="contactPhone"
-                  placeholder="Ej: 3001234567"
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="assignedRoute" className="form-label">
-                  Ruta asignada
-                </label>
-                <input
-                  type="text"
-                  id="assignedRoute"
-                  name="assignedRoute"
-                  placeholder="Ej: Universidad - Centro"
-                  className="form-input"
-                />
-              </div>
-              <div className="modal-actions">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={closeDesignateDriverModal}
-                  className="modal-button-cancel"
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" className="modal-button-submit">
-                  Designar Conductor
-                </Button>
-              </div>
-            </form>
           </div>
         </div>
       )}

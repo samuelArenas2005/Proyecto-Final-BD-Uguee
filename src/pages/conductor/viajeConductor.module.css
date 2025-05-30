@@ -1,0 +1,277 @@
+/* src/pages/TravelInfoPage/TravelInfoPage.module.css */
+.pageContainer {
+  background-color: #f4f6f8; /* Un fondo general suave */
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 80px; /* Espacio para el botón de cancelar flotante o al final */
+}
+
+.waveBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 220px; /* Ajusta según tu imagen de onda */
+  object-fit: cover; /* o 'fill' o 'contain' según tu imagen */
+  z-index: 0;
+  /* Si tu imagen 'wave' ya tiene el color morado, esto no es necesario. */
+  /* Si es un SVG blanco, puedes usar: filter: drop-shadow(0 0 0 #5A2E98); */
+  /* O si es un PNG simple y quieres un fondo morado detrás: */
+  /* background-color: #5A2E98; */ 
+  /* Esto asume que la imagen es la onda morada en sí misma. */
+}
+
+
+.mainContent {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-top: 60px; /* Espacio para que no se solape con la parte superior de la onda */
+}
+
+.topRow {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.tripInfoCard {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  flex: 1; /* Ocupa el espacio disponible */
+  min-width: 300px; /* Ancho mínimo */
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #555;
+}
+
+.infoIcon {
+  color: #5A2E98; /* Morado */
+  margin-right: 12px;
+}
+
+.startButton {
+  background-color: #5A2E98; /* Morado principal */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.startButton:hover {
+  background-color: #4a257d; /* Morado más oscuro */
+}
+
+.qrAndMapSection {
+  flex: 1.8; /* Ocupa más espacio */
+  display: flex;
+  gap: 25px;
+}
+
+.qrSection {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 250px; /* Ancho mínimo */
+  justify-content: center;
+}
+
+.qrTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.qrImageContainer {
+  margin-bottom: 15px;
+  /* Estilos para el contenedor del QR si es necesario */
+}
+
+.qrText {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 10px;
+  max-width: 200px;
+}
+
+.appLink {
+  font-size: 0.9rem;
+  color: #5A2E98;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.appLink:hover {
+  text-decoration: underline;
+}
+
+.mapWrapper {
+  flex-grow: 1;
+  background-color: #fff; /* Para que el botón de reportes tenga fondo si el mapa tarda en cargar */
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* Para que el mapa respete el border-radius */
+  position: relative; /* Para posicionar el botón de reportes */
+  min-height: 350px; /* Altura mínima para el mapa */
+}
+
+.mapContainer {
+  height: 100%; /* O una altura fija, ej: 400px */
+  width: 100%;
+}
+
+.viewReportsButtonMap {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: #8A5DB6; /* Morado claro */
+  color: white !important;
+  padding: 8px 15px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 1000; /* Encima del mapa */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+}
+.viewReportsButtonMap:hover {
+    background-color: #704b99;
+}
+
+
+.passengersListSection {
+  margin-top: 30px;
+  background-color: transparent; /* Ya está sobre el fondo general */
+}
+
+.bottomActions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end; /* Alinea el botón a la derecha */
+}
+
+.cancelButtonLink {
+  background-color: #6c757d; /* Gris */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.cancelButtonLink:hover {
+  background-color: #5a6268; /* Gris más oscuro */
+}
+
+
+/* Notificación */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #28a745; /* Verde éxito */
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.notificationShow {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.notificationIcon {
+  /* Ya tiene color blanco por defecto el icono si el stroke es white */
+}
+
+/* Media queries para responsividad (opcional, pero recomendado) */
+@media (max-width: 992px) {
+  .topRow {
+    flex-direction: column;
+  }
+  .qrAndMapSection {
+    flex-direction: column;
+  }
+  .qrSection {
+    margin-bottom: 20px; /* Espacio cuando está encima del mapa */
+  }
+  .waveBg {
+    height: 180px; /* Más pequeña en móviles */
+  }
+  .mainContent {
+    padding-top: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .waveBg {
+    height: 150px;
+  }
+   .mainContent {
+    padding: 15px;
+    padding-top: 30px;
+  }
+  .tripInfoCard, .qrSection, .mapWrapper {
+    padding: 15px;
+  }
+  .sectionTitle {
+    font-size: 1.3rem;
+  }
+  .startButton, .cancelButtonLink {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+  .bottomActions {
+    justify-content: center; /* Centra el botón en móviles */
+  }
+}

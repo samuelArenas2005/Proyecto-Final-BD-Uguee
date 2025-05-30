@@ -63,16 +63,7 @@ export default function FilterDialog({ open, onOpenChange }) {
           <div className="fd-section">
             <div className="fd-label">Horario de salida</div>
             <div className="fd-tags">
-              {['Mañana (6-12)','Tarde (12-18)','Noche (18-23)'].map(slot => (
-                <Button
-                  key={slot}
-                  variant={timeSlots.includes(slot) ? 'solid' : 'outline'}
-                  className="fd-tag"
-                  onClick={() => toggleTimeSlot(slot)}
-                >
-                  {slot}
-                </Button>
-              ))}
+              <input type="time" min="08:00" max="18:00" step="600"></input>
             </div>
           </div>
 
