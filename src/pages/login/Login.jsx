@@ -4,7 +4,6 @@ import RegisterDialog from "./RegisterDialog";
 import { Link } from "react-router-dom";
 import { ShieldUser, GraduationCap, User, CarFront } from "lucide-react";
 import "./login.css";
-<CarFront />;
 
 const roles = [
   {
