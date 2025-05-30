@@ -51,7 +51,7 @@ export default function RegisterDialog({ open, onOpenChange }) {
             className={role === "pasajero" ? "active" : ""}
             onClick={() => setRole("pasajero")}
           >
-            Pasajero
+            Usuario
           </button>
           <button
             className={role === "universidad" ? "active" : ""}

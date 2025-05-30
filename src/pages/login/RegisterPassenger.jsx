@@ -9,8 +9,8 @@ function RegisterPassenger({ handleChange }) {
   };
 
   const initialUsuarioData = {
-    nidentificacion: undefined, // Se asigna en el contexto
-    idinstitucion: undefined, // Debe ser el UUID de la universidad seleccionada
+    nidentificacion: undefined,
+    idinstitucion: undefined,
     tipodocumento: "",
     fechanacimiento: "",
     nombrecompleto: "",
@@ -24,18 +24,62 @@ function RegisterPassenger({ handleChange }) {
 
   // Campos para pasajero
   const initialPasajeroData = {
-    idusuario: undefined, // Se asigna en el contexto
+    idusuario: undefined,
     estatuto: "",
     cantidadviajestomados: 0,
     estadopasajero: "activo",
   };
 
+  // Campos para conductor
+  const initialConductorData = {
+    idusuario: undefined,
+    idvehiculo: undefined,
+    numerodelicencia: "",
+    estadoconductor: "activo",
+    cantidadviajesrealizados: 0,
+    estatuto: "",
+  };
+
   const [userData, setUserData] = useState(initialUserData);
   const [usuarioData, setUsuarioData] = useState(initialUsuarioData);
   const [pasajeroData, setPasajeroData] = useState(initialPasajeroData);
+  const [conductorData, setConductorData] = useState(initialConductorData);
+
+  const [isPassenger, setIsPassenger] = useState(false);
+  const [isDriver, setIsDriver] = useState(false);
 
   const { listUniversities, submitting, loading } = useLogin();
   const [universities, setUniversities] = useState([]);
+
+  // Estado para tipo de vehículo
+  const [tipoVehiculo, setTipoVehiculo] = useState(""); // "ligero" o "pesado"
+
+  // Estado para datos de vehículo general
+  const initialVehiculoData = {
+    color: "",
+    numeroasientos: "",
+    modelo: "",
+    marca: "",
+  };
+  const [vehiculoData, setVehiculoData] = useState(initialVehiculoData);
+
+  // Estado para datos de vehículo ligero
+  const initialLigeroData = {
+    nserie: "",
+    tipo: "",
+  };
+  const [ligeroData, setLigeroData] = useState(initialLigeroData);
+
+  // Estado para datos de vehículo pesado
+  const initialPesadoData = {
+    placa: "",
+    categoriaviaje: "",
+    tipovehiculo: "",
+    categoria: "",
+    fechaventecno: "",
+    fechavensoat: "",
+  };
+  const [pesadoData, setPesadoData] = useState(initialPesadoData);
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -51,16 +95,41 @@ function RegisterPassenger({ handleChange }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isPassenger && !isDriver) {
+      alert("Debes seleccionar al menos una opción: pasajero o conductor.");
+      return;
+    }
+    // Aquí puedes manejar el registro según los roles seleccionados
     console.log("Datos del usuario:", userData);
     console.log("Datos del usuario (usuarioData):", usuarioData);
-    console.log("Datos del pasajero:", pasajeroData);
-    listUniversities();
+    if (isPassenger) console.log("Datos del pasajero:", pasajeroData);
+    if (isDriver) console.log("Datos del conductor:", conductorData);
   };
 
-  if (submitting) return <p>Registrando pasajero...</p>;
+  if (submitting) return <p>Registrando usuario...</p>;
   if (loading) return <p>Cargando universidades...</p>;
   return (
     <form className="rd-form" onSubmit={handleSubmit}>
+      {/* Selección de roles */}
+      <div className="rd-field">
+        <label>
+          <input
+            type="checkbox"
+            checked={isPassenger}
+            onChange={() => setIsPassenger((v) => !v)}
+          />
+          Quiero ser pasajero
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={isDriver}
+            onChange={() => setIsDriver((v) => !v)}
+          />
+          Quiero ser conductor
+        </label>
+      </div>
+
       {/* Email y Password */}
       <div className="rd-field">
         <label>Email</label>
@@ -188,18 +257,184 @@ function RegisterPassenger({ handleChange }) {
       </div>
 
       {/* Campos pasajero */}
-      <div className="rd-field">
-        <label>Estatuto</label>
-        <input
-          name="estatuto"
-          value={pasajeroData.estatuto}
-          required
-          onChange={(e) => handleChange(e, setPasajeroData)}
-        />
-      </div>
+      {isPassenger && (
+        <div className="rd-field">
+          <label>Estatuto (pasajero)</label>
+          <input
+            name="estatuto"
+            value={pasajeroData.estatuto}
+            required
+            onChange={(e) => handleChange(e, setPasajeroData)}
+          />
+        </div>
+      )}
+
+      {/* Campos conductor */}
+      {isDriver && (
+        <>
+          <div className="rd-field">
+            <label>Estatuto (conductor)</label>
+            <input
+              name="estatuto"
+              value={conductorData.estatuto}
+              required
+              onChange={(e) => handleChange(e, setConductorData)}
+            />
+          </div>
+          <div className="rd-field">
+            <label>Número de licencia</label>
+            <input
+              type="number"
+              name="numerodelicencia"
+              value={conductorData.numerodelicencia}
+              required
+              onChange={(e) => handleChange(e, setConductorData)}
+            />
+          </div>
+
+          {/* Información de vehículo */}
+          <div className="rd-field">
+            <label>Tipo de vehículo</label>
+            <select
+              value={tipoVehiculo}
+              required
+              onChange={(e) => setTipoVehiculo(e.target.value)}
+            >
+              <option value="" disabled>
+                Selecciona tipo de vehículo
+              </option>
+              <option value="ligero">Ligero</option>
+              <option value="pesado">Pesado</option>
+            </select>
+          </div>
+
+          {/* Campos generales de vehículo */}
+          <div className="rd-field">
+            <label>Color</label>
+            <input
+              name="color"
+              value={vehiculoData.color}
+              required
+              onChange={(e) => handleChange(e, setVehiculoData)}
+            />
+          </div>
+          <div className="rd-field">
+            <label>Número de asientos</label>
+            <input
+              type="number"
+              name="numeroasientos"
+              value={vehiculoData.numeroasientos}
+              required
+              onChange={(e) => handleChange(e, setVehiculoData)}
+            />
+          </div>
+          <div className="rd-field">
+            <label>Modelo</label>
+            <input
+              name="modelo"
+              value={vehiculoData.modelo}
+              required
+              onChange={(e) => handleChange(e, setVehiculoData)}
+            />
+          </div>
+          <div className="rd-field">
+            <label>Marca</label>
+            <input
+              name="marca"
+              value={vehiculoData.marca}
+              required
+              onChange={(e) => handleChange(e, setVehiculoData)}
+            />
+          </div>
+
+          {/* Campos específicos según tipo de vehículo */}
+          {tipoVehiculo === "ligero" && (
+            <>
+              <div className="rd-field">
+                <label>Número de serie</label>
+                <input
+                  name="nserie"
+                  value={ligeroData.nserie}
+                  required
+                  onChange={(e) => handleChange(e, setLigeroData)}
+                />
+              </div>
+              <div className="rd-field">
+                <label>Tipo</label>
+                <input
+                  name="tipo"
+                  value={ligeroData.tipo}
+                  required
+                  onChange={(e) => handleChange(e, setLigeroData)}
+                />
+              </div>
+            </>
+          )}
+          {tipoVehiculo === "pesado" && (
+            <>
+              <div className="rd-field">
+                <label>Placa</label>
+                <input
+                  name="placa"
+                  value={pesadoData.placa}
+                  required
+                  onChange={(e) => handleChange(e, setPesadoData)}
+                />
+              </div>
+              <div className="rd-field">
+                <label>Categoría de viaje</label>
+                <input
+                  name="categoriaviaje"
+                  value={pesadoData.categoriaviaje}
+                  required
+                  onChange={(e) => handleChange(e, setPesadoData)}
+                />
+              </div>
+              <div className="rd-field">
+                <label>Tipo de vehículo</label>
+                <input
+                  name="tipovehiculo"
+                  value={pesadoData.tipovehiculo}
+                  required
+                  onChange={(e) => handleChange(e, setPesadoData)}
+                />
+              </div>
+              <div className="rd-field">
+                <label>Categoría</label>
+                <input
+                  name="categoria"
+                  value={pesadoData.categoria}
+                  required
+                  onChange={(e) => handleChange(e, setPesadoData)}
+                />
+              </div>
+              <div className="rd-field">
+                <label>Fecha vencimiento técnico</label>
+                <input
+                  type="date"
+                  name="fechaventecno"
+                  value={pesadoData.fechaventecno}
+                  required
+                  onChange={(e) => handleChange(e, setPesadoData)}
+                />
+              </div>
+              <div className="rd-field">
+                <label>Fecha vencimiento SOAT</label>
+                <input
+                  type="date"
+                  name="fechavensoat"
+                  value={pesadoData.fechavensoat}
+                  required
+                  onChange={(e) => handleChange(e, setPesadoData)}
+                />
+              </div>
+            </>
+          )}
+        </>
+      )}
 
       <button type="submit" className="rd-submit">
-        Registrarse como pasajero
+        Registrarse
       </button>
     </form>
   );

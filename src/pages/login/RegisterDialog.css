@@ -8,13 +8,19 @@
   justify-content: center;
   z-index: 1000;
 }
+
+.rd-colorWhite {
+  color: #fff;
+}
+
 .rd-modal {
   background: #fff;
   border-radius: 0.5rem;
   width: 90%;
   max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
+  height: 90vh;         /* Siempre ocupa la altura máxima posible */
+  max-height: 90vh;     /* Asegura que no la sobrepase */
+  overflow-y: auto;      /* Scroll si el contenido es muy grande */
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 .rd-header {
@@ -51,7 +57,7 @@
 }
 .rd-role-toggle button.active {
   background: #AA00FF;
-  color: #AA00FF;
+  color: #fff;      /* El texto será blanco y estará delante del fondo */
   font-weight: bold;
 }
 .rd-content {
