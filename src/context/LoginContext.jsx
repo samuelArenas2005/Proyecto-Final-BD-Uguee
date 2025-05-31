@@ -76,10 +76,38 @@ export const LoginContextProvider = ({ children }) => {
 
   const createVehicle = async (formData, vehicleType, vehicleData) => {
     setSubmitting(true);
-    const result = await supabase.from("vehiculo").insert([formData]).select();
-    setSubmitting(false);
-    if (result.error) throw result.error;
-    return result;
+    const result = await supabase
+      .from("vehiculo")
+      .insert([formData])
+      .select("idvehiculo");
+    console.log("Vehiculo creado", result);
+    console.log("Primer elemento data:", result.data[0].idvehiculo);
+    if (result.error) {
+      setSubmitting(false);
+      throw result.error;
+    }
+    vehicleData.idvehiculo = result.data[0].idvehiculo;
+    if (vehicleType == "ligero") {
+      console.log("Vehiculo ligero intermedio", vehicleData);
+      const vehicleSoftResult = await supabase
+        .from("vehiculoligero")
+        .insert([vehicleData])
+        .select();
+      if (vehicleSoftResult.error) {
+        setSubmitting(false);
+        throw vehicleSoftResult.error;
+      }
+      return vehicleData;
+    }
+    if (vehicleType == "pesado") {
+      const vehicleHardResult = await supabase
+        .from("vehiculopesado")
+        .insert([vehicleData])
+        .select();
+      setSubmitting(false);        
+      if (vehicleHardResult.error) throw vehicleHardResult.error;
+      return vehicleData;
+    }
   };
 
   const createDriver = async (formData) => {

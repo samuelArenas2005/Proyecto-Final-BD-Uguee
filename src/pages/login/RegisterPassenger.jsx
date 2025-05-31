@@ -45,11 +45,13 @@ function RegisterPassenger({ handleChange }) {
   };
 
   const initialLigeroData = {
+    idvehiculo: undefined,
     nserie: "",
     tipo: "",
   };
 
   const initialPesadoData = {
+    idvehiculo: undefined,
     placa: "",
     categoriaviaje: "",
     tipovehiculo: "",
@@ -113,25 +115,45 @@ function RegisterPassenger({ handleChange }) {
 
       if (isPassenger) {
         const user = result.data[0];
-        await setPasajeroData((prev) => ({
-          ...prev,
-          idusuario: user.nidentificacion, // Asigna el id del usuario creado
-        }));
-        console.log("Datos del pasajero:", pasajeroData);
-        const resultPassenger = await createPassenger(pasajeroData);
+        const pasajeroPayload = {
+          ...pasajeroData,
+          idusuario: user.nidentificacion,
+        };
+        console.log("Datos del pasajero:", pasajeroPayload);
+        const resultPassenger = await createPassenger(pasajeroPayload);
         console.log("Datos del pasajero creado:", resultPassenger);
       }
 
       if (isDriver) {
-        if (tipoVehiculo == "ligero" || tipoVehiculo == "pesado") {
-          const result = await createVehicle(
+        if(tipoVehiculo == "ligero"){
+          const resultVehicle = await createVehicle(
             vehiculoData,
             tipoVehiculo,
             ligeroData
           );
-
-          
-          console.log("Datos del vehículo ligero creado:", result);
+          console.log("Datos del vehículo creado:", resultVehicle);
+          const conductorPayload = {
+          ...conductorData,
+          idvehiculo: resultVehicle.idvehiculo,
+          idusuario: result.data[0].nidentificacion,
+        };
+        const resultDriver = await createDriver(conductorPayload);
+        console.log("Datos del conductor creado:", resultDriver);
+        }
+        if(tipoVehiculo == "pesado"){
+        const resultVehicle = await createVehicle(
+            vehiculoData,
+            tipoVehiculo,
+            pesadoData
+          );
+          console.log("Datos del vehículo creado:", result);
+          const conductorPayload = {
+          ...conductorData,
+          idvehiculo: resultVehicle.idvehiculo,
+          idusuario: result.data[0].nidentificacion,
+        };
+        const resultDriver = await createDriver(conductorPayload);
+        console.log("Datos del conductor creado:", resultDriver);
         }
       }
 
