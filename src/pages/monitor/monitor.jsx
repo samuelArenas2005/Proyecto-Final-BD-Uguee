@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, Search, Filter, MoreVertical, UserCircle, CheckCircle2, XCircle, Download, Check, X,Plus} from 'lucide-react';
-import "./universidad.css"
-
-import AssignUserModal from "./components/asignarUser";
+import { ChevronDown, Search, Filter, MoreVertical, UserCircle, CheckCircle2, XCircle, Download, Check, X } from 'lucide-react';
+import "./monitor.css"
 
 // Datos de ejemplo para las solicitudes (puedes reemplazarlos con datos de una API)
 const initialRequests = [
@@ -79,23 +77,6 @@ const UniversidadPage = () => {
   const [openMenuId, setOpenMenuId] = useState(null); // Para controlar el menú de acciones
   const [selectedRequest, setSelectedRequest] = useState(null); // Para el modal de detalles
 
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  // Funciones para abrir y cerrar el modal de asignar admin y conductor
-  const openAssignModal = () => setIsAssignModalOpen(true);
-  const closeAssignModal = () => setIsAssignModalOpen(false);
-
-  const handleAssignMonitor = (userId) => {
-    console.log(`Designar usuario ${userId} como MONITOR`);
-    // Lógica para actualizar el rol en tu backend o estado global
-    closeAssignModal(); // Cerrar el modal después de la acción
-  };
-
-  const handleAssignUser = (userId) => {
-    console.log(`Designar usuario ${userId} como USUARIO (Pasajero/Conductor normal)`);
-    // Lógica para actualizar el rol en tu backend o estado global
-    closeAssignModal(); // Cerrar el modal después de la acción
-  };
-
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
     // Aquí podrías filtrar las solicitudes si "Pasajeros" y "Conductores" tienen datos diferentes
@@ -160,8 +141,6 @@ const UniversidadPage = () => {
 
 <h1 className="page-title">SOLICITUDES DE INGRESO A <span>UGÜEE</span> UNIVALE</h1>
 
-      
-
       <div className="search-filter-container">
         <div className="search-input-wrapper">
           <Search size={20} />
@@ -177,7 +156,6 @@ const UniversidadPage = () => {
       </div>
 
       <div className="tabs">
-        
         <div
           className={`tab ${activeTab === 'Pasajeros' ? 'active' : ''}`}
           onClick={() => handleTabClick('Pasajeros')}
@@ -190,10 +168,6 @@ const UniversidadPage = () => {
         >
           Conductores
         </div>
-        <button className="assignButton"  onClick={openAssignModal}>
-        <Plus size={20} />
-        <span>ASIGNAR MONITOR/CONDUCTOR</span>
-      </button>
       </div>
 
       <div className="requests-list">
@@ -298,14 +272,7 @@ const UniversidadPage = () => {
           </div>
         </div>
       )}
-      <AssignUserModal
-        isOpen={isAssignModalOpen}
-        onClose={closeAssignModal}
-        onAssignMonitor={handleAssignMonitor}
-        onAssignUser={handleAssignUser}
-      />
     </div>
-    
   );
 };
 

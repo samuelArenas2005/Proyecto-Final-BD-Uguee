@@ -1,99 +1,80 @@
 // Footer.jsx
-import React from "react";
-import { Link } from "react-router-dom";
-import "./footer.css";
+import React, { useEffect } from 'react';
+import styles from './footer.module.css';
+import { Mail, Phone } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFacebookF, faTwitter, faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
+import WebFont from 'webfontloader';
 
-const Footer = () => (
-  <footer className="footer">
-    <div className="footer-container">
-      <div className="footer-sections">
-        {/* Company Info */}
-        <div className="footer-section">
-          <Link to="/" className="footer-logo">
-            Ugüee
-          </Link>
-          <p className="footer-description">
-            Plataforma de transporte para universitarios, conectando pasajeros y
-            conductores en un entorno seguro y eficiente.
+const Footer = () => {
+  useEffect(() => {
+    WebFont.load({
+      google: {
+        families: ['Poppins:400,600,700', 'sans-serif']
+      }
+    });
+  }, []);
+
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.container}>
+        <div className={styles.section}>
+          <h3 className={styles.logo}>Ugüee</h3>
+          <p className={styles.description}>
+            Plataforma de transporte para universitarios, conectando pasajeros y conductores en un entorno seguro y eficiente.
           </p>
-          <div className="social-icons">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook"
-            >
-              {/* SVG icon */}
-            </a>
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Twitter"
-            >
-              {/* SVG icon */}
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-            >
-              {/* SVG icon */}
-            </a>
-          </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="footer-section">
-          <h3>Enlaces rápidos</h3>
-          <ul className="footer-links-list">
-            {[
-              { to: "/", label: "Inicio" },
-              { to: "/#sobre-nosotros", label: "Sobre Nosotros" },
-              { to: "/#servicios", label: "Servicios" },
-              { to: "/#beneficios", label: "Beneficios" },
-              { to: "/#contacto", label: "Contacto" },
-              { to: "/login", label: "Iniciar Sesión" },
-            ].map((link) => (
-              <li key={link.to}>
-                <Link to={link.to}>{link.label}</Link>
-              </li>
-            ))}
+        <div className={styles.section}>
+          <h4 className={styles.heading}>Enlaces rápidos</h4>
+          <ul className={styles.links}>
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#beneficios">Beneficios</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+            <li><a href="#iniciar-sesion">Iniciar Sesión</a></li>
           </ul>
         </div>
 
-        {/* Contact Info */}
-        <div className="footer-section">
-          <h3>Contacto</h3>
-          <address>
-            <p>Calle 123 #45-67, Ciudad Universitaria, Colombia</p>
-            <p>+57 300 123 4567</p>
-            <p>contacto@uguee.com</p>
-          </address>
+        <div className={styles.section}>
+          <h4 className={styles.heading}>Contacto</h4>
+          <p className={styles.contactInfo}>
+            Calle 123 #45-67, Ciudad Universitaria, Colombia
+          </p>
+          <p className={styles.contactInfo}>
+            <Phone size={18} className={styles.icon} /> +57 300 123 4567
+          </p>
+          <p className={styles.contactInfo}>
+            <Mail size={18} className={styles.icon} /> contacto@uguee.com
+          </p>
+          <div className={styles.socialIcons}>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <FontAwesomeIcon icon={faFacebookF} className={styles.socialIcon} />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              <FontAwesomeIcon icon={faTwitter} className={styles.socialIcon} />
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <FontAwesomeIcon icon={faInstagram} className={styles.socialIcon} />
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              <FontAwesomeIcon icon={faLinkedinIn} className={styles.socialIcon} />
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="footer-bottom">
-        <p>
-          &copy; {new Date().getFullYear()} Ugüeé. Todos los derechos
-          reservados.
-        </p>
-        <div className="footer-policy-links">
-          {[
-            { to: "/ayuda", label: "Ayuda" },
-            { to: "/terminos", label: "Términos y Condiciones" },
-            { to: "/privacidad", label: "Política de Privacidad" },
-          ].map((link) => (
-            <Link key={link.to} to={link.to}>
-              {link.label}
-            </Link>
-          ))}
+      <div className={styles.bottomBar}>
+        <p className={styles.copyright}>© 2025 Ugüee. Todos los derechos reservados.</p>
+        <div className={styles.legalLinks}>
+          <a href="#ayuda">Ayuda</a>
+          <a href="#terminos-condiciones">Términos y Condiciones</a>
+          <a href="#politica-privacidad">Política de Privacidad</a>
         </div>
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 export default Footer;
