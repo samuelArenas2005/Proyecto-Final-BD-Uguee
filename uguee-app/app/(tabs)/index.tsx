@@ -41,7 +41,6 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
 
-    <OlaAnimada />
 
       <StatusBar style="auto" />
     </View>
