@@ -41,7 +41,7 @@ export const LoginContextProvider = ({ children }) => {
     setLoading(true);
     const { data, error } = await supabase
       .from("institucion")
-      .select("nombre, idinstitucion");
+      .select("nombre, idinstitucion, sede");
     setLoading(false);
     if (error) throw Error("No se pudo consultar");
     return data;

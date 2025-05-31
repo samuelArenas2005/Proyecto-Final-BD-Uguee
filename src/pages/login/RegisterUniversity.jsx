@@ -64,6 +64,7 @@ function RegisterUniversity({ handleChange }) {
             name="email"
             value={userData.email}
             required
+            placeholder="ejemplo@universidad.edu"
             onChange={(e) => handleChange(e, setUserData)}
           />
         </div>
@@ -74,6 +75,7 @@ function RegisterUniversity({ handleChange }) {
             name="password"
             value={userData.password}
             required
+            placeholder="Minimo 6 caracteres"
             onChange={(e) => handleChange(e, setUserData)}
           />
         </div>
@@ -85,6 +87,7 @@ function RegisterUniversity({ handleChange }) {
             name="nombre"
             value={formData.nombre}
             required
+            placeholder="Universidad Nacional Autónoma"
             onChange={(e) => handleChange(e, setFormData)}
           />
         </div>
@@ -95,6 +98,7 @@ function RegisterUniversity({ handleChange }) {
               name="sede"
               value={formData.sede}
               required
+              placeholder="Melendez"
               onChange={(e) => handleChange(e, setFormData)}
             />
           </div>
@@ -104,6 +108,7 @@ function RegisterUniversity({ handleChange }) {
               name="calle"
               value={formData.calle}
               required
+              placeholder="12"
               onChange={(e) => handleChange(e, setFormData)}
             />
           </div>
@@ -115,6 +120,7 @@ function RegisterUniversity({ handleChange }) {
               name="numerolugar"
               value={formData.numerolugar}
               required
+              placeholder="12-34"
               onChange={(e) => handleChange(e, setFormData)}
             />
           </div>
@@ -124,6 +130,7 @@ function RegisterUniversity({ handleChange }) {
               name="ciudad"
               value={formData.ciudad}
               required
+              placeholder="Ciudad de México"
               onChange={(e) => handleChange(e, setFormData)}
             />
           </div>
@@ -135,6 +142,7 @@ function RegisterUniversity({ handleChange }) {
               name="colorprincipal"
               value={formData.colorprincipal}
               required
+              placeholder="Azul"
               onChange={(e) => handleChange(e, setFormData)}
             />
           </div>
@@ -144,6 +152,7 @@ function RegisterUniversity({ handleChange }) {
               name="colorsecundario"
               value={formData.colorsecundario}
               required
+              placeholder="Blanco"
               onChange={(e) => handleChange(e, setFormData)}
             />
           </div>
@@ -154,6 +163,7 @@ function RegisterUniversity({ handleChange }) {
             name="urllmglogo"
             value={formData.urllmglogo}
             required
+            placeholder="https://ejemplo.com/logo.png"
             onChange={(e) => handleChange(e, setFormData)}
           />
         </div>

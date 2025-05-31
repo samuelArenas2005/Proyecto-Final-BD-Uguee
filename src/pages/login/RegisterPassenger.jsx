@@ -11,8 +11,6 @@ function RegisterPassenger({ handleChange }) {
   const initialUsuarioData = {
     nidentificacion: undefined,
     idinstitucion: "",
-    tipodocumento: "",
-    fechanacimiento: "",
     nombrecompleto: "",
     edad: "",
     telefono: "",
@@ -55,7 +53,6 @@ function RegisterPassenger({ handleChange }) {
     placa: "",
     categoriaviaje: "",
     tipovehiculo: "",
-    categoria: "",
     fechaventecno: "",
     fechavensoat: "",
   };
@@ -125,7 +122,7 @@ function RegisterPassenger({ handleChange }) {
       }
 
       if (isDriver) {
-        if(tipoVehiculo == "ligero"){
+        if (tipoVehiculo == "ligero") {
           const resultVehicle = await createVehicle(
             vehiculoData,
             tipoVehiculo,
@@ -133,27 +130,27 @@ function RegisterPassenger({ handleChange }) {
           );
           console.log("Datos del vehículo creado:", resultVehicle);
           const conductorPayload = {
-          ...conductorData,
-          idvehiculo: resultVehicle.idvehiculo,
-          idusuario: result.data[0].nidentificacion,
-        };
-        const resultDriver = await createDriver(conductorPayload);
-        console.log("Datos del conductor creado:", resultDriver);
+            ...conductorData,
+            idvehiculo: resultVehicle.idvehiculo,
+            idusuario: result.data[0].nidentificacion,
+          };
+          const resultDriver = await createDriver(conductorPayload);
+          console.log("Datos del conductor creado:", resultDriver);
         }
-        if(tipoVehiculo == "pesado"){
-        const resultVehicle = await createVehicle(
+        if (tipoVehiculo == "pesado") {
+          const resultVehicle = await createVehicle(
             vehiculoData,
             tipoVehiculo,
             pesadoData
           );
           console.log("Datos del vehículo creado:", result);
           const conductorPayload = {
-          ...conductorData,
-          idvehiculo: resultVehicle.idvehiculo,
-          idusuario: result.data[0].nidentificacion,
-        };
-        const resultDriver = await createDriver(conductorPayload);
-        console.log("Datos del conductor creado:", resultDriver);
+            ...conductorData,
+            idvehiculo: resultVehicle.idvehiculo,
+            idusuario: result.data[0].nidentificacion,
+          };
+          const resultDriver = await createDriver(conductorPayload);
+          console.log("Datos del conductor creado:", resultDriver);
         }
       }
 
@@ -183,6 +180,7 @@ function RegisterPassenger({ handleChange }) {
             name="email"
             value={userData.email}
             required
+            placeholder="ejemplo@correo.com"
             onChange={(e) => handleChange(e, setUserData)}
           />
         </div>
@@ -193,6 +191,7 @@ function RegisterPassenger({ handleChange }) {
             name="password"
             value={userData.password}
             required
+            placeholder="Mínimo 6 caracteres"
             onChange={(e) => handleChange(e, setUserData)}
           />
         </div>
@@ -204,6 +203,7 @@ function RegisterPassenger({ handleChange }) {
             name="nombrecompleto"
             value={usuarioData.nombrecompleto}
             required
+            placeholder="Juan Pérez"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -220,29 +220,10 @@ function RegisterPassenger({ handleChange }) {
             </option>
             {universities.map((uni) => (
               <option key={uni.idinstitucion} value={uni.idinstitucion}>
-                {uni.nombre}
+                {uni.nombre} {uni.sede ? `- ${uni.sede}` : ""}
               </option>
             ))}
           </select>
-        </div>
-        <div className="rd-field">
-          <label>Tipo de documento</label>
-          <input
-            name="tipodocumento"
-            value={usuarioData.tipodocumento}
-            required
-            onChange={(e) => handleChange(e, setUsuarioData)}
-          />
-        </div>
-        <div className="rd-field">
-          <label>Fecha de nacimiento</label>
-          <input
-            type="date"
-            name="fechanacimiento"
-            value={usuarioData.fechanacimiento}
-            required
-            onChange={(e) => handleChange(e, setUsuarioData)}
-          />
         </div>
         <div className="rd-field">
           <label>Edad</label>
@@ -251,6 +232,7 @@ function RegisterPassenger({ handleChange }) {
             name="edad"
             value={usuarioData.edad}
             required
+            placeholder="20"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -261,6 +243,7 @@ function RegisterPassenger({ handleChange }) {
             name="telefono"
             value={usuarioData.telefono}
             required
+            placeholder="3001234567"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -270,6 +253,7 @@ function RegisterPassenger({ handleChange }) {
             name="calle"
             value={usuarioData.calle}
             required
+            placeholder="45"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -279,6 +263,7 @@ function RegisterPassenger({ handleChange }) {
             name="numerocasa"
             value={usuarioData.numerocasa}
             required
+            placeholder="12-34"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -288,6 +273,7 @@ function RegisterPassenger({ handleChange }) {
             name="ciudad"
             value={usuarioData.ciudad}
             required
+            placeholder="Bogotá"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -298,6 +284,7 @@ function RegisterPassenger({ handleChange }) {
             name="codigoestudiantil"
             value={usuarioData.codigoestudiantil}
             required
+            placeholder="202011111"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -333,13 +320,14 @@ function RegisterPassenger({ handleChange }) {
               name="numerodelicencia"
               value={conductorData.numerodelicencia}
               required
+              placeholder="1234567890"
               onChange={(e) => handleChange(e, setConductorData)}
             />
           </div>
 
           {/* Información de vehículo */}
           <div className="rd-field">
-            <label>Tipo de vehículo</label>
+            <label>¿Como es tu vehiculo?</label>
             <select
               value={tipoVehiculo}
               required
@@ -348,7 +336,7 @@ function RegisterPassenger({ handleChange }) {
               <option value="" disabled>
                 Selecciona tipo de vehículo
               </option>
-              <option value="ligero">Ligero</option>
+              <option value="ligero">Ligero (Solo dentro del campus)</option>
               <option value="pesado">Pesado</option>
             </select>
           </div>
@@ -360,16 +348,18 @@ function RegisterPassenger({ handleChange }) {
               name="color"
               value={vehiculoData.color}
               required
+              placeholder="Rojo"
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
           </div>
           <div className="rd-field">
-            <label>Número de asientos</label>
+            <label>Número de asientos (sin contar el conductor)</label>
             <input
               type="number"
               name="numeroasientos"
               value={vehiculoData.numeroasientos}
               required
+              placeholder="4"
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
           </div>
@@ -379,6 +369,7 @@ function RegisterPassenger({ handleChange }) {
               name="modelo"
               value={vehiculoData.modelo}
               required
+              placeholder="Toyota Fortuner"
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
           </div>
@@ -388,6 +379,7 @@ function RegisterPassenger({ handleChange }) {
               name="marca"
               value={vehiculoData.marca}
               required
+              placeholder="Toyota"
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
           </div>
@@ -401,6 +393,7 @@ function RegisterPassenger({ handleChange }) {
                   name="nserie"
                   value={ligeroData.nserie}
                   required
+                  placeholder="ABC123456789"
                   onChange={(e) => handleChange(e, setLigeroData)}
                 />
               </div>
@@ -410,6 +403,7 @@ function RegisterPassenger({ handleChange }) {
                   name="tipo"
                   value={ligeroData.tipo}
                   required
+                  placeholder="Motocicleta, bicicleta, etc."
                   onChange={(e) => handleChange(e, setLigeroData)}
                 />
               </div>
@@ -423,35 +417,44 @@ function RegisterPassenger({ handleChange }) {
                   name="placa"
                   value={pesadoData.placa}
                   required
+                  placeholder="ABC123"
                   onChange={(e) => handleChange(e, setPesadoData)}
                 />
               </div>
+              {/* Los selects no llevan placeholder, pero puedes dejar la opción por defecto */}
               <div className="rd-field">
                 <label>Categoría de viaje</label>
-                <input
+                <select
                   name="categoriaviaje"
                   value={pesadoData.categoriaviaje}
                   required
                   onChange={(e) => handleChange(e, setPesadoData)}
-                />
+                >
+                  <option value="" disabled>
+                    Selecciona una categoría
+                  </option>
+                  <option value="intermunicipal">Intermunicipal</option>
+                  <option value="municipal">Municipal</option>
+                  <option value="dentro del campus">Dentro del campus</option>
+                </select>
               </div>
               <div className="rd-field">
                 <label>Tipo de vehículo</label>
-                <input
+                <select
                   name="tipovehiculo"
                   value={pesadoData.tipovehiculo}
                   required
                   onChange={(e) => handleChange(e, setPesadoData)}
-                />
-              </div>
-              <div className="rd-field">
-                <label>Categoría</label>
-                <input
-                  name="categoria"
-                  value={pesadoData.categoria}
-                  required
-                  onChange={(e) => handleChange(e, setPesadoData)}
-                />
+                >
+                  <option value="" disabled>
+                    Selecciona tipo de vehículo
+                  </option>
+                  <option value="automovil">Automóvil</option>
+                  <option value="buseta">Buseta</option>
+                  <option value="bus">Bus</option>
+                  <option value="camion">Camión</option>
+                  <option value="motocicleta">Motocicleta</option>
+                </select>
               </div>
               <div className="rd-field">
                 <label>Fecha vencimiento técnico</label>

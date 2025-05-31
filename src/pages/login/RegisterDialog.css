@@ -123,3 +123,9 @@
   background: #f3e5f5;
   border-color: #ce93d8;
 }
+
+/* Puedes poner esto en tu archivo CSS global o importarlo en el componente */
+.rd-form input::placeholder {
+  color: #000;           /* O el color que prefieras */
+  opacity: 0.2 !important; /* Mucho más transparente */
+}
