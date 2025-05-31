@@ -43,31 +43,6 @@
           margin-bottom: 30px;
         }
 
-        .assignButton {
-          background-color: var(--primary-color);
-          color: var(--white-color);
-          padding: 0.75rem 1.25rem; /* Aumentado ligeramente para el texto */
-          border-radius: 0.5rem; /* Bordes redondeados */
-          border: none;
-          cursor: pointer;
-          font-size: 0.8rem; /* Tamaño de fuente */
-          font-weight: 600; /* Semibold */
-          display: flex;
-          align-items: center;
-          gap: 0.5rem; /* Espacio entre el icono y el texto */
-          transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-          white-space: nowrap; /* Evita que el texto se rompa */
-          margin-left: auto;
-          margin-bottom: 1rem;
-        }
-
-        .assignButton:hover {
-          background-color: var(--primary-hover-color); /* Morado más oscuro al pasar el ratón */
-          transform: translateY(-2px); /* Efecto de "elevación" */
-          box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada al hover */
-        }
-
         .page-title span {
           color: var(--primary-color);
           font-weight: bold;

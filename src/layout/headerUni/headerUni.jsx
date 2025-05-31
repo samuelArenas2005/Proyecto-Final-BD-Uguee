@@ -1,24 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react"; // Importa useEffect
 import { Link, useLocation } from "react-router-dom";
-import Button from "../../pages/AuthUser/Button";
+import Button from "../../pages/AuthUser/Button"; // Asegúrate de que la ruta sea correcta
 import { Bell, User } from "lucide-react";
-import "./estiloheader.css";
+import styles from "./estiloheader.module.css"; // Importa los estilos como un módulo
+import WebFont from 'webfontloader'; // Importa webfontloader
 
 const Header = () => {
   const location = useLocation();
 
+  useEffect(() => {
+    WebFont.load({
+      google: {
+        families: ['Poppins:400,600,700', 'sans-serif'] // Carga la fuente Poppins
+      }
+    });
+  }, []);
+
   const getLinkClass = (path) => {
-    return location.pathname === path ? "nav-link2 active" : "nav-link2";
+    return location.pathname === path ? `${styles.navLink2} ${styles.active}` : styles.navLink2;
   };
 
   return (
-    <header className="header-container">
-      <div className="header-content">
-        <div className="logo-and-nav">
-          <Link to="/" className="logo2">
+    <header className={styles.headerContainer}>
+      <div className={styles.headerContent}>
+        <div className={styles.logoAndNav}>
+          <Link to="/" className={styles.logo2}>
             Ugüee
           </Link>
-          <nav className="navigation">
+          <nav className={styles.navigation}>
             <Link to="/universidad" className={getLinkClass("/universidad")}>
               Solicitudes de ingreso
             </Link>
@@ -37,15 +46,14 @@ const Header = () => {
           </nav>
         </div>
 
-        <div className="user-actions">
-          <Button size="icon" variant="ghost" className="notification-button">
-            <Bell className="icon" />
+        <div className={styles.userActions}>
+          {/* Asegúrate de que el componente Button acepte className como prop y lo aplique correctamente */}
+          <Button size="icon" variant="ghost" className={styles.notificationButton}>
+            <Bell className={styles.icon} />
           </Button>
-          {/* Este botón simula el "samuel@gmail.com" de la imagen */}
-          <Button variant="primary" className="user-profile-button">
-            <User className="icon user-icon" />
-            samuel@gmail.com
-          </Button>
+          <button className={`${styles.navButton} ${styles.profileButton}`}>
+            <User size={24} className={styles.iconProfile} />
+          </button>
         </div>
       </div>
     </header>
