@@ -1,17 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styles from "./AuthUser.module.css";
 import { Mail, Lock, LockKeyhole } from 'lucide-react'; 
 import google from "../../../public/googleicon.svg";
 
 
+
 export default function AuthUser() {
-  const { role} = useParams(); 
+  const {role} = useParams(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [toggled, setToggled] = useState(false);
+
+  const [roleActual,setRole] = useState(role)
+
+  const [admin,setAdmin] = useState(false);
+
+  // Switch as an extra (nested) component
+  const Switch = ({ checked, onChange, disabled, show }) => {
+  // Usar bloque de función para evaluaciones antes del return
+  if (!show) {
+    return null;
+  }
+
+  return (
+    <label className={styles.switch}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        disabled={disabled}
+      />
+      <span className={styles.slider} />
+      <span className={styles.labelText}>Soy monitor</span>
+    </label>
+  );
+};
+
+useEffect(() => {
+    if(role=="universidad"){
+      setAdmin(true)
+    }
+  }, []);
  
   const isLoginMode = true;
+
+  function onChangeSwitch(){
+    setToggled(prev => !prev)
+    toggled ? setRole("universidad") : setRole("monitor")
+    
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -29,7 +68,7 @@ export default function AuthUser() {
 
           <div className={styles.authCard}>
             <h2 className={styles.formTitle}>
-              Iniciar Sesión como {role}
+              Iniciar Sesión como {roleActual}
             </h2>
 
             <form onSubmit={handleSubmit} className={styles.authForm}>
@@ -59,7 +98,16 @@ export default function AuthUser() {
                 />
               </div>
 
-              <Link to={`/${role}`} >
+              <Switch
+              checked={toggled}
+              onChange={() => onChangeSwitch()}
+              disabled={false}
+              show={admin}
+              />
+
+
+
+              <Link to={`/${roleActual}`} >
               <button type="submit" className={styles.submitButton}>
                 Iniciar Sesión
               </button>

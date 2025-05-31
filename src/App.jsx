@@ -13,8 +13,10 @@ import MonitoreoPage from "./pages/universidad/monitoreo";
 import ConductorPage from "./pages/conductor/conductor";
 import ConductorPageViaje from "./pages/conductor/viajeConductor";
 import ConductorPageReporteVia from "./pages/conductor/reporteVia";
-import AdminPage from "./pages/admin/adminPage"
+import AdminPage from "./pages/admin/adminPage";
 import HistorialPasajero from "./pages/pasajero/historialPasajeros/HistorialPasajerosPage";
+
+import Monitor from "./pages/monitor/monitor";
 
 
 import Prueba from "./pages/prueba/prueba"
@@ -103,6 +105,14 @@ const App = () => {
             <LayoutUni>
               <UniversidadPage />
             </LayoutUni>
+          }
+        />
+         <Route
+          path="/monitor"
+          element={
+            <Layout1>
+              <Monitor />
+            </Layout1>
           }
         />
         <Route

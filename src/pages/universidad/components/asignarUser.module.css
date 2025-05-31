@@ -1,0 +1,307 @@
+/* Variables de Color (para consistencia con tu proyecto) */
+:root {
+  --primary-color: #AA00FF; /* Morado principal */
+  --primary-hover-color: #7150B0; /* Morado más oscuro para hover */
+  --text-gray-color: #6B7280; /* Gris para texto */
+  --text-gray-light-color: #9CA3AF; /* Gris más claro para texto secundario */
+  --background-gray-light-color: #F3F4F6; /* Gris claro para fondos */
+  --border-gray-color: #E5E7EB; /* Gris para bordes */
+  --white-color: #FFFFFF;
+  --body-bg-color: #F9FAFB; /* Fondo general del cuerpo */
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente oscuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200; /* Z-index alto para asegurar que esté por encima de todo */
+  font-family: 'Poppins', sans-serif; /* Aplica la fuente Poppins */
+}
+
+.modalContent {
+  background-color: var(--white-color);
+  border-radius: 1rem; /* Bordes redondeados */
+  padding: 2rem;
+  width: 90%;
+  max-width: 700px; /* Ancho máximo para el modal */
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-height: 90vh; /* Para modals largos, permite scroll */
+  overflow-y: auto; /* Habilita scroll vertical si el contenido excede el alto */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Espacio entre elementos principales del modal */
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-gray-color);
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.closeButton:hover {
+  background-color: var(--background-gray-light-color);
+  color: var(--primary-color);
+}
+
+.modalTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 1rem; /* Espacio debajo del título */
+}
+
+/* --- Nuevos estilos para la barra de búsqueda con botón --- */
+.searchBarContainer {
+  display: flex;
+  gap: 1rem; /* Espacio entre el input y el botón */
+  align-items: center;
+  margin-bottom: 1rem; /* Espacio debajo del contenedor de búsqueda */
+  flex-wrap: wrap; /* Permite que el botón se envuelva debajo del input en móviles */
+}
+
+.searchInputWrapper {
+  flex-grow: 1; /* Ocupa el espacio restante */
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-gray-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--background-gray-light-color);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.searchIcon {
+  color: var(--text-gray-light-color);
+  margin-right: 0.75rem;
+}
+
+.searchInput {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--text-gray-color);
+  background-color: transparent;
+}
+
+.searchInput::placeholder {
+  color: var(--text-gray-light-color);
+}
+
+.searchButton {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+.searchButton:hover {
+  background-color: var(--primary-hover-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* --- FIN Nuevos estilos para la barra de búsqueda con botón --- */
+
+
+.userList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espacio entre las tarjetas de usuario */
+}
+
+.userCard {
+  background-color: var(--white-color);
+  border: 1px solid var(--border-gray-color);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.userCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--primary-color); /* Color del avatar */
+  color: var(--white-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.userActions {
+  display: flex;
+  gap: 0.75rem; /* Espacio entre los botones de acción */
+  flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas pequeñas */
+  justify-content: flex-end;
+}
+
+.actionButton {
+  background-color: var(--background-gray-light-color);
+  color: var(--text-gray-color);
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-gray-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+.actionButton:hover {
+  background-color: var(--border-gray-color);
+}
+
+.monitorButton {
+  color: var(--primary-color); /* Color principal para el botón de monitor */
+  border-color: var(--primary-color);
+}
+
+.monitorButton:hover {
+  background-color: rgba(170, 0, 255, 0.1); /* Ligero hover morado */
+  color: var(--primary-hover-color);
+  border-color: var(--primary-hover-color);
+}
+
+.userButton {
+  color: #28A745; /* Verde para el botón de usuario */
+  border-color: #28A745;
+}
+
+.userButton:hover {
+  background-color: rgba(40, 167, 69, 0.1); /* Ligero hover verde */
+  color: darken(#28A745, 10%); /* Oscurece el verde */
+  border-color: darken(#28A745, 10%);
+}
+
+.noResults {
+  text-align: center;
+  color: var(--text-gray-color);
+  font-size: 1rem;
+  margin-top: 2rem;
+}
+
+/* Opcional: Estilos para el botón de limpiar búsqueda */
+.clearSearchButton {
+  background: none;
+  border: none;
+  color: var(--text-gray-color);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  align-self: flex-end; /* Alinea a la derecha del modal */
+}
+
+.clearSearchButton:hover {
+  background-color: var(--background-gray-light-color);
+  color: var(--primary-color);
+}
+
+
+/* Responsive design for modal */
+@media (max-width: 600px) {
+  .modalContent {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .modalTitle {
+    font-size: 1.5rem;
+  }
+
+  .searchBarContainer {
+    flex-direction: column; /* Apila el input y el botón de búsqueda */
+    gap: 0.75rem;
+    align-items: stretch; /* Estira los elementos para que ocupen todo el ancho */
+  }
+
+  .searchButton {
+    width: 100%; /* El botón ocupa todo el ancho */
+    justify-content: center;
+  }
+
+  .userCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .userInfo {
+    width: 100%;
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+  }
+
+  .userActions {
+    width: 100%;
+    justify-content: center;
+    flex-direction: column; /* Apila los botones de acción en pantallas muy pequeñas */
+  }
+
+  .actionButton {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .actionButton {
+    font-size: 0.85rem;
+  }
+}

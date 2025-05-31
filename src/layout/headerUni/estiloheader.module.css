@@ -1,0 +1,194 @@
+/* Variables de Color */
+:root {
+  --primary-color: #AA00FF; /* Morado principal de la imagen */
+  --primary-hover-color: #AA00FF; /* Morado más oscuro para hover (simulado) */
+  --text-gray-color: #6B7280; /* Gris para texto */
+  --text-gray-light-color: #9CA3AF; /* Gris más claro para texto secundario */
+  --background-gray-light-color: #F3F4F6; /* Gris claro para fondos */
+  --border-gray-color: #E5E7EB; /* Gris para bordes */
+  --white-color: #FFFFFF;
+  --body-bg-color: #F9FAFB; /* Fondo general del cuerpo si es necesario */
+}
+
+.headerContainer {
+  background-color: var(--white-color);
+  border-bottom: 1px solid var(--border-gray-color);
+  padding: 0 1rem; /* py-4 px-6 (ajustado para match h-16 con padding vertical) */
+  font-family: 'Poppins', sans-serif; /* Asegura que la fuente se aplique */
+}
+
+@media (min-width: 768px) { /* md: */
+  .headerContainer {
+    padding: 0 1.5rem;
+  }
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1280px; /* container */
+  margin-left: auto;
+  margin-right: auto;
+  height: 4rem; /* h-16 */
+}
+
+.logoAndNav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* gap-6 */
+}
+
+.logo2 {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700; /* bold, ajustado a 700 para Poppins */
+  color: var(--primary-color); /* Color principal #AA00FF */
+  text-decoration: none;
+  transition: color 0.2s ease-in-out; /* Transición para el hover */
+}
+
+.logo2:hover {
+  color: var(--primary-hover-color); /* Color principal más oscuro para hover */
+}
+
+
+.navigation {
+  display: none; 
+  justify-content: center;
+  margin-left: 16rem;
+}
+
+@media (min-width: 768px) { /* md:flex */
+  .navigation {
+    display: flex;
+  }
+}
+
+.navLink2 {
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  color: var(--text-gray-color);
+  text-decoration: none;
+  font-weight: 500; /* text-sm font-medium, ajusta según preferencia */
+  font-size: 0.875rem;
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.navLink2:hover {
+  color: var(--primary-color); /* Hover de enlaces de navegación con color principal */
+}
+
+.navLink2.active {
+  color: var(--primary-color); /* Enlace activo con color principal */
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* gap-3 */
+}
+
+.notificationButton {
+  color: var(--text-gray-color);
+  background-color: transparent; /* variant="ghost" */
+  border: none;
+  padding: 0.5rem; /* size="icon" */
+  border-radius: 0.375rem; /* rounded-md */
+  cursor: pointer;
+  display: flex; /* Para centrar el icono */
+  align-items: center; /* Para centrar el icono */
+  justify-content: center; /* Para centrar el icono */
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.notificationButton:hover {
+  background-color: var(--background-gray-light-color); /* Ligero hover para ghost */
+  color: var(--primary-color); /* Icono cambia a morado en hover */
+}
+
+/* El icono dentro del botón de notificación */
+.notificationButton .icon {
+  height: 1.25rem; /* h-5 */
+  width: 1.25rem; /* w-5 */
+  color: inherit; /* Hereda el color del padre para el hover */
+}
+
+
+.profileButton {
+  background-color: var(--background-gray-light-color); /* Fondo gris muy claro para el círculo */
+  color: var(--primary-color); /* Icono morado */
+  border-radius: 50%; /* Círculo perfecto */
+  width: 44px; /* Ancho y alto iguales */
+  height: 44px;
+  padding: 0; /* Quitamos padding para centrar el icono */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex; /* Para centrar el icono */
+  align-items: center; /* Para centrar el icono */
+  justify-content: center; /* Para centrar el icono */
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border-width: 0;
+  cursor:pointer
+}
+
+.profileButton .iconProfile {
+  /* No necesita margen si el botón es solo para el icono y está centrado */
+  height: 1.25rem; /* Asegura que el icono sea visible, ajusta si quieres 1rem */
+  width: 1.25rem;
+  color: var(--primary-color); /* Icono morado dentro del círculo */
+}
+
+.profileButton:hover {
+  background-color: var(--border-gray-color); /* Un gris un poco más oscuro para hover */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos para Button (simulados si no tienes la definición exacta de AuthUser/button) */
+/* Button component base styles (si no es importado) */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem; /* rounded-md */
+  font-weight: 500; /* font-medium */
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.button-ghost {
+  background-color: transparent;
+  border-color: transparent;
+}
+.button-ghost:hover {
+  background-color: var(--background-gray-light-color); /* O un gris muy sutil */
+}
+
+.button-icon {
+  padding: 0.5rem;
+}
+
+/* Media Queries Responsivas (ya las tenías bien estructuradas) */
+@media (max-width: 767px) { /* Móviles pequeños, debajo de md: */
+  .headerContent {
+    flex-direction: column;
+    height: auto; /* Altura automática en móviles */
+    padding: 10px 0; /* Ajusta el padding vertical en móviles */
+  }
+
+  .logoAndNav {
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 15px; /* Espacio entre logo/nav y acciones de usuario */
+  }
+
+  .navigation {
+    display: none; /* Sigue oculto en móviles por defecto, a menos que tengas un toggle */
+  }
+
+  .userActions {
+    width: 100%;
+    justify-content: flex-end; /* Alinea los botones a la derecha en móvil */
+  }
+}

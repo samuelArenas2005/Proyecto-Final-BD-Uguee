@@ -7,6 +7,7 @@ import RegisterUniversity from "./RegisterUniversity";
 import Login from "./Login";
 import { LoginContextProvider } from "../../context/LoginContext";
 
+
 export default function RegisterDialog({ open, onOpenChange }) {
   const [role, setRole] = useState("pasajero");
 
