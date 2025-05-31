@@ -101,3 +101,25 @@
 .rd-submit:hover {
   background: #7000cc;
 }
+.rd-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 0.4rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: #faf7ff;
+}
+.rd-section-title {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #7c2ae8;
+  font-weight: bold;
+}
+.rd-section-pasajero {
+  background: #e3f2fd;
+  border-color: #90caf9;
+}
+.rd-section-conductor {
+  background: #f3e5f5;
+  border-color: #ce93d8;
+}

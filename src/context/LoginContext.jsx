@@ -45,10 +45,64 @@ export const LoginContextProvider = ({ children }) => {
     setLoading(false);
     if (error) throw Error("No se pudo consultar");
     return data;
-  }
+  };
+
+  const createUser = async (userData, formData) => {
+    setSubmitting(true);
+    const { email, password } = userData;
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+    console.log(data, error);
+    if (error) {
+      setSubmitting(false);
+      throw error;
+    }
+    formData.nidentificacion = data.user.id;
+    const result = await supabase.from("usuario").insert([formData]).select();
+    setSubmitting(false);
+    if (result.error) throw result.error;
+    return result;
+  };
+
+  const createPassenger = async (formData) => {
+    setSubmitting(true);
+    const result = await supabase.from("pasajero").insert([formData]).select();
+    setSubmitting(false);
+    if (result.error) throw result.error;
+    return result;
+  };
+
+  const createVehicle = async (formData, vehicleType, vehicleData) => {
+    setSubmitting(true);
+    const result = await supabase.from("vehiculo").insert([formData]).select();
+    setSubmitting(false);
+    if (result.error) throw result.error;
+    return result;
+  };
+
+  const createDriver = async (formData) => {
+    setSubmitting(true);
+    const result = await supabase.from("conductor").insert([formData]).select();
+    setSubmitting(false);
+    if (result.error) throw result.error;
+    return result;
+  };
 
   return (
-    <LoginContext.Provider value={{ createUniversity, listUniversities, submitting, loading }}>
+    <LoginContext.Provider
+      value={{
+        createUniversity,
+        listUniversities,
+        createUser,
+        createPassenger,
+        createVehicle,
+        createDriver,
+        submitting,
+        loading,
+      }}
+    >
       {children}
     </LoginContext.Provider>
   );

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLogin } from "../../context/LoginContext";
 
 function RegisterPassenger({ handleChange }) {
-  // Campos para usuario
+  // --- Objetos iniciales ---
   const initialUserData = {
     email: "",
     password: "",
@@ -10,7 +10,7 @@ function RegisterPassenger({ handleChange }) {
 
   const initialUsuarioData = {
     nidentificacion: undefined,
-    idinstitucion: undefined,
+    idinstitucion: "",
     tipodocumento: "",
     fechanacimiento: "",
     nombrecompleto: "",
@@ -20,57 +20,35 @@ function RegisterPassenger({ handleChange }) {
     numerocasa: "",
     ciudad: "",
     codigoestudiantil: "",
+    estatuto: "",
   };
 
-  // Campos para pasajero
   const initialPasajeroData = {
     idusuario: undefined,
-    estatuto: "",
     cantidadviajestomados: 0,
-    estadopasajero: "activo",
+    estadopasajero: "pendiente",
   };
 
-  // Campos para conductor
   const initialConductorData = {
     idusuario: undefined,
     idvehiculo: undefined,
     numerodelicencia: "",
-    estadoconductor: "activo",
+    estadoconductor: "pendiente",
     cantidadviajesrealizados: 0,
-    estatuto: "",
   };
 
-  const [userData, setUserData] = useState(initialUserData);
-  const [usuarioData, setUsuarioData] = useState(initialUsuarioData);
-  const [pasajeroData, setPasajeroData] = useState(initialPasajeroData);
-  const [conductorData, setConductorData] = useState(initialConductorData);
-
-  const [isPassenger, setIsPassenger] = useState(false);
-  const [isDriver, setIsDriver] = useState(false);
-
-  const { listUniversities, submitting, loading } = useLogin();
-  const [universities, setUniversities] = useState([]);
-
-  // Estado para tipo de vehículo
-  const [tipoVehiculo, setTipoVehiculo] = useState(""); // "ligero" o "pesado"
-
-  // Estado para datos de vehículo general
   const initialVehiculoData = {
     color: "",
     numeroasientos: "",
     modelo: "",
     marca: "",
   };
-  const [vehiculoData, setVehiculoData] = useState(initialVehiculoData);
 
-  // Estado para datos de vehículo ligero
   const initialLigeroData = {
     nserie: "",
     tipo: "",
   };
-  const [ligeroData, setLigeroData] = useState(initialLigeroData);
 
-  // Estado para datos de vehículo pesado
   const initialPesadoData = {
     placa: "",
     categoriaviaje: "",
@@ -79,7 +57,35 @@ function RegisterPassenger({ handleChange }) {
     fechaventecno: "",
     fechavensoat: "",
   };
+
+  // --- useState ---
+  const [userData, setUserData] = useState(initialUserData);
+  const [usuarioData, setUsuarioData] = useState(initialUsuarioData);
+  const [pasajeroData, setPasajeroData] = useState(initialPasajeroData);
+  const [conductorData, setConductorData] = useState(initialConductorData);
+
+  const [vehiculoData, setVehiculoData] = useState(initialVehiculoData);
+  const [ligeroData, setLigeroData] = useState(initialLigeroData);
   const [pesadoData, setPesadoData] = useState(initialPesadoData);
+
+  const [isPassenger, setIsPassenger] = useState(false);
+  const [isDriver, setIsDriver] = useState(false);
+
+  const [tipoVehiculo, setTipoVehiculo] = useState(""); // "ligero" o "pesado"
+
+  // --- Contexto de Login ---
+  const {
+    listUniversities,
+    createUser,
+    createPassenger,
+    createVehicle,
+    createDriver,
+    submitting,
+    loading,
+  } = useLogin();
+
+  // --- useEffect para cargar universidades ---
+  const [universities, setUniversities] = useState([]);
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -93,194 +99,211 @@ function RegisterPassenger({ handleChange }) {
     fetchUniversities();
   }, []);
 
+  // --- Manejo de cambios en los campos del formulario ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isPassenger && !isDriver) {
       alert("Debes seleccionar al menos una opción: pasajero o conductor.");
+    }
+    // Preparar datos del usuario
+    console.log("Datos del usuario:", usuarioData);
+    try {
+      const result = await createUser(userData, usuarioData);
+      console.log("Datos del usuario creado:", result);
+
+      if (isPassenger) {
+        const user = result.data[0];
+        await setPasajeroData((prev) => ({
+          ...prev,
+          idusuario: user.nidentificacion, // Asigna el id del usuario creado
+        }));
+        console.log("Datos del pasajero:", pasajeroData);
+        const resultPassenger = await createPassenger(pasajeroData);
+        console.log("Datos del pasajero creado:", resultPassenger);
+      }
+
+      if (isDriver) {
+        if (tipoVehiculo == "ligero" || tipoVehiculo == "pesado") {
+          const result = await createVehicle(
+            vehiculoData,
+            tipoVehiculo,
+            ligeroData
+          );
+
+          
+          console.log("Datos del vehículo ligero creado:", result);
+        }
+      }
+
+      alert("Usuario creado con éxito");
+    } catch (error) {
+      console.error("Error al crear usuario:", error);
+      alert(
+        "Error al crear usuario. Inténtalo de nuevo.",
+        error?.message || error
+      );
       return;
     }
-    // Aquí puedes manejar el registro según los roles seleccionados
-    console.log("Datos del usuario:", userData);
-    console.log("Datos del usuario (usuarioData):", usuarioData);
-    if (isPassenger) console.log("Datos del pasajero:", pasajeroData);
-    if (isDriver) console.log("Datos del conductor:", conductorData);
   };
 
   if (submitting) return <p>Registrando usuario...</p>;
   if (loading) return <p>Cargando universidades...</p>;
   return (
     <form className="rd-form" onSubmit={handleSubmit}>
-      {/* Selección de roles */}
-      <div className="rd-field">
-        <label>
-          <input
-            type="checkbox"
-            checked={isPassenger}
-            onChange={() => setIsPassenger((v) => !v)}
-          />
-          Quiero ser pasajero
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={isDriver}
-            onChange={() => setIsDriver((v) => !v)}
-          />
-          Quiero ser conductor
-        </label>
-      </div>
-
-      {/* Email y Password */}
-      <div className="rd-field">
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={userData.email}
-          required
-          onChange={(e) => handleChange(e, setUserData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Contraseña</label>
-        <input
-          type="password"
-          name="password"
-          value={userData.password}
-          required
-          onChange={(e) => handleChange(e, setUserData)}
-        />
-      </div>
-
-      {/* Campos usuario */}
-      <div className="rd-field">
-        <label>Nombre completo</label>
-        <input
-          name="nombrecompleto"
-          value={usuarioData.nombrecompleto}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Universidad</label>
-        <select
-          name="idinstitucion"
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        >
-          <option value="" disabled>
-            Selecciona una universidad
-          </option>
-          {universities.map((uni) => (
-            <option key={uni.idinstitucion} value={uni.idinstitucion}>
-              {uni.nombre}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="rd-field">
-        <label>Tipo de documento</label>
-        <input
-          name="tipodocumento"
-          value={usuarioData.tipodocumento}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Fecha de nacimiento</label>
-        <input
-          type="date"
-          name="fechanacimiento"
-          value={usuarioData.fechanacimiento}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Edad</label>
-        <input
-          type="number"
-          name="edad"
-          value={usuarioData.edad}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Teléfono</label>
-        <input
-          type="number"
-          name="telefono"
-          value={usuarioData.telefono}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Calle</label>
-        <input
-          name="calle"
-          value={usuarioData.calle}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Número de casa</label>
-        <input
-          name="numerocasa"
-          value={usuarioData.numerocasa}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Ciudad</label>
-        <input
-          name="ciudad"
-          value={usuarioData.ciudad}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-      <div className="rd-field">
-        <label>Código estudiantil</label>
-        <input
-          type="number"
-          name="codigoestudiantil"
-          value={usuarioData.codigoestudiantil}
-          required
-          onChange={(e) => handleChange(e, setUsuarioData)}
-        />
-      </div>
-
-      {/* Campos pasajero */}
-      {isPassenger && (
+      {/* Sección datos de usuario */}
+      <div className="rd-section">
+        <h3 className="rd-section-title">Datos de usuario</h3>
+        {/* Email y Password */}
         <div className="rd-field">
-          <label>Estatuto (pasajero)</label>
+          <label>Email</label>
           <input
-            name="estatuto"
-            value={pasajeroData.estatuto}
+            type="email"
+            name="email"
+            value={userData.email}
             required
-            onChange={(e) => handleChange(e, setPasajeroData)}
+            onChange={(e) => handleChange(e, setUserData)}
           />
         </div>
-      )}
+        <div className="rd-field">
+          <label>Contraseña</label>
+          <input
+            type="password"
+            name="password"
+            value={userData.password}
+            required
+            onChange={(e) => handleChange(e, setUserData)}
+          />
+        </div>
 
-      {/* Campos conductor */}
+        {/* Campos usuario */}
+        <div className="rd-field">
+          <label>Nombre completo</label>
+          <input
+            name="nombrecompleto"
+            value={usuarioData.nombrecompleto}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Universidad</label>
+          <select
+            name="idinstitucion"
+            value={usuarioData.idinstitucion}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          >
+            <option value="" disabled>
+              Selecciona una universidad
+            </option>
+            {universities.map((uni) => (
+              <option key={uni.idinstitucion} value={uni.idinstitucion}>
+                {uni.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="rd-field">
+          <label>Tipo de documento</label>
+          <input
+            name="tipodocumento"
+            value={usuarioData.tipodocumento}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Fecha de nacimiento</label>
+          <input
+            type="date"
+            name="fechanacimiento"
+            value={usuarioData.fechanacimiento}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Edad</label>
+          <input
+            type="number"
+            name="edad"
+            value={usuarioData.edad}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Teléfono</label>
+          <input
+            type="number"
+            name="telefono"
+            value={usuarioData.telefono}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Calle</label>
+          <input
+            name="calle"
+            value={usuarioData.calle}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Número de casa</label>
+          <input
+            name="numerocasa"
+            value={usuarioData.numerocasa}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Ciudad</label>
+          <input
+            name="ciudad"
+            value={usuarioData.ciudad}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Código estudiantil</label>
+          <input
+            type="number"
+            name="codigoestudiantil"
+            value={usuarioData.codigoestudiantil}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          />
+        </div>
+        <div className="rd-field">
+          <label>Estatuto</label>
+          <select
+            name="estatuto"
+            value={usuarioData.estatuto}
+            required
+            onChange={(e) => handleChange(e, setUsuarioData)}
+          >
+            <option value="" disabled>
+              Selecciona estatuto
+            </option>
+            <option value="estudiante">Estudiante</option>
+            <option value="profesor">Profesor</option>
+            <option value="funcionario">Funcionario</option>
+            <option value="egresado">Egresado</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Sección conductor */}
       {isDriver && (
-        <>
-          <div className="rd-field">
-            <label>Estatuto (conductor)</label>
-            <input
-              name="estatuto"
-              value={conductorData.estatuto}
-              required
-              onChange={(e) => handleChange(e, setConductorData)}
-            />
-          </div>
+        <div className="rd-section rd-section-conductor">
+          <h3 className="rd-section-title">Datos de conductor</h3>
+          {/* Campos conductor */}
           <div className="rd-field">
             <label>Número de licencia</label>
             <input
@@ -430,8 +453,28 @@ function RegisterPassenger({ handleChange }) {
               </div>
             </>
           )}
-        </>
+        </div>
       )}
+
+      {/* Selección de roles */}
+      <div className="rd-field">
+        <label>
+          <input
+            type="checkbox"
+            checked={isPassenger}
+            onChange={() => setIsPassenger((v) => !v)}
+          />
+          Quiero ser pasajero
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={isDriver}
+            onChange={() => setIsDriver((v) => !v)}
+          />
+          Quiero ser conductor
+        </label>
+      </div>
 
       <button type="submit" className="rd-submit">
         Registrarse
