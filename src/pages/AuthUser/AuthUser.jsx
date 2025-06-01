@@ -92,6 +92,7 @@ useEffect(() => {
     if (role === 'pasajero') {tableName = 'pasajero'; idName = 'idusuario'}
     else if (role === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'}
     else if  (role === 'conductor') {tableName = 'conductor'; idName = 'idusuario'}
+    else if (role === 'monitor') {tableName = 'administrador'; idName = 'idadmin'}
     else {
       setErrorMsg('Rol inválido en la URL');
       await supabase.auth.signOut();
