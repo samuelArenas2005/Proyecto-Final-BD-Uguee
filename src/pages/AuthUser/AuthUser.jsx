@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link,useNavigate } from 'react-router-dom';
 import styles from "./AuthUser.module.css";
 import { Mail, Lock, LockKeyhole } from 'lucide-react'; 
 import google from "../../../public/googleicon.svg";
+import { supabase } from "../../supabaseClient.js";
 
 
 
 export default function AuthUser() {
   const {role} = useParams(); 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const [toggled, setToggled] = useState(false);
 
@@ -52,11 +52,66 @@ useEffect(() => {
     
   }
 
-  const handleSubmit = (e) => {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Authentication or registration logic would go here
-    console.log(isLoginMode ? "Login" : "Register", role, { email, password });
-    // Example: navigate(`/${role}/dashboard`); after successful login
+    setErrorMsg(null);
+
+    if (!email || !password) {
+      setErrorMsg('Por favor ingresa email y contraseña.');
+      return;
+    }
+
+    // 1. Auth con signInWithPassword (v2.x)
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    // Manejo de errores en autenticación
+    if (authError) {
+      setErrorMsg('Credenciales de inicio de sesion invalidas');
+      return;
+    }
+    
+    // data puede ser null si hay un error no capturado
+    if (!data || !data.user) {
+      setErrorMsg('Error desconocido en la autenticación.');
+      return;
+    }
+    const user = data.user;
+
+    // 2. Verificar rol en tablas personalizadas
+    let tableName;
+    let idName;
+    if (role === 'pasajero') {tableName = 'pasajero'; idName = 'idusuario'}
+    else if (role === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'}
+    else if  (role === 'conductor') {tableName = 'conductor'; idName = 'idusuario'}
+    else {
+      setErrorMsg('Rol inválido en la URL');
+      await supabase.auth.signOut();
+      return;
+    }
+
+    const { data: roleData, error: roleError } = await supabase
+      .from(tableName)
+      .select(idName)
+      .eq(idName, user.id)
+      .single();
+
+    if (roleError || !roleData) {
+      setErrorMsg(`No tienes permisos de ${role}`);
+      await supabase.auth.signOut();
+      return;
+    }
+
+    // 3. Redirigir al dashboard correspondiente
+    navigate(`/${role}`);
   };
 
   return (
@@ -70,6 +125,11 @@ useEffect(() => {
             <h2 className={styles.formTitle}>
               Iniciar Sesión como {roleActual}
             </h2>
+             {errorMsg && (
+          <div className={styles.errormsg}>
+            {errorMsg}
+          </div>
+            )}
 
             <form onSubmit={handleSubmit} className={styles.authForm}>
               <div className={styles.inputGroup}>
@@ -107,11 +167,9 @@ useEffect(() => {
 
 
 
-              <Link to={`/${roleActual}`} >
               <button type="submit" className={styles.submitButton}>
                 Iniciar Sesión
               </button>
-              </Link>
               <button type="button" className={styles.googleButton}>
                 <img src={google} alt="" className={styles.googleIconPlaceholder} width={20} height={20}/>
                 Iniciar sesión con Google
