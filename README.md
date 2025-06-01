@@ -10,6 +10,8 @@ Dependencias a instalar:
 
 --fortawesome/react-fontawesome y fortawesome/free-brands-svg-icons webfontloader
 
+--react-google-maps/api
+
 ***EXPLICACIÓN CODIGO***
 
 La organización del proyecto se divide en diferentes carpetas, las más importantes siendo:
@@ -35,7 +37,9 @@ La organización del proyecto se divide en diferentes carpetas, las más importa
 
 (Asegurarse de haber usado los comandos:
     --npm install
-    --npm install @fortawesome/react-fontawesome @fortawesome/free-brands-svg-icons webfontloader)
+    --npm install @fortawesome/react-fontawesome @fortawesome/free-brands-svg-icons webfontloader
+    --npm install @react-google-maps/api
+)
 
 
 Para iniciar la aplicación debes usar el siguiente comando en la consola:
