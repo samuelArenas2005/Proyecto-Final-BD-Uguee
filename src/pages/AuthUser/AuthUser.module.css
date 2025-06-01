@@ -255,6 +255,11 @@
   color: #2C2C2C;
 }
 
+.errormsg{
+  color: rgb(251, 43, 43);
+  padding-bottom: 1rem;
+}
+
 
 
 @media (max-width: 480px) { /* Mobile */
