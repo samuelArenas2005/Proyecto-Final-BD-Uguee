@@ -49,6 +49,31 @@ export const LoginContextProvider = ({ children }) => {
 
   const createUser = async (userData, formData) => {
     setSubmitting(true);
+
+    // Validar teléfono único
+    let { data: telData, error: telError } = await supabase
+      .from("usuario")
+      .select("telefono")
+      .eq("telefono", formData.telefono)
+      .maybeSingle();
+
+    if (telData) {
+      setSubmitting(false);
+      throw new Error("El teléfono ya está registrado.");
+    }
+
+    // Validar código estudiantil único
+    let { data: codData, error: codError } = await supabase
+      .from("usuario")
+      .select("codigoestudiantil")
+      .eq("codigoestudiantil", formData.codigoestudiantil)
+      .maybeSingle();
+
+    if (codData) {
+      setSubmitting(false);
+      throw new Error("El código estudiantil ya está registrado.");
+    }
+
     const { email, password } = userData;
     const { data, error } = await supabase.auth.signUp({
       email: email,
@@ -62,7 +87,13 @@ export const LoginContextProvider = ({ children }) => {
     formData.nidentificacion = data.user.id;
     const result = await supabase.from("usuario").insert([formData]).select();
     setSubmitting(false);
-    if (result.error) throw result.error;
+    if (result.error) {
+      console.error("Se entro al error 2:", result.error);
+      const deleteUser = await supabase.auth.admin.deleteUser(data.user.id);
+      console.error("Usuario eliminado:", deleteUser);
+      throw result.error;
+    }
+
     return result;
   };
 
@@ -104,7 +135,7 @@ export const LoginContextProvider = ({ children }) => {
         .from("vehiculopesado")
         .insert([vehicleData])
         .select();
-      setSubmitting(false);        
+      setSubmitting(false);
       if (vehicleHardResult.error) throw vehicleHardResult.error;
       return vehicleData;
     }

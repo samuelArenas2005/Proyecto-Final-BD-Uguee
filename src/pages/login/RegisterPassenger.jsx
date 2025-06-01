@@ -92,7 +92,7 @@ function RegisterPassenger({ handleChange }) {
         const data = await listUniversities();
         setUniversities(data);
       } catch (error) {
-        console.error("Error al crear usuario \n:", (error?.message || error));
+        console.error("Error al obtener universidades:", error?.message || error);
       }
     };
     fetchUniversities();
@@ -159,8 +159,7 @@ function RegisterPassenger({ handleChange }) {
     } catch (error) {
       console.error("Error al crear usuario:", error);
       alert(
-        "Error al crear usuario. Inténtalo de nuevo.",
-        error?.message || error
+        "Error al crear usuario. Inténtalo de nuevo. \n" + error?.message || error
       );
       return;
     }
