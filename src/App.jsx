@@ -15,8 +15,9 @@ import ConductorPageViaje from "./pages/conductor/viajeConductor";
 import ConductorPageReporteVia from "./pages/conductor/reporteVia";
 import AdminPage from "./pages/admin/adminPage";
 import HistorialPasajero from "./pages/pasajero/historialPasajeros/HistorialPasajerosPage";
-
 import Monitor from "./pages/monitor/monitor";
+
+import ProtectedRoute from "./private/privateRoutes";
 
 
 import Prueba from "./pages/prueba/prueba"
@@ -62,9 +63,11 @@ const App = () => {
         <Route
           path="/pasajero"
           element={
+            <ProtectedRoute role="pasajero">
             <Layout2>
               <Pasajero />
             </Layout2>
+            </ProtectedRoute>
           }
         />
         <Route
