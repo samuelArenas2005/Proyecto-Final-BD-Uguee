@@ -1,186 +1,218 @@
-/* TravelPage.module.css */
+/* GENERAL STYLES & VARIABLES */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #aa00ff;
+  --primary-color-dark: #8800cc;
+  --primary-color-light: #c466ff;
+  --secondary-color: #f3f4f6; /* Light gray for backgrounds */
+  --text-color: #1f2937; /* Dark gray for text */
+  --text-color-light: #6b7280; /* Lighter gray for secondary text */
+  --card-bg-color: #ffffff;
+  --border-color: #e5e7eb;
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+}
+
+/* Apply Poppins globally within the component scope if not already on body */
+.travelPageContainer * {
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+}
+
 .travelPageContainer {
   display: flex;
-  height: 100vh;
-  width: 100%;
-  background: #F9FAFB;
-  padding: 8px 20px; /* Espacio alrededor reducido */
-  gap: 30px; /* Espacio entre paneles reducido */
-  box-sizing: border-box;
-  overflow: hidden;
-  align-items: center;
-  z-index: 3;
+  height: 100vh; /* O la altura que necesites */
+  background-color: var(--secondary-color);
+  padding: 20px;
+  gap: 20px;
 }
-
-.waveBg {
-  position: absolute;
-  top:0;
-  left: 0;
-  width: 100%;        /* que ocupe todo el ancho del padre */
-  height: auto;       /* mantiene proporción */
-  z-index: 0;         /* debajo de todo */
-  pointer-events: none;/* que no interfiera clicks */
-}
-
 
 .leftPanel {
-  z-index: 3;
-  margin-left: 1rem;
-  max-height: 100%;
-  width: 480px; /* Ancho fijo para el panel izquierdo reducido */
+  align-self: center;
+  width: 700px; /* Ancho fijo o adaptable */
+  min-width: 380px;
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Espacio entre las tarjetas del panel izquierdo reducido */
-  flex-shrink: 0;
+  gap: 20px;
+  overflow-y: auto; /* Para scroll si el contenido excede */
+  padding-right: 10px; /* Espacio para la barra de scroll */
 }
 
-.tripRequestCard,
-.driverOptionsCard {
-  background-color: #ffffff;
-  border-radius: 16px; /* Bordes redondeados reducidos */
-  padding: 20px; /* Padding reducido */
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.07);
+
+/* Scrollbar styling (optional, for better aesthetics) */
+.leftPanel::-webkit-scrollbar {
+  width: 6px;
+}
+.leftPanel::-webkit-scrollbar-track {
+  background: var(--secondary-color);
+  border-radius: 3px;
+}
+.leftPanel::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+.leftPanel::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color-light);
 }
 
-.tripRequestCard h2 {
-  font-size: 18px; /* Tamaño de fuente reducido */
+
+.rightPanelMap {
+  z-index: 0;
+  flex-grow: 1;
+  justify-content: center;
+  align-self: center;
+  width: 20rem;
+  height: 40rem;
+  border-radius: var(--border-radius-lg); /* Ajustado aquí para el contenedor del mapa */
+  box-shadow: var(--shadow-md);
+  overflow: hidden; /* Para que el border-radius afecte al MapContainer */
+}
+
+/* === TRIP REQUEST CARD === */
+.tripRequestCard, .driverOptionsCard, .acceptedTripCard {
+  background-color: var(--card-bg-color);
+  padding: 24px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tripRequestCard h2, .driverOptionsCard h3, .acceptedTripCard .mainTitle {
+  font-size: 1.5rem; /* 24px */
   font-weight: 600;
-  color: #1f2937;
-  margin-top: 0;
-  margin-bottom: 15px; /* Margen inferior reducido */
+  color: var(--text-color);
+  margin-bottom: 8px;
 }
 
 .inputGroup {
   display: flex;
   align-items: center;
-  background-color: #f3f4f6;
-  border-radius: 10px; /* Bordes redondeados reducidos */
-  padding: 0 12px; /* Padding reducido */
-  margin-bottom: 12px; /* Margen inferior reducido */
-  height: 44px; /* Altura reducida */
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius-md);
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.inputGroup input{
+  width: 37rem;
+}
+
+.inputGroup:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light);
 }
 
 .inputIcon {
-  color: #6b7280;
-  margin-right: 8px; /* Margen derecho reducido */
+  color: var(--text-color-light);
+  margin-right: 10px;
 }
 
 .inputField {
   flex-grow: 1;
   border: none;
   background-color: transparent;
-  font-size: 14px; /* Tamaño de fuente reducido */
-  color: #1f2937;
+  padding: 12px 0;
+  font-size: 0.95rem; /* 15px */
+  color: var(--text-color);
   outline: none;
 }
 
 .inputField::placeholder {
-  color: #9ca3af;
+  color: var(--text-color-light);
 }
 
 .buttonGroup {
   display: flex;
-  gap: 8px; /* Espacio entre botón de búsqueda y filtro reducido */
-  margin-top: 15px; /* Margen superior reducido */
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.searchButton, .filterButton, .qrButton {
+  padding: 12px 18px;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .searchButton {
   flex-grow: 1;
-  background-color: #AA00FF;
-  color: #ffffff;
+  background-color: var(--primary-color);
+  color: white;
   border: none;
-  border-radius: 10px; /* Bordes redondeados reducidos */
-  padding: 10px 12px; /* Padding reducido */
-  font-size: 14px; /* Tamaño de fuente reducido */
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-  height: 42px; /* Altura reducida */
 }
-
 .searchButton:hover {
-  background-color: #7150B0;
+  background-color: var(--primary-color-dark);
+}
+.searchButton:active {
+  transform: scale(0.98);
 }
 
 .filterButton {
-  background-color: #E5E7EB;
-  color: #4B5563;
-  border: none;
-  border-radius: 10px; /* Bordes redondeados reducidos */
-  padding: 8px; /* Padding reducido */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-  width: 42px; /* Ancho reducido */
-  height: 42px; /* Altura reducida */
+  background-color: var(--card-bg-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
 }
-
 .filterButton:hover {
-  background-color: #D1D5DB;
+  background-color: var(--primary-color-light);
+  color: white;
+  border-color: var(--primary-color-light);
 }
 
+/* === DRIVER OPTIONS CARD === */
 .driverOptionsCard h3 {
-  font-size: 16px; /* Tamaño de fuente reducido */
-  font-weight: 600;
-  color: #1f2937;
-  margin-top: 0;
-  margin-bottom: 12px; /* Margen inferior reducido */
+ font-size: 1.25rem; /* 20px */
 }
-
 .driverList {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Espacio reducido */
-  max-height: calc(100vh - 380px); /* Ajustado según la altura del otro contenido reducido */
-  overflow-y: auto;
-  padding-right: 6px; /* Espacio para la barra de scroll reducido */
-}
-
-.driverList::-webkit-scrollbar {
-  width: 5px; /* Ancho reducido */
-}
-.driverList::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 8px; /* Radio reducido */
-}
-.driverList::-webkit-scrollbar-thumb {
-  background: #c7c7c7;
-  border-radius: 8px; /* Radio reducido */
-}
-.driverList::-webkit-scrollbar-thumb:hover {
-  background: #a3a3a3;
+  gap: 16px;
 }
 
 .driverItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f9fafb;
-  padding: 10px 12px; /* Padding reducido */
-  border-radius: 10px; /* Bordes redondeados reducidos */
-  border: 1px solid #e5e7eb;
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  background-color: var(--secondary-color);
+  transition: background-color 0.2s ease;
+}
+.driverItem:hover {
+  background-color: #e9d5ff; /* Light purple on hover */
 }
 
 .driverInfo {
   display: flex;
   align-items: center;
-  gap: 10px; /* Espacio reducido */
+  gap: 12px;
 }
 
 .driverAvatar {
-  width: 32px; /* Tamaño reducido */
-  height: 32px; /* Tamaño reducido */
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 .driverAvatarDefault {
-  color: #9ca3af;
+  color: var(--text-color-light);
+  background-color: var(--border-color);
+  padding: 4px;
+  border-radius: 50%;
 }
 
 .driverText {
@@ -189,77 +221,54 @@
 }
 
 .driverName {
-  font-size: 13px; /* Tamaño de fuente reducido */
   font-weight: 500;
-  color: #1f2937;
+  color: var(--text-color);
+  font-size: 0.95rem;
 }
 
 .driverLocation {
-  font-size: 11px; /* Tamaño de fuente reducido para el texto */
-  color: #6b7280;
+  font-size: 0.8rem; /* 13px */
+  color: var(--text-color-light);
   display: flex;
   align-items: center;
+  gap: 4px;
 }
+.driverLocation svg {
+  width: 14px;
+  height: 14px;
+}
+
 
 .driverMoreButton {
-  background-color: transparent;
+  background-color: var(--primary-color);
+  color: white;
   border: none;
-  color: #6b7280;
-  padding: 4px; /* Padding reducido */
+  padding: 8px 12px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.2s ease;
 }
-
 .driverMoreButton:hover {
-  background-color: #e5e7eb;
-  color: #1f2937;
+  background-color: var(--primary-color-dark);
+}
+.driverMoreButton svg {
+  stroke-width: 2.5;
 }
 
-.rightPanelMap {
-  flex-grow: 1;
-  height: 75%; /* Altura del mapa reducida */
-  border-radius: 24px; /* Bordes redondeados reducidos */
-  overflow: hidden;
-  box-shadow: 0px 6px 20px rgba(198, 117, 249, 0.23);
-  z-index: 0;
+.noDriversMessage {
+    text-align: center;
+    color: var(--text-color-light);
+    padding: 20px;
+    font-style: italic;
 }
 
-:global(.leaflet-control-zoom) {
-  border: 1px solid #BDBDBD !important;
-  border-radius: 8px !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
-  margin-bottom: 12px !important;
-  margin-right: 12px !important;
-}
 
-:global(.leaflet-control-zoom-in),
-:global(.leaflet-control-zoom-out) {
-  width: 32px !important;
-  height: 32px !important;
-  line-height: 32px !important;
-  font-size: 20px !important;
-  color: #4B5563 !important;
-  background-color: #FFFFFF !important;
-  font-weight: normal !important;
-}
-
-:global(.leaflet-control-zoom-in) {
-  border-bottom: 1px solid #D6D6D6 !important;
-  border-radius: 8px 8px 0 0 !important;
-}
-
-:global(.leaflet-control-zoom-out) {
-  border-radius: 0 0 8px 8px !important;
-}
-
-:global(.leaflet-control-zoom-in:hover),
-:global(.leaflet-control-zoom-out:hover) {
-  background-color: #F4F4F4 !important;
-}
-
+/* === ACCEPTED TRIP CARD / CONDUCTOR ELEGIDO === */
 .cardContainer {
   background-color: #ffffff;
   border-radius: 16px; /* Bordes redondeados reducidos */
@@ -448,21 +457,6 @@
   margin-top: 1px;
 }
 
-.messageButton {
-  margin: 12px auto; /* Margen reducido */
-  margin-left: 25px; /* Margen izquierdo reducido */
-  width: calc(80% - 10px); /* Ancho ajustado */
-  padding: 10px; /* Padding ajustado y reducido */
-  font-size: 14px; /* Tamaño ajustado y reducido */
-  font-weight: 500;
-  color: #adb5bd;
-  background-color: #f0f0f0;
-  border: 1px solid #e0e0e0;
-  border-radius: 16px; /* Bordes consistentes y reducidos */
-  cursor: default;
-  text-align: center;
-  margin-top: 12px;
-}
 
 .actionButtons {
   display: flex;
@@ -511,85 +505,95 @@
   background-color: #6a429f;
 }
 
+
+
+
+/* === QR MODAL === */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 12px; /* Padding reducido */
+  padding: 20px;
 }
 
 .modalContent {
-  background-color: white;
-  padding: 20px; /* Padding reducido */
-  border-radius: 10px; /* Radio reducido */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.20); /* Sombra ajustada */
+  background-color: var(--card-bg-color);
+  padding: 24px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
   width: 100%;
-  max-width: 340px; /* Ancho máximo reducido */
-  display: flex;
-  flex-direction: column;
-  gap: 15px; /* Espacio reducido */
-  animation: fadeInModal 0.3s ease-out;
+  max-width: 400px; /* Ancho máximo del modal */
+  animation: fadeInScaleUp 0.3s ease-out;
 }
 
-@keyframes fadeInModal {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes fadeInScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 10px; /* Padding inferior reducido */
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modalTitle {
-  font-size: 18px; /* Tamaño de fuente reducido */
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
-  color: #343a40;
-  margin: 0;
+  color: var(--text-color);
 }
 
 .closeModalButton {
   background: none;
   border: none;
+  color: var(--text-color-light);
   cursor: pointer;
-  padding: 4px; /* Padding reducido */
-  color: #6c757d;
-  line-height: 1;
+  padding: 4px; /* Área de click más grande */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 .closeModalButton:hover {
-  color: #343a40;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
 }
 
 .modalBody {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px; /* Espacio reducido */
+  gap: 16px;
 }
 
 .qrImageModal {
-  max-width: 180px; /* Ancho máximo reducido */
+  max-width: 200px; /* Tamaño del QR */
+  width: 100%;
   height: auto;
-  border: 1px solid #dee2e6;
-  border-radius: 6px; /* Radio reducido */
-  background-color: #f8f9fa;
-  padding: 4px; /* Padding reducido */
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
 }
 
 .qrHelpText {
-  font-size: 13px; /* Tamaño de fuente reducido */
-  color: #495057;
+  font-size: 0.9rem; /* 14px */
+  color: var(--text-color-light);
   text-align: center;
-  margin: 0;
   line-height: 1.5;
 }

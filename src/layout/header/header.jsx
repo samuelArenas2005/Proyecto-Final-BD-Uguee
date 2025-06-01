@@ -43,7 +43,7 @@ const header = () => {
   return (
     <header className={`header ${scrolled ? "scrolled" : ""}`}>
       <div className="container-wrapper">
-        <Link to="/" className="logo">
+        <Link key= '/#hero' to="/#hero" className="logo" onClick={(e) => handleNavLinkClick(e, "/#hero")}>
           Ugüee
         </Link>
 
