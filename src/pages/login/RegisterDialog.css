@@ -101,6 +101,37 @@
 .rd-submit:hover {
   background: #7000cc;
 }
+
+.errormsg {
+  color: #fff;
+  background: #ff3b3b;
+  border: 1.5px solid #d32f2f;
+  border-radius: 0.35rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(255, 59, 59, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: shake 0.2s 1;
+}
+
+.errormsg::before {
+  content: "⚠️";
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
 .rd-section {
   border: 1px solid #e0e0e0;
   border-radius: 0.4rem;

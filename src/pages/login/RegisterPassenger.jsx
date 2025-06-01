@@ -92,11 +92,16 @@ function RegisterPassenger({ handleChange }) {
         const data = await listUniversities();
         setUniversities(data);
       } catch (error) {
-        console.error("Error al obtener universidades:", error?.message || error);
+        console.error(
+          "Error al obtener universidades:",
+          error?.message || error
+        );
       }
     };
     fetchUniversities();
   }, []);
+
+  const [errorMsg, setErrorMsg] = useState(null);
 
   // --- Manejo de cambios en los campos del formulario ---
   const handleSubmit = async (e) => {
@@ -158,8 +163,8 @@ function RegisterPassenger({ handleChange }) {
       alert("Usuario creado con éxito");
     } catch (error) {
       console.error("Error al crear usuario:", error);
-      alert(
-        "Error al crear usuario. Inténtalo de nuevo. \n" + error?.message || error
+      setErrorMsg(
+        "Error al crear usuario: " + error?.message + "Intentelo de nuevo"
       );
       return;
     }
@@ -172,6 +177,7 @@ function RegisterPassenger({ handleChange }) {
       {/* Sección datos de usuario */}
       <div className="rd-section">
         <h3 className="rd-section-title">Datos de usuario</h3>
+        {errorMsg && <div className="errormsg">{errorMsg}</div>}
         {/* Email y Password */}
         <div className="rd-field">
           <label>Email</label>
@@ -501,7 +507,6 @@ function RegisterPassenger({ handleChange }) {
           Quiero ser conductor
         </label>
       </div>
-
       <button type="submit" className="rd-submit">
         Registrarse
       </button>
