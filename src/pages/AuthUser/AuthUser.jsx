@@ -44,7 +44,6 @@ useEffect(() => {
     }
   }, []);
  
-  const isLoginMode = true;
 
   function onChangeSwitch(){
     setToggled(prev => !prev)
@@ -73,18 +72,28 @@ useEffect(() => {
       password,
     });
 
-    // Manejo de errores en autenticación
     if (authError) {
       setErrorMsg('Credenciales de inicio de sesion invalidas');
       return;
     }
-    
-    // data puede ser null si hay un error no capturado
+
     if (!data || !data.user) {
       setErrorMsg('Error desconocido en la autenticación.');
       return;
     }
     const user = data.user;
+
+    // Si el rol es admin, solo verifica el correo
+    if (role === 'admin') {
+        if (user.id !== '16057514-7e1c-4fa5-add2-1e778901f7c8') {
+         setErrorMsg('Acceso denegado.');
+         await supabase.auth.signOut();
+         return;
+       }
+       
+      navigate('/admin', { replace: true });
+      return;
+    }
 
     // 2. Verificar rol en tablas personalizadas
     let tableName;
@@ -94,6 +103,9 @@ useEffect(() => {
     else if (role === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'; estado = 'estado'}
     else if  (role === 'conductor') {tableName = 'conductor'; idName = 'idusuario'; estado = 'estadoconductor'}
     else if (role === 'monitor') {tableName = 'administrador'; idName = 'idadmin'}
+    else if(role === 'admin') {console.log('entre aca ')
+      return
+    }
     else {
       setErrorMsg('Rol inválido en la URL');
       await supabase.auth.signOut();
@@ -191,13 +203,13 @@ useEffect(() => {
                 Iniciar sesión con Google
               </button>
 
-              {isLoginMode && (
+              
                 <div className={styles.forgotPasswordContainer}>
                   <a href="#" className={styles.forgotPasswordLink}>
                     Olvidé mi contraseña
                   </a>
                 </div>
-              )}
+              
             </form>
           </div>
         </div>

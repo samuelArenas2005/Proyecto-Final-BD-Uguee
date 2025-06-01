@@ -20,7 +20,7 @@ const UniversidadPage = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       if (activeTab === 'Pasajeros') {
-        
+
         const { data, error } = await supabase
           .from('pasajero')
           .select(`*, usuario(nombrecompleto, edad, telefono, calle, numerocasa, ciudad, codigoestudiantil, estatuto)`)
@@ -29,10 +29,16 @@ const UniversidadPage = () => {
           console.error(error);
           setRequests([]);
         } else {
-          const { data: datauser } = await supabase.auth.admin.getUserById(data[0].idusuario);
-          console.log(datauser.user.email)
+          const emailPromises = data.map(async (item) => {
+            const { data: emailUsuario, error: errEmail } = await supabase
+              .rpc('get_user_email_by_id', { p_user_id: item.idusuario })
+            return emailUsuario 
+          })
+
+          const emails = await Promise.all(emailPromises)
+
           setRequests(
-            data.map(item => ({
+            data.map((item, idx) => ({
               id: item.idusuario,
               name: item.usuario.nombrecompleto,
               requestType: 'Pasajero',
@@ -42,7 +48,7 @@ const UniversidadPage = () => {
                 fullName: item.usuario.nombrecompleto,
                 studentCode: item.usuario.codigoestudiantil,
                 statuto: item.usuario.estatuto,
-                institutionalEmail: datauser.user.email,
+                institutionalEmail: emails[idx],
                 address: `${item.usuario.calle} #${item.usuario.numerocasa}, ${item.usuario.ciudad}`,
                 phoneNumber: item.usuario.telefono,
                 documentLink: '#'
@@ -94,30 +100,30 @@ const UniversidadPage = () => {
 
   const toggleActionMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
 
-  const changeStateUser = async(id,accept) => {
-    if(accept) {
-      const {data} = await supabase
-          .from('pasajero')
-          .update({ estadopasajero : 'activo' }) 
-          .eq('idusuario', id);
-    }else{
-         const {data} = await supabase
-          .from('pasajero')
-          .update({ estadopasajero : 'inactivo' }) 
-          .eq('idusuario', id);
+  const changeStateUser = async (id, accept) => {
+    if (accept) {
+      const { data } = await supabase
+        .from('pasajero')
+        .update({ estadopasajero: 'activo' })
+        .eq('idusuario', id);
+    } else {
+      const { data } = await supabase
+        .from('pasajero')
+        .update({ estadopasajero: 'inactivo' })
+        .eq('idusuario', id);
     }
   }
 
   const handleAcceptUser = (id) => {
-    changeStateUser(id,true)
+    changeStateUser(id, true)
     setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Usuario aceptado' } : r));
     setOpenMenuId(null);
   };
 
- 
+
 
   const handleDenyUser = (id) => {
-     changeStateUser(id,false)
+    changeStateUser(id, false)
     setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Usuario denegado' } : r));
     setOpenMenuId(null);
   };
@@ -161,13 +167,13 @@ const UniversidadPage = () => {
       </div>
 
       <div className="tabs">
-        <div className={`tab ${activeTab==='Pasajeros' ? 'active':''}`} onClick={()=>handleTabClick('Pasajeros')}>Pasajeros</div>
-        <div className={`tab ${activeTab==='Conductores' ? 'active':''}`} onClick={()=>handleTabClick('Conductores')}>Conductores</div>
-        <button className="assignButton" onClick={openAssignModal}><Plus size={20}/> <span>ASIGNAR MONITOR/CONDUCTOR</span></button>
+        <div className={`tab ${activeTab === 'Pasajeros' ? 'active' : ''}`} onClick={() => handleTabClick('Pasajeros')}>Pasajeros</div>
+        <div className={`tab ${activeTab === 'Conductores' ? 'active' : ''}`} onClick={() => handleTabClick('Conductores')}>Conductores</div>
+        <button className="assignButton" onClick={openAssignModal}><Plus size={20} /> <span>ASIGNAR MONITOR/CONDUCTOR</span></button>
       </div>
 
       <div className="requests-list">
-        {filtered.length>0 ? filtered.map(request=> (
+        {filtered.length > 0 ? filtered.map(request => (
           <div key={request.id} className="request-card">
             <div className="request-info">
               <div className="avatar-icon">{request.avatar}</div>
@@ -176,16 +182,16 @@ const UniversidadPage = () => {
                 <span className="request-type">{request.requestType}</span>
               </div>
             </div>
-            <div className="request-status" style={{color: getStatusColor(request.status)}}>
+            <div className="request-status" style={{ color: getStatusColor(request.status) }}>
               {request.status}{getStatusIcon(request.status)}
             </div>
             <div className="actions-menu-container">
-              <button className="more-options-button" onClick={()=>toggleActionMenu(request.id)}><MoreVertical size={24}/></button>
-              {openMenuId===request.id && (
+              <button className="more-options-button" onClick={() => toggleActionMenu(request.id)}><MoreVertical size={24} /></button>
+              {openMenuId === request.id && (
                 <div className="action-menu">
-                  <div className="action-menu-item" onClick={()=>openDetailsModal(request)}>Ver detalles</div>
-                  <div className="action-menu-item accept" onClick={()=>handleAcceptUser(request.id)}><Check size={16}/> Aceptar usuario</div>
-                  <div className="action-menu-item deny" onClick={()=>handleDenyUser(request.id)}><X size={16}/> Denegar usuario</div>
+                  <div className="action-menu-item" onClick={() => openDetailsModal(request)}>Ver detalles</div>
+                  <div className="action-menu-item accept" onClick={() => handleAcceptUser(request.id)}><Check size={16} /> Aceptar usuario</div>
+                  <div className="action-menu-item deny" onClick={() => handleDenyUser(request.id)}><X size={16} /> Denegar usuario</div>
                 </div>
               )}
             </div>
@@ -195,8 +201,8 @@ const UniversidadPage = () => {
 
       {selectedRequest && (
         <div className="modal-overlay" onClick={closeDetailsModal}>
-          <div className="modal-content" onClick={e=>e.stopPropagation()}>
-            <button className="modal-close-button" onClick={closeDetailsModal}><X size={28}/></button>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={closeDetailsModal}><X size={28} /></button>
             <div className="modal-header">
               <div className="modal-avatar">{selectedRequest.avatar}</div>
               <div className="modal-user-info">
@@ -211,14 +217,14 @@ const UniversidadPage = () => {
               <div className="detail-item"><strong>Estatuto</strong><span>{selectedRequest.details.statuto}</span></div>
               <div className="detail-item"><strong>N° Celular</strong><span>{selectedRequest.details.phoneNumber}</span></div>
               <div className="detail-item"><strong>Correo Institucional</strong><span>{selectedRequest.details.institutionalEmail}</span></div>
-              {selectedRequest.requestType==='Conductor' && (
+              {selectedRequest.requestType === 'Conductor' && (
                 <div className="detail-item"><strong>Licencia</strong><span>{selectedRequest.details.licenseNumber}</span></div>
               )}
-              <div className="detail-item"><strong>Documento</strong><a href={selectedRequest.details.documentLink} className="modal-document-button"><Download size={18}/> Descargar</a></div>
+              <div className="detail-item"><strong>Documento</strong><a href={selectedRequest.details.documentLink} className="modal-document-button"><Download size={18} /> Descargar</a></div>
             </div>
             <div className="modal-actions">
-              <button className="modal-action-button deny" onClick={()=>handleDenyUser(selectedRequest.id)}><X size={20}/> Denegar</button>
-              <button className="modal-action-button accept" onClick={()=>handleAcceptUser(selectedRequest.id)}><Check size={20}/> Admitir</button>
+              <button className="modal-action-button deny" onClick={() => handleDenyUser(selectedRequest.id)}><X size={20} /> Denegar</button>
+              <button className="modal-action-button accept" onClick={() => handleAcceptUser(selectedRequest.id)}><Check size={20} /> Admitir</button>
             </div>
           </div>
         </div>
@@ -227,8 +233,8 @@ const UniversidadPage = () => {
       <AssignUserModal
         isOpen={isAssignModalOpen}
         onClose={closeAssignModal}
-        onAssignMonitor={() => {} }
-        onAssignUser={() => {} }
+        onAssignMonitor={() => { }}
+        onAssignUser={() => { }}
       />
     </div>
   );
