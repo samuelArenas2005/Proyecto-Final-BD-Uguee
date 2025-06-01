@@ -72,9 +72,12 @@ function RegisterPassenger({ handleChange }) {
 
   const [tipoVehiculo, setTipoVehiculo] = useState(""); // "ligero" o "pesado"
 
+  const [infoMsg, setInfoMsg] = useState(""); // información de error o éxito
+
   // --- Contexto de Login ---
   const {
     listUniversities,
+    checkUniqueAtributes,
     createUser,
     createPassenger,
     createVehicle,
@@ -101,8 +104,6 @@ function RegisterPassenger({ handleChange }) {
     fetchUniversities();
   }, []);
 
-  const [errorMsg, setErrorMsg] = useState(null);
-
   // --- Manejo de cambios en los campos del formulario ---
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,6 +114,12 @@ function RegisterPassenger({ handleChange }) {
     // Preparar datos del usuario
     console.log("Datos del usuario:", usuarioData);
     try {
+      const check = await checkUniqueAtributes(
+        usuarioData,
+        conductorData,
+        ligeroData,
+        pesadoData
+      );
       const result = await createUser(userData, usuarioData);
       console.log("Datos del usuario creado:", result);
 
@@ -159,12 +166,21 @@ function RegisterPassenger({ handleChange }) {
           console.log("Datos del conductor creado:", resultDriver);
         }
       }
-
-      alert("Usuario creado con éxito");
+      setInfoMsg("Usuario creado con éxito");
+      setUserData(initialUserData);
+      setUsuarioData(initialUsuarioData);
+      setPasajeroData(initialPasajeroData);
+      setConductorData(initialConductorData);
+      setVehiculoData(initialVehiculoData);
+      setLigeroData(initialLigeroData);
+      setPesadoData(initialPesadoData);
+      setIsPassenger(false);
+      setIsDriver(false);
+      setTipoVehiculo("");
     } catch (error) {
       console.error("Error al crear usuario:", error);
-      setErrorMsg(
-        "Error al crear usuario: " + error?.message + "Intentelo de nuevo"
+      setInfoMsg(
+        "Error al crear usuario: " + error?.message + " Intentelo de nuevo"
       );
       return;
     }
@@ -177,7 +193,17 @@ function RegisterPassenger({ handleChange }) {
       {/* Sección datos de usuario */}
       <div className="rd-section">
         <h3 className="rd-section-title">Datos de usuario</h3>
-        {errorMsg && <div className="errormsg">{errorMsg}</div>}
+        {infoMsg && (
+          <div
+            className={
+              infoMsg.includes("Usuario creado con éxito")
+                ? "successmsg"
+                : "errormsg"
+            }
+          >
+            {infoMsg}
+          </div>
+        )}
         {/* Email y Password */}
         <div className="rd-field">
           <label>Email</label>

@@ -132,6 +132,26 @@
   100% { transform: translateX(0); }
 }
 
+.successmsg {
+  color: #fff;
+  background: #43a047;
+  border: 1.5px solid #2e7d32;
+  border-radius: 0.35rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.successmsg::before {
+  content: "✅";
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+}
+
 .rd-section {
   border: 1px solid #e0e0e0;
   border-radius: 0.4rem;
