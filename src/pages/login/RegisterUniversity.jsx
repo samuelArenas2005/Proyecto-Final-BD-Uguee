@@ -22,6 +22,7 @@ function RegisterUniversity({ handleChange }) {
 
   const [userData, setUserData] = useState(initialUserData);
   const [formData, setFormData] = useState(initialFormData);
+  const [infoMsg, setInfoMsg] = useState(""); // Mensaje de éxito o error
 
   const { createUniversity, submitting } = useLogin();
 
@@ -31,31 +32,30 @@ function RegisterUniversity({ handleChange }) {
       await createUniversity(userData, formData);
       setUserData(initialUserData);
       setFormData(initialFormData);
-      alert("Universidad registrada con éxito");
+      setInfoMsg("Universidad registrada con éxito");
     } catch (error) {
-      console.error(
-        "Error al registrar universidad:",
-        error,
-        error?.message,
-        error?.stack
-      );
-      alert(
-        "Error al registrar universidad. Inténtalo de nuevo.\n" +
-          (error?.message || error)
+      setInfoMsg(
+        "Error al registrar universidad: " +
+          (error?.message || error) +
+          " Inténtalo de nuevo."
       );
     }
   };
 
   if (submitting) return <p>Registrando universidad...</p>;
-  else
-    return (
-      <form
-        className="rd-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(e);
-        }}
-      >
+
+  return (
+    <form className="rd-form" onSubmit={handleSubmit}>
+      <div className="rd-section">
+        <h3 className="rd-section-title">Registro de Universidad</h3>
+        {infoMsg && (
+          <div
+            className={infoMsg.includes("éxito") ? "successmsg" : "errormsg"}
+          >
+            {infoMsg}
+          </div>
+        )}
+
         {/* Email y Password */}
         <div className="rd-field">
           <label>Email</label>
@@ -69,18 +69,19 @@ function RegisterUniversity({ handleChange }) {
           />
         </div>
         <div className="rd-field">
-          <label>Password</label>
+          <label>Contraseña</label>
           <input
             type="password"
             name="password"
+            minLength={6}
             value={userData.password}
             required
-            placeholder="Minimo 6 caracteres"
+            placeholder="Mínimo 6 caracteres"
             onChange={(e) => handleChange(e, setUserData)}
           />
         </div>
 
-        {/* Campos de initialFormData */}
+        {/* Campos de la universidad */}
         <div className="rd-field">
           <label>Nombre oficial de la Universidad</label>
           <input
@@ -167,11 +168,13 @@ function RegisterUniversity({ handleChange }) {
             onChange={(e) => handleChange(e, setFormData)}
           />
         </div>
-        <button type="submit" className="rd-submit">
-          Registrarse como universidad
-        </button>
-      </form>
-    );
+      </div>
+
+      <button type="submit" className="rd-submit">
+        Registrarse como universidad
+      </button>
+    </form>
+  );
 }
 
 export default RegisterUniversity;
