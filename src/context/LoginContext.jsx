@@ -47,8 +47,80 @@ export const LoginContextProvider = ({ children }) => {
     return data;
   };
 
+  const checkUniqueAtributes = async (
+    usuarioData,
+    conductorData,
+    ligeroData,
+    pesadoData
+  ) => {
+    setSubmitting(true);
+
+    if (usuarioData?.telefono) {
+      const { data: telData, error: telError } = await supabase
+        .from("usuario")
+        .select("telefono")
+        .eq("telefono", usuarioData.telefono)
+        .maybeSingle();
+      if (telData) {
+        setSubmitting(false);
+        throw new Error("El teléfono ya está registrado.");
+      }
+    }
+
+    if (usuarioData?.codigoestudiantil) {
+      const { data: codData, error: codError } = await supabase
+        .from("usuario")
+        .select("codigoestudiantil")
+        .eq("codigoestudiantil", usuarioData.codigoestudiantil)
+        .maybeSingle();
+      if (codData) {
+        setSubmitting(false);
+        throw new Error("El código estudiantil ya está registrado.");
+      }
+    }
+
+    if (conductorData?.numerodelicencia) {
+      const { data: licData, error: licError } = await supabase
+        .from("conductor")
+        .select("numerodelicencia")
+        .eq("numerodelicencia", conductorData.numerodelicencia)
+        .maybeSingle();
+      if (licData) {
+        setSubmitting(false);
+        throw new Error("La licencia ya está registrada.");
+      }
+    }
+
+    if (pesadoData?.placa) {
+      const { data: placaData, error: placaError } = await supabase
+        .from("vehiculopesado")
+        .select("placa")
+        .eq("placa", pesadoData.placa)
+        .maybeSingle();
+      if (placaData) {
+        setSubmitting(false);
+        throw new Error("La placa del vehiculo ya está registrada.");
+      }
+      setSubmitting(false);
+    }
+
+    if (ligeroData?.nserie) {
+      const { data: serieData, error: serieError } = await supabase
+        .from("vehiculoligero")
+        .select("nserie")
+        .eq("nserie", ligeroData.nserie)
+        .maybeSingle();
+      if (serieData) {
+        setSubmitting(false);
+        throw new Error("El número de serie ya está registrado.");
+      }
+    }
+    setSubmitting(false);
+  };
+
   const createUser = async (userData, formData) => {
     setSubmitting(true);
+
     const { email, password } = userData;
     const { data, error } = await supabase.auth.signUp({
       email: email,
@@ -62,7 +134,10 @@ export const LoginContextProvider = ({ children }) => {
     formData.nidentificacion = data.user.id;
     const result = await supabase.from("usuario").insert([formData]).select();
     setSubmitting(false);
-    if (result.error) throw result.error;
+    if (result.error) {
+      throw result.error;
+    }
+
     return result;
   };
 
@@ -104,7 +179,7 @@ export const LoginContextProvider = ({ children }) => {
         .from("vehiculopesado")
         .insert([vehicleData])
         .select();
-      setSubmitting(false);        
+      setSubmitting(false);
       if (vehicleHardResult.error) throw vehicleHardResult.error;
       return vehicleData;
     }
@@ -127,6 +202,7 @@ export const LoginContextProvider = ({ children }) => {
         createPassenger,
         createVehicle,
         createDriver,
+        checkUniqueAtributes,
         submitting,
         loading,
       }}

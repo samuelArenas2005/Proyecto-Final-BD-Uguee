@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./RegisterDialog.css";
 import { supabase } from "../../supabaseClient";
-import RegisterPassenger from "./RegisterPassenger";
+import RegisterUser from "./RegisterUser";
 import RegisterUniversity from "./RegisterUniversity";
 import Login from "./Login";
 import { LoginContextProvider } from "../../context/LoginContext";
@@ -64,7 +64,7 @@ export default function RegisterDialog({ open, onOpenChange }) {
 
         <div className="rd-content">
           <LoginContextProvider>
-            {role === "pasajero" && <RegisterPassenger handleChange={handleChange}/>}
+            {role === "pasajero" && <RegisterUser handleChange={handleChange}/>}
             {role === "universidad" && <RegisterUniversity handleChange={handleChange}/>}
           </LoginContextProvider>
         </div>

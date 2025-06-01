@@ -73,73 +73,91 @@ const App = () => {
         <Route
           path="/pasajero/actividad"
           element={
+            <ProtectedRoute role="pasajero">
             <Layout2>
               <HistorialPasajero />
             </Layout2>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/conductor"
           element={
+            <ProtectedRoute role="conductor">
             <Layout2>
               <ConductorPage />
             </Layout2>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/conductor/viaje"
           element={
+            <ProtectedRoute role="conductor">
             <Layout2>
               <ConductorPageViaje />
             </Layout2>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/conductor/reporte"
           element={
+            <ProtectedRoute role="conductor">
             <Layout2>
               <ConductorPageReporteVia />
             </Layout2>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/universidad"
           element={
+            <ProtectedRoute role="universidad">
             <LayoutUni>
               <UniversidadPage />
             </LayoutUni>
+            </ProtectedRoute>
           }
         />
          <Route
           path="/monitor"
           element={
+            <ProtectedRoute role="monitor">
             <Layout1>
               <Monitor />
             </Layout1>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/universidad/reportes"
           element={
+            <ProtectedRoute role="universidad">
             <LayoutUni>
               <ReportesPage />
             </LayoutUni>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/universidad/monitoreo"
           element={
+            <ProtectedRoute role="universidad">
             <LayoutUni>
               <MonitoreoPage />
             </LayoutUni>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin"
           element={
+            <ProtectedRoute role="admin">
             <Layout1>
               <AdminPage />
             </Layout1>
+            </ProtectedRoute>
           }
         />
         <Route

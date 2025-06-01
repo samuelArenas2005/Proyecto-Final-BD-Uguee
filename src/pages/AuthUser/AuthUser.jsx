@@ -89,9 +89,11 @@ useEffect(() => {
     // 2. Verificar rol en tablas personalizadas
     let tableName;
     let idName;
-    if (role === 'pasajero') {tableName = 'pasajero'; idName = 'idusuario'}
-    else if (role === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'}
-    else if  (role === 'conductor') {tableName = 'conductor'; idName = 'idusuario'}
+    let estado;
+    if (role === 'pasajero') {tableName = 'pasajero'; idName = 'idusuario'; estado = 'estadopasajero'}
+    else if (role === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'; estado = 'estado'}
+    else if  (role === 'conductor') {tableName = 'conductor'; idName = 'idusuario'; estado = 'estadoconductor'}
+    else if (role === 'monitor') {tableName = 'administrador'; idName = 'idadmin'}
     else {
       setErrorMsg('Rol inválido en la URL');
       await supabase.auth.signOut();
@@ -109,6 +111,19 @@ useEffect(() => {
       await supabase.auth.signOut();
       return;
     }
+
+    const { data: estadoData, error: estadoError } = await supabase
+      .from(tableName)
+      .select(estado)
+      .eq(idName, user.id) 
+      .eq(estado, 'activo')
+      .single();
+
+    if (estadoError || !estadoData) {
+      setErrorMsg(`Tu usuario aún no ha sido aceptado, comunicate con tu institución`);
+      await supabase.auth.signOut();
+      return;
+    } 
 
     // 3. Redirigir al dashboard correspondiente
     const from = location.state?.from?.pathname || `/${role}`;
