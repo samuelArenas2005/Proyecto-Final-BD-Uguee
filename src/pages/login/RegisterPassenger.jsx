@@ -103,6 +103,7 @@ function RegisterPassenger({ handleChange }) {
     e.preventDefault();
     if (!isPassenger && !isDriver) {
       alert("Debes seleccionar al menos una opción: pasajero o conductor.");
+      return;
     }
     // Preparar datos del usuario
     console.log("Datos del usuario:", usuarioData);
@@ -189,6 +190,7 @@ function RegisterPassenger({ handleChange }) {
           <input
             type="password"
             name="password"
+            minLength={6}
             value={userData.password}
             required
             placeholder="Mínimo 6 caracteres"

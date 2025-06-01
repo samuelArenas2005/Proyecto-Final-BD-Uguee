@@ -73,6 +73,7 @@ function RegisterUniversity({ handleChange }) {
           <input
             type="password"
             name="password"
+            minLength={6}
             value={userData.password}
             required
             placeholder="Minimo 6 caracteres"
