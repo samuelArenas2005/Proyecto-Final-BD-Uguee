@@ -1,20 +1,33 @@
-import React from 'react';
+import React ,{useState,useEffect} from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { supabase } from "../supabaseClient.js";
 
 
 export default function ProtectedRoute({ children, role }) {
   const location = useLocation();
-  const session = supabase.auth.getSession(); // v2 returns { data: { session }, error }
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const user = session?.data?.session?.user;
+  useEffect(() => {
+    // Obtener sesión inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+    // Suscribirse a cambios de auth
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
-  // Si no hay usuario autenticado, redirige a login con el mismo role
-  if (!user) {
-    return <Navigate to={`/login/${role}`} state={{ from: location }} replace />;
+  if (loading) {
+    return <div>Cargando...</div>;
   }
 
-  // Verificar rol en tablas personalizadas (sin await, supón que ya prefetched o hazlo en un contexto)
-  // Por simplicidad: aquí solo devolvemos children
+  if (!session || !session.user) {
+    return <Navigate to={`/authUser/${role}`} state={{ from: location }} replace />;
+  }
+
   return children;
 }

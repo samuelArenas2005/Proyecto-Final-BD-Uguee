@@ -111,7 +111,8 @@ useEffect(() => {
     }
 
     // 3. Redirigir al dashboard correspondiente
-    navigate(`/${role}`);
+    const from = location.state?.from?.pathname || `/${role}`;
+    navigate(from, { replace: true });
   };
 
   return (
