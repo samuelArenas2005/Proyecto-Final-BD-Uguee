@@ -1,3 +1,5 @@
+// TravelPage.jsx
+
 import React, { useRef, useEffect, useState } from 'react';
 import {
   MapPin,
@@ -21,103 +23,81 @@ import {
   DirectionsRenderer,
 } from '@react-google-maps/api';
 
+// ==== IMPORTACIÓN DE SUPABASE ====
+import { supabase } from '../../supabaseClient.js';
+// =================================
+
+// Google API Key
 const apigoogle = import.meta.env.VITE_APIS_GOOGLE;
 
+// Estilos personalizados para el mapa
 const mapCustomStyles = [
   {
-    featureType: 'poi', // Puntos de Interés (negocios, parques, etc.)
+    featureType: 'poi',
     elementType: 'labels',
-    stylers: [{ visibility: 'on' }], // Oculta todas las etiquetas de POIs
+    stylers: [{ visibility: 'on' }],
   },
   {
-    featureType: 'transit', // Transporte público (estaciones, paradas)
+    featureType: 'transit',
     elementType: 'labels',
-    stylers: [{ visibility: 'off' }], // Oculta etiquetas de transporte
-  },
-  {
-    featureType: 'road', // Carreteras y calles
-    elementType: 'labels.text.fill', // Color del texto de las etiquetas de carretera
-    stylers: [{ visibility: 'simplified' }], // Muestra solo las etiquetas principales, o 'off' para ocultarlas
-  },
-  {
-    featureType: 'road',
-    elementType: 'labels.text.stroke', // Borde del texto de las etiquetas de carretera
-    stylers: [{ visibility: 'simplified' }], // O 'off'
-  },
-  {
-    featureType: 'road',
-    elementType: 'labels.icon', // Iconos en las carreteras (como escudos de autopistas)
     stylers: [{ visibility: 'off' }],
   },
   {
-    featureType: 'administrative', // Límites administrativos (países, provincias, ciudades)
+    featureType: 'road',
     elementType: 'labels.text.fill',
-    stylers: [{ color: '#666666' }, { visibility: 'simplified' }], // Mantiene algunas etiquetas administrativas pero simplificadas
+    stylers: [{ visibility: 'simplified' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.stroke',
+    stylers: [{ visibility: 'simplified' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.icon',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'administrative',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#666666' }, { visibility: 'simplified' }],
   },
 ];
 
 const libraries = ['places'];
 
-// Centro por defecto (Bogotá), antes de seleccionar “Punto de partida”
+// Centro por defecto en Bogotá
 const DEFAULT_CENTER = {
   lat: 4.624335,
   lng: -74.063644,
 };
 
-// Rutas a tus assets
-const carImagePath = '/car.png';
-const carIconoPath = '/carIcono.png';
-
-const mockDrivers = [
-  {
-    id: 'driver1',
-    name: 'Nicolas Arenas',
-    location: 'Ave. Ciudad de Cali',
-    avatar: null,
-  },
-  {
-    id: 'driver2',
-    name: 'Miguel Andrade',
-    location: 'Carrera 82',
-    avatar: null,
-  },
-  {
-    id: 'driver3',
-    name: 'Juliana Rincon',
-    location: 'Ave. Ciudad de Cali',
-    avatar: null,
-  },
-];
-
-const driverData = {
-  name: 'Nicolas Arenas',
-  location: 'Ave. Ciudad de Cali',
-  avatarUrl: 'https://i.pravatar.cc/150?img=56',
-  rating: 4.88,
-  car: {
-    plate: 'PLA234',
-    model: 'Ford Explore Blanca',
-    imageUrl: carImagePath,
-  },
-  eta: '10:00 am - 10:10 am',
-  price: 'Gratis',
-};
-
 const TravelPage = () => {
+  // Estados para inputs de Google Autocomplete
   const [startPoint, setStartPoint] = useState('');
   const [destination, setDestination] = useState('');
   const [startCoords, setStartCoords] = useState(null);
   const [destCoords, setDestCoords] = useState(null);
+
+  // Estados del mapa
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [mapZoom, setMapZoom] = useState(14);
   const [directionsResponse, setDirectionsResponse] = useState(null);
 
+  // Estados para manejar la búsqueda de rutas
+  const [matchingRoutes, setMatchingRoutes] = useState([]); // lista de rutas encontradas
+  const [loadingRoutes, setLoadingRoutes] = useState(false); // indica búsqueda en curso
+  const [searchMessage, setSearchMessage] = useState(''); // mensaje si no hay rutas
+
+  // Estados para diálgos (filtros y detalle de viaje)
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [isTripDetailDialogOpen, setIsTripDetailDialogOpen] = useState(false);
-  const [selectedTripId, setSelectedTripId] = useState(null);
-  const [acceptedTripId, setAcceptedTripId] = useState(null);
+  const [selectedRoute, setSelectedRoute] = useState(null); // ruta seleccionada para modal
 
-  // Autocomplete refs
+  // NUEVO: estado para la ruta aceptada
+  const [acceptedRoute, setAcceptedRoute] = useState(null);
+
+  // Referencias para Autocomplete
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
 
@@ -126,29 +106,27 @@ const TravelPage = () => {
   const handleOpenQrModal = () => setShowQrModal(true);
   const handleCloseQrModal = () => setShowQrModal(false);
 
-  // Botones de búsqueda / cancelación
-  const handleSearchTrip = () => {
-    console.log('Buscando viaje desde:', startPoint, 'hasta:', destination);
-    console.log('Coordenadas:', startCoords, destCoords);
-    setAcceptedTripId(null);
-    setDirectionsResponse(null); // Limpiar ruta anterior
-  };
+  // ==== CÁLCULO DE DISTANCIA (Haversine) ====
+  // Retorna distancia en metros entre dos puntos { lat, lng }
+  const getDistanceMeters = (coord1, coord2) => {
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371000; // Radio de la Tierra en metros
 
-  const openTripDetailDialog = (tripId) => {
-    setSelectedTripId(tripId);
-    setIsTripDetailDialogOpen(true);
-  };
+    const dLat = toRad(coord2.lat - coord1.lat);
+    const dLon = toRad(coord2.lng - coord1.lng);
+    const lat1 = toRad(coord1.lat);
+    const lat2 = toRad(coord2.lat);
 
-  const handleAcceptTrip = (tripId) => {
-    setAcceptedTripId(tripId);
-    setIsTripDetailDialogOpen(false);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return d; // en metros
   };
+  // ==========================================
 
-  const handleCancelAcceptedTrip = () => {
-    setAcceptedTripId(null);
-  };
-
-  // Callbacks de Autocomplete
+  // ==== HANDLERS DE AUTOCOMPLETE ====
   const onLoadStart = (autocompleteInstance) => {
     autoStartRef.current = autocompleteInstance;
   };
@@ -184,8 +162,9 @@ const TravelPage = () => {
       }
     }
   };
+  // ==================================
 
-  // Cuando ambos puntos están disponibles, calculamos la ruta con el DirectionsService “manual”
+  // Cuando cambia cualquiera de los dos puntos (inicio o destino), recalcular la ruta visual en el mapa
   useEffect(() => {
     if (startCoords && destCoords) {
       const directionsService = new window.google.maps.DirectionsService();
@@ -200,13 +179,108 @@ const TravelPage = () => {
             setDirectionsResponse(result);
           } else {
             console.error('Error obteniendo ruta:', status);
+            setDirectionsResponse(null);
           }
         }
       );
     }
   }, [startCoords, destCoords]);
 
-  // Opciones del mapa para que esté “limpio”
+  // ==== FUNCIÓN PARA BUSCAR RUTAS EN SUPABASE ====
+  const handleSearchTrip = async () => {
+    // Limpiar estados previos
+    setMatchingRoutes([]);
+    setSearchMessage('');
+    setLoadingRoutes(true);
+    setSelectedRoute(null);
+    setIsTripDetailDialogOpen(false);
+
+    if (!startCoords || !destCoords) {
+      setSearchMessage('Primero ingresa punto de partida y destino válidos.');
+      setLoadingRoutes(false);
+      return;
+    }
+
+    console.log('Buscando rutas desde:', startCoords, 'hasta:', destCoords);
+
+    // 1) Obtener todas las rutas con estado = 'activo', haciendo el join correcto:
+    //    ruta → rutaconductorviaje → conductor → usuario(*)
+    const { data: rutas, error } = await supabase
+      .from('ruta')
+      .select(`
+        idruta,
+        salidalatitud,
+        salidalongitud,
+        paradalatitud,
+        paradalongitud,
+        horadesalida,
+        fecha,
+        tipoderuta,
+        distancia,
+        asientosdisponibles,
+        rutaconductorviaje (
+          conductor (
+            usuario (*)
+          )
+        ),
+        vehiculo (
+          color,
+          marca,
+          modelo,
+          vehiculopesado (
+            placa,
+            tipovehiculo
+          )
+        )
+      `)
+      .eq('estado', 'activo');
+
+    if (error) {
+      console.error('Error al consultar Supabase:', error);
+      setSearchMessage('Ocurrió un error al buscar rutas. Intenta más tarde.');
+      setLoadingRoutes(false);
+      return;
+    }
+
+    // 2) Filtrar en frontend con Haversine para 500 m (0.5 km)
+    const RADIUS_METERS = 500;
+    const filtradas = rutas.filter((ruta) => {
+      const salidaRuta = {
+        lat: parseFloat(ruta.salidalatitud),
+        lng: parseFloat(ruta.salidalongitud),
+      };
+      const destinoRuta = {
+        lat: parseFloat(ruta.paradalatitud),
+        lng: parseFloat(ruta.paradalongitud),
+      };
+
+      const distSalida = getDistanceMeters(startCoords, salidaRuta);
+      const distDestino = getDistanceMeters(destCoords, destinoRuta);
+
+      return distSalida <= RADIUS_METERS && distDestino <= RADIUS_METERS;
+    });
+
+    if (filtradas.length === 0) {
+      setSearchMessage('No se encontraron rutas que coincidan con los criterios.');
+    }
+    setMatchingRoutes(filtradas);
+    setLoadingRoutes(false);
+  };
+  // ============================================
+
+  // Abrir modal con detalle de ruta
+  const openTripDetailDialog = (ruta) => {
+    setSelectedRoute(ruta);
+    setIsTripDetailDialogOpen(true);
+  };
+
+  // NUEVO: manejar aceptación de ruta desde el modal
+  const handleAcceptRoute = () => {
+    setAcceptedRoute(selectedRoute);
+    setIsTripDetailDialogOpen(false);
+  };
+
+  // Opciones del mapa (“limpio”)
   const mapOptions = {
     disableDefaultUI: true,
     zoomControl: true,
@@ -214,6 +288,41 @@ const TravelPage = () => {
     mapTypeControl: false,
     styles: mapCustomStyles,
   };
+
+  // Función auxiliar para mostrar coordenadas abreviadas (4 decimales)
+  const formatCoordsShort = (lat, lng) => {
+    const round4 = (num) => Number(num).toFixed(4);
+    return `${round4(lat)}, ${round4(lng)}`;
+  };
+
+  // ==== Construir datos dinámicos para el “Conductor Elegido” ====
+  let chosenDriverData = null;
+  if (acceptedRoute) {
+    const rutaconductor = acceptedRoute.rutaconductorviaje?.[0];
+    const usuario = rutaconductor?.conductor?.usuario || {};
+    const nombre =
+      usuario.nombrecompleto || usuario.codigoestudiantil || 'Sin nombre';
+    const coordsShort = formatCoordsShort(
+      acceptedRoute.salidalatitud,
+      acceptedRoute.salidalongitud
+    );
+
+    // Generamos un objeto similar a driverData para usar en el card
+    chosenDriverData = {
+      name: nombre,
+      location: coordsShort,
+      avatarUrl: '', // no tienes avatar en BD, puedes dejar vacío o poner un placeholder
+      rating: 0, // si no tienes rating en BD, dejas 0 o un valor fijo
+      car: {
+        plate: acceptedRoute.vehiculo?.vehiculopesado?.placa || '—',
+        model: `${acceptedRoute.vehiculo?.marca || ''} ${acceptedRoute.vehiculo?.modelo || ''}`.trim(),
+        imageUrl: '/car.png', // puedes reemplazar con un placeholder
+      },
+      eta: acceptedRoute.horadesalida || '—', // mostramos hora de salida como ETA
+      price: 'Gratis', // si no tienes precio, dejamos “Gratis” o “—”
+    };
+  }
+  // ============================================================
 
   return (
     <LoadScript googleMapsApiKey={apigoogle} libraries={libraries}>
@@ -274,20 +383,25 @@ const TravelPage = () => {
             </div>
           </div>
 
-          {acceptedTripId ? (
+          {acceptedRoute ? (
+            // === Conductor Elegido (mostrado cuando ya se aceptó una ruta) ===
             <div className={styles.cardContainer}>
               <h2 className={styles.mainTitle}>Conductor Elegido</h2>
               <div className={styles.driverSection}>
                 <img
-                  src={driverData.avatarUrl}
-                  alt={driverData.name}
+                  src={chosenDriverData.avatarUrl || '/placeholder-avatar.png'}
+                  alt={chosenDriverData.name}
                   className={styles.driverAvatarBig}
                 />
                 <div className={styles.driverInfoBig}>
-                  <p className={styles.driverNameBig}>{driverData.name}</p>
+                  <p className={styles.driverNameBig}>
+                    {chosenDriverData.name}
+                  </p>
                   <div className={styles.locationRow}>
                     <MapPin size={16} className={styles.locationIcon} />
-                    <p className={styles.driverLocation}>{driverData.location}</p>
+                    <p className={styles.driverLocation}>
+                      {chosenDriverData.location}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -295,45 +409,58 @@ const TravelPage = () => {
               <div className={styles.vehicleDetailsSectionWrapper}>
                 <div className={styles.driverAvatarRatingColumn}>
                   <img
-                    src={driverData.avatarUrl}
+                    src={chosenDriverData.avatarUrl || '/placeholder-avatar.png'}
                     alt=""
                     className={styles.driverAvatarSmall}
                   />
                   <div className={styles.ratingBadge}>
-                    <Star size={12} className={styles.starIcon} fill="#AA00FF" color="#AA00FF" />
-                    <span className={styles.ratingText}>{driverData.rating.toFixed(2)}</span>
+                    <Star
+                      size={12}
+                      className={styles.starIcon}
+                      fill="#AA00FF"
+                      color="#AA00FF"
+                    />
+                    <span className={styles.ratingText}>
+                      {chosenDriverData.rating.toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
                 <div className={styles.carImageColumn}>
                   <img
-                    src={driverData.car.imageUrl}
-                    alt={driverData.car.model}
+                    src={chosenDriverData.car.imageUrl}
+                    alt={chosenDriverData.car.model}
                     className={styles.carImage}
                   />
                 </div>
 
                 <div className={styles.vehicleTextInfoColumn}>
-                  <p className={styles.carPlate}>{driverData.car.plate}</p>
-                  <p className={styles.carModel}>{driverData.car.model}</p>
-                  <p className={styles.priceInfo}>{driverData.price}</p>
+                  <p className={styles.carPlate}>
+                    {chosenDriverData.car.plate}
+                  </p>
+                  <p className={styles.carModel}>
+                    {chosenDriverData.car.model}
+                  </p>
+                  <p className={styles.priceInfo}>
+                    {chosenDriverData.price}
+                  </p>
                 </div>
               </div>
 
               <div className={styles.etaSection}>
                 <Clock size={24} className={styles.clockIconDetails} />
                 <div className={styles.etaTextContainer}>
-                  <p className={styles.etaTitle}>Tiempo estimado de salida</p>
-                  <p className={styles.etaTime}>{driverData.eta}</p>
+                  <p className={styles.etaTitle}>
+                    Tiempo estimado de salida
+                  </p>
+                  <p className={styles.etaTime}>{chosenDriverData.eta}</p>
                 </div>
               </div>
 
               <div className={styles.actionButtons}>
                 <button
                   className={styles.cancelButton}
-                  onClick={() => {
-                    setAcceptedTripId(null);
-                  }}
+                  onClick={() => setAcceptedRoute(null)}
                 >
                   Cancelar viaje
                 </button>
@@ -344,18 +471,26 @@ const TravelPage = () => {
 
               {showQrModal && (
                 <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
-                  <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className={styles.modalContent}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className={styles.modalHeader}>
-                      <h3 className={styles.modalTitle}>Código QR del Viaje</h3>
-                      <button onClick={handleCloseQrModal} className={styles.closeModalButton}>
+                      <h3 className={styles.modalTitle}>
+                        Código QR del Viaje
+                      </h3>
+                      <button
+                        onClick={handleCloseQrModal}
+                        className={styles.closeModalButton}
+                      >
                         <X size={24} />
                       </button>
                     </div>
                     <div className={styles.modalBody}>
                       <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ViajeConductor:${encodeURIComponent(
-                          driverData.name,
-                        )}-Placa:${encodeURIComponent(driverData.car.plate)}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ViajeRuta:${encodeURIComponent(
+                          acceptedRoute.idruta
+                        )}`}
                         alt="Código QR"
                         className={styles.qrImageModal}
                       />
@@ -368,45 +503,69 @@ const TravelPage = () => {
               )}
             </div>
           ) : (
-            <div className={styles.driverOptionsCard}>
-              <h3>Opciones de conductores</h3>
-              <div className={styles.driverList}>
-                {mockDrivers.map((driver) => (
-                  <div key={driver.id} className={styles.driverItem}>
-                    <div className={styles.driverInfo}>
-                      {driver.avatar ? (
-                        <img
-                          src={driver.avatar}
-                          alt={driver.name}
-                          className={styles.driverAvatar}
-                        />
-                      ) : (
-                        <UserCircle2 size={36} className={styles.driverAvatarDefault} />
-                      )}
+            // === Listado de rutas o mensajes, cuando NO hay ruta aceptada ===
+            <>
+              {/* Mostrar mensaje de búsqueda / cargando */}
+              {loadingRoutes && (
+                <p className={styles.searchStatus}>Buscando rutas...</p>
+              )}
+              {!loadingRoutes && searchMessage && (
+                <p className={styles.searchStatus}>{searchMessage}</p>
+              )}
 
-                      <div className={styles.driverText}>
-                        <span className={styles.driverName}>{driver.name}</span>
-                        <span className={styles.driverLocation}>
-                          <MapPin
-                            size={12}
-                            style={{ marginRight: '4px', color: '#6b7280' }}
-                          />
-                          {driver.location}
-                        </span>
-                      </div>
-                    </div>
-
-                    <button
-                      className={styles.driverMoreButton}
-                      onClick={() => openTripDetailDialog(driver.id)}
-                      aria-label={`Más opciones para ${driver.name}`}
-                    >
-                      <MoreVertical size={20} />
-                    </button>
+              {matchingRoutes.length > 0 && (
+                <div className={styles.cardContainer}>
+                  <h2 className={styles.mainTitle}>Rutas Disponibles</h2>
+                  <div className={styles.driverList}>
+                    {matchingRoutes.map((ruta) => {
+                      // Obtener nombre del conductor desde la tabla intermedia
+                      const rutaconductor = ruta.rutaconductorviaje?.[0];
+                      const usuario = rutaconductor?.conductor?.usuario || {};
+                      const conductorNombre =
+                        usuario.nombrecompleto ||
+                        usuario.codigoestudiantil ||
+                        'Sin nombre';
+                      const coordsShort = formatCoordsShort(
+                        ruta.salidalatitud,
+                        ruta.salidalongitud
+                      );
+                      return (
+                        <div key={ruta.idruta} className={styles.driverItem}>
+                          <div className={styles.driverInfo}>
+                            <UserCircle2
+                              size={36}
+                              className={styles.driverAvatarDefault}
+                            />
+                            <div className={styles.driverText}>
+                              <span className={styles.driverName}>
+                                {conductorNombre}
+                              </span>
+                              <span className={styles.driverLocation}>
+                                <MapPin
+                                  size={12}
+                                  style={{
+                                    marginRight: '4px',
+                                    color: '#6b7280',
+                                  }}
+                                />
+                                {coordsShort}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            className={styles.driverMoreButton}
+                            onClick={() => openTripDetailDialog(ruta)}
+                            aria-label={`Más opciones para ruta ${ruta.idruta}`}
+                          >
+                            <MoreVertical size={20} />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -418,7 +577,6 @@ const TravelPage = () => {
             mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '20px' }}
             options={mapOptions}
           >
-            {/* Si directionsResponse no es null, lo pintamos */}
             {directionsResponse && (
               <DirectionsRenderer
                 options={{
@@ -434,18 +592,65 @@ const TravelPage = () => {
           </GoogleMap>
         </div>
 
+        {/* Diálogo de filtros */}
         <FilterDialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen} />
-        <TripDetailDialog
-          open={isTripDetailDialogOpen}
-          onOpenChange={setIsTripDetailDialogOpen}
-          tripId={selectedTripId}
-          driverData={
-            selectedTripId
-              ? mockDrivers.find((d) => d.id === selectedTripId) || driverData
-              : driverData
-          }
-          onAcceptTrip={() => handleAcceptTrip(selectedTripId)}
-        />
+
+        {/* Diálogo de detalles de ruta */}
+        {selectedRoute && (
+          <TripDetailDialog
+            open={isTripDetailDialogOpen}
+            onOpenChange={setIsTripDetailDialogOpen}
+            tripId={selectedRoute.idruta}
+            driverData={{
+              nombre:
+                selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario?.nombrecompleto ||
+                selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                  ?.codigoestudiantil ||
+                'Sin nombre',
+            }}
+            routeData={{
+              horadesalida: selectedRoute.horadesalida,
+              fecha: selectedRoute.fecha,
+              tipoderuta: selectedRoute.tipoderuta,
+              distancia: selectedRoute.distancia,
+              asientosdisponibles: selectedRoute.asientosdisponibles,
+            }}
+            vehicleData={{
+              color: selectedRoute.vehiculo?.color,
+              marca: selectedRoute.vehiculo?.marca,
+              modelo: selectedRoute.vehiculo?.modelo,
+              placa: selectedRoute.vehiculo?.vehiculopesado?.placa,
+              tipovehiculo: selectedRoute.vehiculo?.vehiculopesado?.tipovehiculo,
+            }}
+            onAcceptTrip={handleAcceptRoute}
+          />
+        )}
+
+        {/* Modal QR */}
+        {showQrModal && (
+          <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h3 className={styles.modalTitle}>Código QR del Viaje</h3>
+                <button onClick={handleCloseQrModal} className={styles.closeModalButton}>
+                  <X size={24} />
+                </button>
+              </div>
+              <div className={styles.modalBody}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ViajeRuta:${encodeURIComponent(
+                    acceptedRoute?.idruta || ''
+                  )}`}
+                  alt="Código QR"
+                  className={styles.qrImageModal}
+                />
+                <p className={styles.qrHelpText}>
+                  Scanea este QR en la App para seguir el viaje.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </LoadScript>
   );
