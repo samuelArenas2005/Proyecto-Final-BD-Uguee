@@ -6,7 +6,9 @@ import AssignUserModal from "./components/asignarUser";
 
 const UniversidadPage = () => {
   const [activeTab, setActiveTab] = useState('Pasajeros');
+
   const [searchTerm, setSearchTerm] = useState('');
+
   const [requests, setRequests] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -96,6 +98,7 @@ const UniversidadPage = () => {
     setSearchTerm('');
   };
 
+
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   const toggleActionMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
@@ -179,6 +182,7 @@ const UniversidadPage = () => {
               <div className="avatar-icon">{request.avatar}</div>
               <div className="request-details">
                 <span className="request-name">{request.name}</span>
+                <span>{request.name}</span>
                 <span className="request-type">{request.requestType}</span>
               </div>
             </div>
