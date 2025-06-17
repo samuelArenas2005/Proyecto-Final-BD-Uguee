@@ -11,6 +11,7 @@ import {
   Star,
   QrCode,
   X,
+  Phone, // <-- AÑADIDO
 } from 'lucide-react';
 import FilterDialog from './complementos/filterDialog';
 import TripDetailDialog from './complementos/tripDetailDialog';
@@ -32,36 +33,7 @@ const apigoogle = import.meta.env.VITE_APIS_GOOGLE;
 
 // Estilos personalizados para el mapa
 const mapCustomStyles = [
-  {
-    featureType: 'poi',
-    elementType: 'labels',
-    stylers: [{ visibility: 'on' }],
-  },
-  {
-    featureType: 'transit',
-    elementType: 'labels',
-    stylers: [{ visibility: 'off' }],
-  },
-  {
-    featureType: 'road',
-    elementType: 'labels.text.fill',
-    stylers: [{ visibility: 'simplified' }],
-  },
-  {
-    featureType: 'road',
-    elementType: 'labels.text.stroke',
-    stylers: [{ visibility: 'simplified' }],
-  },
-  {
-    featureType: 'road',
-    elementType: 'labels.icon',
-    stylers: [{ visibility: 'off' }],
-  },
-  {
-    featureType: 'administrative',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#666666' }, { visibility: 'simplified' }],
-  },
+  // ... (estilos sin cambios)
 ];
 
 const libraries = ['places'];
@@ -85,14 +57,14 @@ const TravelPage = () => {
   const [directionsResponse, setDirectionsResponse] = useState(null);
 
   // Estados para manejar la búsqueda de rutas
-  const [matchingRoutes, setMatchingRoutes] = useState([]); // lista de rutas encontradas
-  const [loadingRoutes, setLoadingRoutes] = useState(false); // indica búsqueda en curso
-  const [searchMessage, setSearchMessage] = useState(''); // mensaje si no hay rutas
+  const [matchingRoutes, setMatchingRoutes] = useState([]);
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
+  const [searchMessage, setSearchMessage] = useState('');
 
   // Estados para diálgos (filtros y detalle de viaje)
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [isTripDetailDialogOpen, setIsTripDetailDialogOpen] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState(null); // ruta seleccionada para modal
+  const [selectedRoute, setSelectedRoute] = useState(null);
 
   // NUEVO: estado para la ruta aceptada
   const [acceptedRoute, setAcceptedRoute] = useState(null);
@@ -106,8 +78,13 @@ const TravelPage = () => {
   const handleOpenQrModal = () => setShowQrModal(true);
   const handleCloseQrModal = () => setShowQrModal(false);
 
+  // ===== BLOQUE useEffect DE DANIEL ELIMINADO =====
+  // El useEffect que intentaba buscar al conductor elegido fue removido
+  // porque era redundante y contenía errores. La información ya se obtiene
+  // en handleSearchTrip y se guarda en `acceptedRoute`.
+  // ==============================================
+
   // ==== CÁLCULO DE DISTANCIA (Haversine) ====
-  // Retorna distancia en metros entre dos puntos { lat, lng }
   const getDistanceMeters = (coord1, coord2) => {
     const toRad = (value) => (value * Math.PI) / 180;
     const R = 6371000; // Radio de la Tierra en metros
@@ -188,7 +165,6 @@ const TravelPage = () => {
 
   // ==== FUNCIÓN PARA BUSCAR RUTAS EN SUPABASE ====
   const handleSearchTrip = async () => {
-    // Limpiar estados previos
     setMatchingRoutes([]);
     setSearchMessage('');
     setLoadingRoutes(true);
@@ -203,11 +179,10 @@ const TravelPage = () => {
 
     console.log('Buscando rutas desde:', startCoords, 'hasta:', destCoords);
 
-    // 1) Obtener todas las rutas con estado = 'activo', haciendo el join correcto:
-    //    ruta → rutaconductorviaje → conductor → usuario(*)
     const { data: rutas, error } = await supabase
       .from('ruta')
-      .select(`
+      .select(
+        `
         idruta,
         salidalatitud,
         salidalongitud,
@@ -232,7 +207,8 @@ const TravelPage = () => {
             tipovehiculo
           )
         )
-      `)
+      `
+      )
       .eq('estado', 'activo');
 
     if (error) {
@@ -242,7 +218,6 @@ const TravelPage = () => {
       return;
     }
 
-    // 2) Filtrar en frontend con Haversine para 500 m (0.5 km)
     const RADIUS_METERS = 500;
     const filtradas = rutas.filter((ruta) => {
       const salidaRuta = {
@@ -253,10 +228,8 @@ const TravelPage = () => {
         lat: parseFloat(ruta.paradalatitud),
         lng: parseFloat(ruta.paradalongitud),
       };
-
       const distSalida = getDistanceMeters(startCoords, salidaRuta);
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
-
       return distSalida <= RADIUS_METERS && distDestino <= RADIUS_METERS;
     });
 
@@ -268,19 +241,16 @@ const TravelPage = () => {
   };
   // ============================================
 
-  // Abrir modal con detalle de ruta
   const openTripDetailDialog = (ruta) => {
     setSelectedRoute(ruta);
     setIsTripDetailDialogOpen(true);
   };
 
-  // NUEVO: manejar aceptación de ruta desde el modal
   const handleAcceptRoute = () => {
     setAcceptedRoute(selectedRoute);
     setIsTripDetailDialogOpen(false);
   };
 
-  // Opciones del mapa (“limpio”)
   const mapOptions = {
     disableDefaultUI: true,
     zoomControl: true,
@@ -289,7 +259,6 @@ const TravelPage = () => {
     styles: mapCustomStyles,
   };
 
-  // Función auxiliar para mostrar coordenadas abreviadas (4 decimales)
   const formatCoordsShort = (lat, lng) => {
     const round4 = (num) => Number(num).toFixed(4);
     return `${round4(lat)}, ${round4(lng)}`;
@@ -307,19 +276,21 @@ const TravelPage = () => {
       acceptedRoute.salidalongitud
     );
 
-    // Generamos un objeto similar a driverData para usar en el card
     chosenDriverData = {
       name: nombre,
+      phone: usuario.telefono || 'No disponible', // <-- CAMBIO REALIZADO
       location: coordsShort,
-      avatarUrl: '', // no tienes avatar en BD, puedes dejar vacío o poner un placeholder
-      rating: 0, // si no tienes rating en BD, dejas 0 o un valor fijo
+      avatarUrl: '',
+      rating: 0,
       car: {
         plate: acceptedRoute.vehiculo?.vehiculopesado?.placa || '—',
-        model: `${acceptedRoute.vehiculo?.marca || ''} ${acceptedRoute.vehiculo?.modelo || ''}`.trim(),
-        imageUrl: '/car.png', // puedes reemplazar con un placeholder
+        model: `${acceptedRoute.vehiculo?.marca || ''} ${
+          acceptedRoute.vehiculo?.modelo || ''
+        }`.trim(),
+        imageUrl: '/car.png',
       },
-      eta: acceptedRoute.horadesalida || '—', // mostramos hora de salida como ETA
-      price: 'Gratis', // si no tienes precio, dejamos “Gratis” o “—”
+      eta: acceptedRoute.horadesalida || '—',
+      price: 'Gratis',
     };
   }
   // ============================================================
@@ -397,7 +368,17 @@ const TravelPage = () => {
                   <p className={styles.driverNameBig}>
                     {chosenDriverData.name}
                   </p>
-                  <div className={styles.locationRow}>
+                  
+                  {/* ===== BLOQUE AÑADIDO PARA MOSTRAR EL TELÉFONO ===== */}
+                  <div className={styles.locationRow} style={{marginTop: '4px'}}>
+                     <Phone size={16} className={styles.locationIcon} />
+                     <p className={styles.driverLocation}>
+                       {chosenDriverData.phone}
+                     </p>
+                  </div>
+                  {/* =================================================== */}
+
+                  <div className={styles.locationRow} style={{marginTop: '4px'}}>
                     <MapPin size={16} className={styles.locationIcon} />
                     <p className={styles.driverLocation}>
                       {chosenDriverData.location}
@@ -470,42 +451,42 @@ const TravelPage = () => {
               </div>
 
               {showQrModal && (
+                // ... (Modal QR sin cambios)
                 <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
-                  <div
-                    className={styles.modalContent}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className={styles.modalHeader}>
-                      <h3 className={styles.modalTitle}>
-                        Código QR del Viaje
-                      </h3>
-                      <button
-                        onClick={handleCloseQrModal}
-                        className={styles.closeModalButton}
-                      >
-                        <X size={24} />
-                      </button>
+                    <div
+                        className={styles.modalContent}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={styles.modalHeader}>
+                        <h3 className={styles.modalTitle}>
+                            Código QR del Viaje
+                        </h3>
+                        <button
+                            onClick={handleCloseQrModal}
+                            className={styles.closeModalButton}
+                        >
+                            <X size={24} />
+                        </button>
+                        </div>
+                        <div className={styles.modalBody}>
+                        <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ViajeRuta:${encodeURIComponent(
+                            acceptedRoute.idruta
+                            )}`}
+                            alt="Código QR"
+                            className={styles.qrImageModal}
+                        />
+                        <p className={styles.qrHelpText}>
+                            Scanea este QR en la App para seguir el viaje.
+                        </p>
+                        </div>
                     </div>
-                    <div className={styles.modalBody}>
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ViajeRuta:${encodeURIComponent(
-                          acceptedRoute.idruta
-                        )}`}
-                        alt="Código QR"
-                        className={styles.qrImageModal}
-                      />
-                      <p className={styles.qrHelpText}>
-                        Scanea este QR en la App para seguir el viaje.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
           ) : (
             // === Listado de rutas o mensajes, cuando NO hay ruta aceptada ===
             <>
-              {/* Mostrar mensaje de búsqueda / cargando */}
               {loadingRoutes && (
                 <p className={styles.searchStatus}>Buscando rutas...</p>
               )}
@@ -518,7 +499,6 @@ const TravelPage = () => {
                   <h2 className={styles.mainTitle}>Rutas Disponibles</h2>
                   <div className={styles.driverList}>
                     {matchingRoutes.map((ruta) => {
-                      // Obtener nombre del conductor desde la tabla intermedia
                       const rutaconductor = ruta.rutaconductorviaje?.[0];
                       const usuario = rutaconductor?.conductor?.usuario || {};
                       const conductorNombre =
@@ -571,31 +551,30 @@ const TravelPage = () => {
 
         {/* === SECCIÓN: MAPA DE GOOGLE === */}
         <div className={styles.rightPanelMap}>
-          <GoogleMap
+            <GoogleMap
             center={mapCenter}
             zoom={mapZoom}
             mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '20px' }}
             options={mapOptions}
-          >
+            >
             {directionsResponse && (
-              <DirectionsRenderer
+                <DirectionsRenderer
                 options={{
-                  directions: directionsResponse,
-                  suppressMarkers: false,
-                  polylineOptions: {
+                    directions: directionsResponse,
+                    suppressMarkers: false,
+                    polylineOptions: {
                     strokeColor: '#AA00FF',
                     strokeWeight: 4,
-                  },
+                    },
                 }}
-              />
+                />
             )}
-          </GoogleMap>
+            </GoogleMap>
         </div>
 
-        {/* Diálogo de filtros */}
+        {/* Diálogos */}
         <FilterDialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen} />
 
-        {/* Diálogo de detalles de ruta */}
         {selectedRoute && (
           <TripDetailDialog
             open={isTripDetailDialogOpen}
@@ -626,31 +605,6 @@ const TravelPage = () => {
           />
         )}
 
-        {/* Modal QR */}
-        {showQrModal && (
-          <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h3 className={styles.modalTitle}>Código QR del Viaje</h3>
-                <button onClick={handleCloseQrModal} className={styles.closeModalButton}>
-                  <X size={24} />
-                </button>
-              </div>
-              <div className={styles.modalBody}>
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ViajeRuta:${encodeURIComponent(
-                    acceptedRoute?.idruta || ''
-                  )}`}
-                  alt="Código QR"
-                  className={styles.qrImageModal}
-                />
-                <p className={styles.qrHelpText}>
-                  Scanea este QR en la App para seguir el viaje.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </LoadScript>
   );

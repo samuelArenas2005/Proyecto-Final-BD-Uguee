@@ -85,7 +85,7 @@ useEffect(() => {
 
     // Si el rol es admin, solo verifica el correo
     if (role === 'admin') {
-        if (user.id !== '16057514-7e1c-4fa5-add2-1e778901f7c8') {
+        if (user.id !== 'bfe65c8d-48f5-4186-b01f-d7e9795f6047') {
          setErrorMsg('Acceso denegado.');
          await supabase.auth.signOut();
          return;
