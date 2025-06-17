@@ -99,13 +99,10 @@ useEffect(() => {
     let tableName;
     let idName;
     let estado;
-    if (role === 'pasajero') {tableName = 'pasajero'; idName = 'idusuario'; estado = 'estadopasajero'}
-    else if (role === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'; estado = 'estado'}
-    else if  (role === 'conductor') {tableName = 'conductor'; idName = 'idusuario'; estado = 'estadoconductor'}
-    else if (role === 'monitor') {tableName = 'administrador'; idName = 'idadmin'}
-    else if(role === 'admin') {console.log('entre aca ')
-      return
-    }
+    if (roleActual === 'pasajero') {tableName = 'pasajero'; idName = 'idusuario'; estado = 'estadopasajero'}
+    else if (roleActual === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'; estado = 'estado'}
+    else if  (roleActual === 'conductor') {tableName = 'conductor'; idName = 'idusuario'; estado = 'estadoconductor'}
+    else if (roleActual === 'monitor') {tableName = 'administrador'; idName = 'idadmin'; estado = 'estado'}
     else {
       setErrorMsg('Rol inválido en la URL');
       await supabase.auth.signOut();
@@ -118,11 +115,13 @@ useEffect(() => {
       .eq(idName, user.id)
       .single();
 
+
     if (roleError || !roleData) {
-      setErrorMsg(`No tienes permisos de ${role}`);
+      setErrorMsg(`No tienes permisos de ${roleActual}`);
       await supabase.auth.signOut();
       return;
     }
+
 
     const { data: estadoData, error: estadoError } = await supabase
       .from(tableName)
@@ -131,7 +130,8 @@ useEffect(() => {
       .eq(estado, 'activo')
       .single();
 
-    if (estadoError || !estadoData) {
+    if (estadoError || (!estadoData && roleActual != 'monitor') ) {
+      console.log(estadoError)
       setErrorMsg(`Tu usuario aún no ha sido aceptado, comunicate con tu institución`);
       await supabase.auth.signOut();
       return;

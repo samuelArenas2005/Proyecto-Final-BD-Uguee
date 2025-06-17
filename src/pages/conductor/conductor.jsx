@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   MapPin,
   Clock,
   SlidersHorizontal,
-  Users, // Icono para asientos
+  Users,
 } from 'lucide-react';
 import {
   GoogleMap,
@@ -11,135 +12,218 @@ import {
   Autocomplete,
   DirectionsRenderer,
 } from '@react-google-maps/api';
-
-// ==== IMPORTACIÓN DE SUPABASE ====
-import { supabase } from '../../supabaseClient.js'; // Ajusta la ruta si es necesario
+import { supabase } from '../../supabaseClient.js';
 
 import styles from './conductor.module.css';
 import RutaAnteriorCard from './componentes/RutaAnteriorCard';
 import SuccessModal from './componentes/succes';
 import FilterDialog from '../pasajero/complementos/filterDialog';
-import wave from '/wave.svg'; // Ruta correcta para assets en /public en Vite
+import wave from '/wave.svg';
 
-// ==== CONFIGURACIÓN DE GOOGLE MAPS ====
 const apigoogle = import.meta.env.VITE_APIS_GOOGLE;
-
 const libraries = ['places'];
-
-// Estilos para un mapa limpio
 const mapCustomStyles = [
   { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
   { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
 ];
+const DEFAULT_CENTER = { lat: 3.3745, lng: -76.5308 };
 
-const DEFAULT_CENTER = { lat: 3.3745, lng: -76.5308 }; // Univalle Cali
+// --- COMPONENTE DE CARGA ---
+const LoadingScreen = () => (
+  <div className={styles.loadingScreen}>
+    <h2>Verificando rutas activas...</h2>
+    {/* Podrías agregar un spinner aquí */}
+  </div>
+);
+
 
 const ConductorPage = () => {
-  // Estados para inputs y coordenadas
+  const navigate = useNavigate();
+  // --- NUEVO ESTADO PARA VERIFICACIÓN INICIAL ---
+  const [isCheckingForActiveRoute, setIsCheckingForActiveRoute] = useState(true);
+
   const [startPoint, setStartPoint] = useState('');
   const [destination, setDestination] = useState('');
   const [startCoords, setStartCoords] = useState(null);
   const [destCoords, setDestCoords] = useState(null);
-  const [asientos, setAsientos] = useState(4); // Nuevo estado para asientos disponibles
+  const [asientos, setAsientos] = useState(1);
   const [dateTime, setDateTime] = useState(() => {
     const now = new Date();
-    now.setHours(now.getHours() + 1); // Pone la hora por defecto 1 hora en el futuro
+    now.setHours(now.getHours() + 1);
     now.setMinutes(0);
     return now.toISOString().slice(0, 16);
   });
 
-  // Estados del mapa y de la ruta
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [mapZoom, setMapZoom] = useState(14);
   const [directionsResponse, setDirectionsResponse] = useState(null);
-  const [distance, setDistance] = useState(null); // Estado para guardar la distancia en metros
+  const [distance, setDistance] = useState(null);
+  const [duration, setDuration] = useState(null);
 
-  // Estados de UI
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(false); // Estado para deshabilitar el botón al enviar
+  const [loading, setLoading] = useState(false);
+  
+  const [maxAsientosVehiculo, setMaxAsientosVehiculo] = useState(null);
+  const [isVehicleInfoLoading, setIsVehicleInfoLoading] = useState(true);
 
-  // Referencias para Autocomplete
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
+  
+  // --- NUEVO USEEFFECT PARA VERIFICAR RUTA ACTIVA AL CARGAR ---
+  useEffect(() => {
+    const checkForActiveRoute = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
 
-  // ==== HANDLERS DE AUTOCOMPLETE ====
+        if (user) {
+          // Busca una relación que pertenezca al conductor y cuya ruta interna tenga estado 'activo'
+          const { data: activeRouteData, error } = await supabase
+            .from('rutaconductorviaje')
+            .select('idruta, ruta!inner(estado)') // !inner asegura que solo traiga registros si hay una ruta coincidente
+            .eq('idconductor', user.id)
+            .eq('ruta.estado', 'activo')
+            .maybeSingle(); // .maybeSingle() devuelve un solo registro o null, sin lanzar error si no encuentra nada.
+
+          if (error) {
+            console.error('Error verificando ruta activa:', error);
+          }
+
+          // Si se encuentra una ruta activa, redirige al usuario a la página de información del viaje
+          if (activeRouteData && activeRouteData.idruta) {
+            // El usuario ya tiene una ruta activa, lo redirigimos a la página de esa ruta.
+            // Asumo que la página de información del viaje es TravelInfoPage, montada en esta URL.
+            navigate(`/conductor/viaje/${activeRouteData.idruta}`);
+          } else {
+            // No hay ruta activa, permite que la página se cargue para crear una nueva.
+            setIsCheckingForActiveRoute(false);
+          }
+        } else {
+          // No hay usuario, permite que la página cargue.
+          // Otras lógicas (como guardias de ruta) deberían manejar el caso de usuario no autenticado.
+          setIsCheckingForActiveRoute(false);
+        }
+      } catch (e) {
+        console.error("Error en la verificación de ruta:", e);
+        setIsCheckingForActiveRoute(false); // En caso de cualquier error, permite que la página cargue
+      }
+    };
+
+    checkForActiveRoute();
+  }, [navigate]); // Se agrega navigate a las dependencias
+
+
+  useEffect(() => {
+    const fetchVehicleInfo = async () => {
+      //... (el resto del código de este useEffect no cambia)
+      setIsVehicleInfoLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            throw new Error("Usuario no autenticado.");
+        }
+        const { data: conductorData, error } = await supabase
+          .from('conductor')
+          .select('vehiculo ( numeroasientos )')
+          .eq('idusuario', user.id)
+          .single();
+        if (error) throw error;
+        if (conductorData && conductorData.vehiculo) {
+          const capacidadPasajeros = conductorData.vehiculo.numeroasientos - 1;
+          setMaxAsientosVehiculo(capacidadPasajeros > 0 ? capacidadPasajeros : 0);
+          if (asientos > capacidadPasajeros) {
+              setAsientos(capacidadPasajeros);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching vehicle info:', error.message);
+        setMaxAsientosVehiculo(0);
+      } finally {
+        setIsVehicleInfoLoading(false);
+      }
+    };
+    fetchVehicleInfo();
+  }, [asientos]);
+
+  const handleAsientosChange = (e) => {
+    let value = parseInt(e.target.value, 10);
+    if (isNaN(value) || value < 1) {
+        value = 1;
+    }
+    if (maxAsientosVehiculo !== null && value > maxAsientosVehiculo) {
+        value = maxAsientosVehiculo;
+    }
+    setAsientos(value);
+  };
+
   const onLoadStart = (autocomplete) => (autoStartRef.current = autocomplete);
   const onPlaceChangedStart = () => {
+    //... (código sin cambios)
     if (autoStartRef.current) {
-      const place = autoStartRef.current.getPlace();
-      if (place.geometry) {
-        const location = place.geometry.location;
-        const coords = { lat: location.lat(), lng: location.lng() };
-        setStartPoint(place.formatted_address);
-        setStartCoords(coords);
-        setMapCenter(coords);
-        setMapZoom(16);
-      }
+        const place = autoStartRef.current.getPlace();
+        if (place.geometry) {
+            const location = place.geometry.location;
+            const coords = { lat: location.lat(), lng: location.lng() };
+            setStartPoint(place.formatted_address);
+            setStartCoords(coords);
+            setMapCenter(coords);
+            setMapZoom(16);
+        }
     }
   };
 
   const onLoadDest = (autocomplete) => (autoDestRef.current = autocomplete);
   const onPlaceChangedDest = () => {
+    //... (código sin cambios)
     if (autoDestRef.current) {
-      const place = autoDestRef.current.getPlace();
-      if (place.geometry) {
-        const location = place.geometry.location;
-        const coords = { lat: location.lat(), lng: location.lng() };
-        setDestination(place.formatted_address);
-        setDestCoords(coords);
-      }
+        const place = autoDestRef.current.getPlace();
+        if (place.geometry) {
+            const location = place.geometry.location;
+            const coords = { lat: location.lat(), lng: location.lng() };
+            setDestination(place.formatted_address);
+            setDestCoords(coords);
+        }
     }
   };
 
-  // ==== EFECTO PARA CALCULAR LA RUTA EN EL MAPA ====
   useEffect(() => {
+    //... (código sin cambios)
     if (startCoords && destCoords) {
-      const directionsService = new window.google.maps.DirectionsService();
-      directionsService.route(
-        {
-          origin: startCoords,
-          destination: destCoords,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-        },
-        (result, status) => {
-          if (status === 'OK' && result) {
-            setDirectionsResponse(result);
-            // Extraer y guardar la distancia (en metros)
-            const routeDistance = result.routes[0].legs[0].distance.value;
-            setDistance(routeDistance);
-          } else {
-            console.error(`Error fetching directions ${result}`);
-          }
-        }
-      );
+        const directionsService = new window.google.maps.DirectionsService();
+        directionsService.route(
+            {
+                origin: startCoords,
+                destination: destCoords,
+                travelMode: window.google.maps.TravelMode.DRIVING,
+            },
+            (result, status) => {
+                if (status === 'OK' && result) {
+                    setDirectionsResponse(result);
+                    const leg = result.routes[0].legs[0];
+                    setDistance(leg.distance.value);
+                    setDuration(leg.duration.value);
+                } else {
+                    console.error(`Error fetching directions ${result}`);
+                    setDuration(null);
+                }
+            }
+        );
     }
   }, [startCoords, destCoords]);
 
-  // ==== FUNCIÓN PARA ESTABLECER RUTA EN SUPABASE ====
   const handleEstablecerRuta = async () => {
-    if (!startCoords || !destCoords || !dateTime || asientos <= 0) {
-      alert('Por favor, completa todos los campos: partida, destino, fecha/hora y asientos.');
+    //... (código de la función sin cambios)
+    if (!startCoords || !destCoords || !dateTime || asientos <= 0 || !duration) {
+      alert('Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente.');
       return;
     }
-
     setLoading(true);
-
     try {
-      // 1. Obtener el usuario autenticado
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error('Usuario no autenticado.');
-
-      // 2. Obtener el idvehiculo del conductor
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuario no autenticado.');
       const { data: conductorData, error: conductorError } = await supabase
-        .from('conductor')
-        .select('idvehiculo')
-        .eq('idusuario', user.id)
-        .single();
-
+          .from('conductor').select('idvehiculo').eq('idusuario', user.id).single();
       if (conductorError || !conductorData) throw new Error('No se pudo encontrar el vehículo del conductor.');
-
-      // 3. Preparar los datos para la tabla 'ruta'
       const fechaHora = new Date(dateTime);
       const nuevaRuta = {
         idvehiculo: conductorData.idvehiculo,
@@ -147,162 +231,127 @@ const ConductorPage = () => {
         salidalongitud: startCoords.lng,
         paradalatitud: destCoords.lat,
         paradalongitud: destCoords.lng,
-        distancia: distance, // Distancia en metros calculada por Google Maps
-        fecha: fechaHora.toISOString().split('T')[0], // Formato YYYY-MM-DD
-        horadesalida: fechaHora.toTimeString().split(' ')[0], // Formato HH:MM:SS
+        distancia: distance / 1000,
+        fecha: fechaHora.toISOString().split('T')[0],
+        horadesalida: fechaHora.toTimeString().split(' ')[0],
         asientosdisponibles: parseInt(asientos, 10),
-        tipoderuta: 'Diaria', // Valor por defecto o puedes añadir un input para esto
-        estado: 'activo', // Por defecto 'activo'
+        tipoderuta: 'Diaria',
+        estado: 'activo',
       };
-
-      // 4. Insertar la nueva ruta y obtener su ID
       const { data: rutaInsertada, error: rutaError } = await supabase
         .from('ruta')
         .insert(nuevaRuta)
         .select('idruta')
         .single();
-
-      if (rutaError || !rutaInsertada) throw new Error('Error al crear la ruta.');
-
-      // 5. Crear la relación en 'rutaconductorviaje'
+      if (rutaError || !rutaInsertada) throw new Error(`Error al crear la ruta: ${rutaError?.message}`);
+      const duracionEnHoras = duration / 3600;
+      const nuevoViaje = {
+        tiempodesalida: fechaHora.toISOString(),
+        tiempodellegada: null,
+        duracionviajehoras: duracionEnHoras,
+        estadodelviaje: 'pendiente',
+        ubicacionactuallatitud: null,
+        ubicacionactuallongitud: null,
+      };
+      const { data: viajeInsertado, error: viajeError } = await supabase
+        .from('viaje')
+        .insert(nuevoViaje)
+        .select('idviaje')
+        .single();
+      if (viajeError || !viajeInsertado) throw new Error(`Error al crear el viaje: ${viajeError?.message}`);
       const nuevaRelacion = {
         idruta: rutaInsertada.idruta,
-        idconductor: user.id, // Es el id del usuario autenticado
-        idviaje: null, // Default NULL como se solicitó
+        idconductor: user.id,
+        idviaje: viajeInsertado.idviaje,
       };
-
-      const { error: relacionError } = await supabase
-        .from('rutaconductorviaje')
-        .insert(nuevaRelacion);
-
-      if (relacionError) throw new Error('Error al asociar la ruta al conductor.');
-
-      // 6. Éxito: mostrar modal y limpiar formulario
+      const { error: relacionError } = await supabase.from('rutaconductorviaje').insert(nuevaRelacion);
+      if (relacionError) throw new Error(`Error al asociar la ruta al conductor: ${relacionError?.message}`);
       setShowSuccessModal(true);
-      setStartPoint('');
-      setDestination('');
-      setStartCoords(null);
-      setDestCoords(null);
-      setDirectionsResponse(null);
-
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate(`/conductor/viaje/${rutaInsertada.idruta}`);
+      }, 2000);
     } catch (error) {
-      console.error('Error al establecer la ruta:', error.message);
+      console.error('Error al establecer la ruta y el viaje:', error.message);
       alert(`Ocurrió un error: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCloseModal = () => setShowSuccessModal(false);
-
-  // Datos mock para rutas anteriores (sin cambios)
   const rutasAnterioresData = [
     { id: 1, title: 'Ruta 1', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Lunes, 10:00 am' },
     { id: 2, title: 'Ruta 2', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Martes, 8:00 am' },
   ];
 
+  // --- RENDERIZADO CONDICIONAL ---
+  if (isCheckingForActiveRoute) {
+    return <LoadingScreen />;
+  }
+
   return (
     <LoadScript googleMapsApiKey={apigoogle} libraries={libraries}>
       <div className={styles.pageContainer}>
+        {/* ... (resto del JSX sin cambios) ... */}
         <div className={styles.topSectionWave}>
-          <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
-          <div className={styles.contentWrapper}>
-            <div className={styles.routeSetupSection}>
-              <h2 className={styles.greeting}>¡Hola Miguel Andrade! Establece tu ruta de hoy</h2>
-              <div className={styles.inputGroup}>
-                {/* AUTOCOMPLETE: Punto de partida */}
-                <div className={styles.inputWrapper}>
-                  <MapPin className={styles.inputIcon} size={20} />
-                  <Autocomplete onLoad={onLoadStart} onPlaceChanged={onPlaceChangedStart} fields={['formatted_address', 'geometry']}>
-                    <input
-                      type="text"
-                      placeholder="Punto de partida"
-                      value={startPoint}
-                      onChange={(e) => setStartPoint(e.target.value)}
-                      className={styles.inputField}
-                    />
-                  </Autocomplete>
+            <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
+            <div className={styles.contentWrapper}>
+                <div className={styles.routeSetupSection}>
+                    <h2 className={styles.greeting}>¡Hola Miguel Andrade! Establece tu ruta de hoy</h2>
+                    <div className={styles.inputGroup}>
+                        <div className={styles.inputWrapper}>
+                            <MapPin className={styles.inputIcon} size={20} />
+                            <Autocomplete onLoad={onLoadStart} onPlaceChanged={onPlaceChangedStart} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
+                                <input type="text" placeholder="Punto de partida" value={startPoint} onChange={(e) => setStartPoint(e.target.value)} className={styles.inputField} />
+                            </Autocomplete>
+                        </div>
+                        <div className={styles.inputWrapper}>
+                            <MapPin className={styles.inputIcon} size={20} />
+                            <Autocomplete onLoad={onLoadDest} onPlaceChanged={onPlaceChangedDest} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
+                                <input type="text" placeholder="Destino" value={destination} onChange={(e) => setDestination(e.target.value)} className={styles.inputField} />
+                            </Autocomplete>
+                        </div>
+                        <div className={styles.inputWrapper}>
+                            <Clock className={styles.inputIcon} size={20} />
+                            <input type="datetime-local" value={dateTime} onChange={(e) => setDateTime(e.target.value)} className={styles.inputField} />
+                        </div>
+                        <div className={styles.inputWrapper}>
+                            <Users className={styles.inputIcon} size={20} />
+                            <input
+                                type="number"
+                                value={asientos}
+                                onChange={handleAsientosChange}
+                                className={styles.inputField}
+                                min="1"
+                                max={maxAsientosVehiculo}
+                                disabled={isVehicleInfoLoading}
+                                title={isVehicleInfoLoading ? "Cargando capacidad del vehículo..." : `Máximo ${maxAsientosVehiculo} asientos disponibles`}
+                            />
+                        </div>
+                    </div>
+                    <div className={styles.buttonGroup}>
+                        <button className={styles.submitButton} onClick={handleEstablecerRuta} disabled={loading || isVehicleInfoLoading}>
+                            {loading ? 'Estableciendo...' : 'Establecer ruta'}
+                        </button>
+                        <button className={styles.filterButton} onClick={() => setIsFilterDialogOpen(true)} aria-label="Filtros">
+                            <SlidersHorizontal size={20} />
+                        </button>
+                    </div>
                 </div>
-                {/* AUTOCOMPLETE: Destino */}
-                <div className={styles.inputWrapper}>
-                  <MapPin className={styles.inputIcon} size={20} />
-                  <Autocomplete onLoad={onLoadDest} onPlaceChanged={onPlaceChangedDest} fields={['formatted_address', 'geometry']}>
-                    <input
-                      type="text"
-                      placeholder="Destino"
-                      value={destination}
-                      onChange={(e) => setDestination(e.target.value)}
-                      className={styles.inputField}
-                    />
-                  </Autocomplete>
+                <div className={styles.mapSection}>
+                    <GoogleMap mapContainerClassName={styles.mapContainer} center={mapCenter} zoom={mapZoom} options={{ styles: mapCustomStyles, disableDefaultUI: true, zoomControl: true }}>
+                        {directionsResponse && (<DirectionsRenderer options={{ directions: directionsResponse, suppressMarkers: false, polylineOptions: { strokeColor: '#AA00FF', strokeWeight: 5 } }} />)}
+                    </GoogleMap>
                 </div>
-                {/* INPUT: Fecha y Hora */}
-                <div className={styles.inputWrapper}>
-                  <Clock className={styles.inputIcon} size={20} />
-                  <input
-                    type="datetime-local"
-                    value={dateTime}
-                    onChange={(e) => setDateTime(e.target.value)}
-                    className={styles.inputField}
-                  />
-                </div>
-                {/* INPUT: Asientos Disponibles */}
-                <div className={styles.inputWrapper}>
-                  <Users className={styles.inputIcon} size={20} />
-                  <input
-                    type="number"
-                    value={asientos}
-                    onChange={(e) => setAsientos(e.target.value)}
-                    placeholder="Asientos disponibles"
-                    className={styles.inputField}
-                    min="1"
-                  />
-                </div>
-              </div>
-              <div className={styles.buttonGroup}>
-                <button className={styles.submitButton} onClick={handleEstablecerRuta} disabled={loading}>
-                  {loading ? 'Estableciendo...' : 'Establecer ruta'}
-                </button>
-                <button className={styles.filterButton} onClick={() => setIsFilterDialogOpen(true)} aria-label="Filtros">
-                  <SlidersHorizontal size={20} />
-                </button>
-              </div>
             </div>
-
-            <div className={styles.mapSection}>
-              <GoogleMap
-                mapContainerClassName={styles.mapContainer}
-                center={mapCenter}
-                zoom={mapZoom}
-                options={{ styles: mapCustomStyles, disableDefaultUI: true, zoomControl: true }}
-              >
-                {directionsResponse && (
-                  <DirectionsRenderer
-                    options={{
-                      directions: directionsResponse,
-                      suppressMarkers: false, // Google pone los marcadores A y B
-                      polylineOptions: {
-                        strokeColor: '#AA00FF',
-                        strokeWeight: 5,
-                      },
-                    }}
-                  />
-                )}
-              </GoogleMap>
-            </div>
-          </div>
         </div>
-
         <div className={styles.previousRoutesSection}>
-          <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
-          <div className={styles.cardsGrid}>
-            {rutasAnterioresData.map((ruta) => (
-              <RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { /* Lógica si se reutiliza una ruta */ }} />
-            ))}
-          </div>
+            <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
+            <div className={styles.cardsGrid}>
+                {rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))}
+            </div>
         </div>
-
-        <SuccessModal isOpen={showSuccessModal} onClose={handleCloseModal} />
+        <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
         <FilterDialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen} />
       </div>
     </LoadScript>

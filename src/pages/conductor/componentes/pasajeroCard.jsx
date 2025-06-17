@@ -1,7 +1,7 @@
 
 import React from 'react';
 import styles from './pasajeroCard.module.css';
-import { MapPin, Clock, UserCircle2 } from 'lucide-react'; // Agregado UserCircle2
+import { MapPin, Clock, UserCircle2,User2, Info} from 'lucide-react'; // Agregado UserCircle2
 
 const PassengerCard = ({ passenger }) => {
   return (
@@ -18,23 +18,19 @@ const PassengerCard = ({ passenger }) => {
         <p className={styles.passengerName}>{passenger.name}</p>
         <div className={styles.locationDetails}>
           <div className={styles.locationItem}>
-            <MapPin size={16} className={styles.locationIcon} />
-            <span>{passenger.departure}</span>
+            <User2 size={16} className={styles.locationIcon} />
+            <span>{passenger.estatuto}</span>
           </div>
-          <div className={styles.locationItem}>
-            <MapPin size={16} className={styles.locationIcon} />
-            <span>{passenger.destination}</span>
-          </div>
+          
         </div>
       </div>
 
       <div className={styles.moreInfo}>
         <p className={styles.moreInfoTitle}>Mas info:</p>
-        <div className={styles.arrivalTimeLine}>
-          <Clock size={16} className={styles.clockIcon} />
-          <span className={styles.arrivalLabel}>Hora de llegada</span>
+        <div className={styles.locationItem}>
+            <Info size={16} className={styles.locationIcon} />
+            <span>{passenger.codigo}</span>
         </div>
-        <p className={styles.arrivalTimeValue}>{passenger.arrivalTime}</p>
       </div>
     </div>
   );
