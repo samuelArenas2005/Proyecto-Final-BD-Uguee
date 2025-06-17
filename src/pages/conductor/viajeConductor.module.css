@@ -1,9 +1,9 @@
-/* src/pages/TravelInfoPage/TravelInfoPage.module.css */
+/* src/pages/TravelInfoPage/viajeConductor.module.css */
 .pageContainer {
-  background-color: #f4f6f8; /* Un fondo general suave */
+  background-color: #f4f6f8;
   min-height: 100vh;
   position: relative;
-  padding-bottom: 80px; /* Espacio para el botón de cancelar flotante o al final */
+  padding-bottom: 80px;
 }
 
 .waveBg {
@@ -11,16 +11,10 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 220px; /* Ajusta según tu imagen de onda */
-  object-fit: cover; /* o 'fill' o 'contain' según tu imagen */
+  height: 220px;
+  object-fit: cover;
   z-index: 0;
-  /* Si tu imagen 'wave' ya tiene el color morado, esto no es necesario. */
-  /* Si es un SVG blanco, puedes usar: filter: drop-shadow(0 0 0 #5A2E98); */
-  /* O si es un PNG simple y quieres un fondo morado detrás: */
-  /* background-color: #5A2E98; */ 
-  /* Esto asume que la imagen es la onda morada en sí misma. */
 }
-
 
 .mainContent {
   position: relative;
@@ -28,7 +22,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  padding-top: 60px; /* Espacio para que no se solape con la parte superior de la onda */
+  padding-top: 60px;
 }
 
 .topRow {
@@ -42,8 +36,8 @@
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-  flex: 1; /* Ocupa el espacio disponible */
-  min-width: 300px; /* Ancho mínimo */
+  flex: 1;
+  min-width: 300px;
 }
 
 .sectionTitle {
@@ -63,12 +57,13 @@
 }
 
 .infoIcon {
-  color: #5A2E98; /* Morado */
+  color: #5A2E98;
   margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .startButton {
-  background-color: #5A2E98; /* Morado principal */
+  background-color: #5A2E98;
   color: white;
   border: none;
   padding: 12px 25px;
@@ -82,11 +77,11 @@
 }
 
 .startButton:hover {
-  background-color: #4a257d; /* Morado más oscuro */
+  background-color: #4a257d;
 }
 
 .qrAndMapSection {
-  flex: 1.8; /* Ocupa más espacio */
+  flex: 1.8;
   display: flex;
   gap: 25px;
 }
@@ -100,7 +95,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-width: 250px; /* Ancho mínimo */
+  min-width: 250px;
   justify-content: center;
 }
 
@@ -112,9 +107,9 @@
   margin-bottom: 15px;
 }
 
-.qrImageContainer {
-  margin-bottom: 15px;
-  /* Estilos para el contenedor del QR si es necesario */
+.qrImageContainer img {
+  border-radius: 8px;
+  border: 1px solid #eee;
 }
 
 .qrText {
@@ -140,16 +135,16 @@
 
 .mapWrapper {
   flex-grow: 1;
-  background-color: #fff; /* Para que el botón de reportes tenga fondo si el mapa tarda en cargar */
+  background-color: #e9ecef; /* Color de fondo para carga */
   border-radius: 12px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden; /* Para que el mapa respete el border-radius */
-  position: relative; /* Para posicionar el botón de reportes */
-  min-height: 350px; /* Altura mínima para el mapa */
+  overflow: hidden;
+  position: relative;
+  min-height: 350px;
 }
 
 .mapContainer {
-  height: 100%; /* O una altura fija, ej: 400px */
+  height: 100%;
   width: 100%;
 }
 
@@ -157,7 +152,7 @@
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #8A5DB6; /* Morado claro */
+  background-color: #8A5DB6;
   color: white !important;
   padding: 8px 15px;
   border-radius: 20px;
@@ -167,28 +162,27 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  z-index: 1000; /* Encima del mapa */
+  z-index: 1000;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   transition: background-color 0.3s ease;
 }
-.viewReportsButtonMap:hover {
-    background-color: #704b99;
-}
 
+.viewReportsButtonMap:hover {
+  background-color: #704b99;
+}
 
 .passengersListSection {
   margin-top: 30px;
-  background-color: transparent; /* Ya está sobre el fondo general */
 }
 
 .bottomActions {
   margin-top: 30px;
   display: flex;
-  justify-content: flex-end; /* Alinea el botón a la derecha */
+  justify-content: flex-end;
 }
 
 .cancelButtonLink {
-  background-color: #6c757d; /* Gris */
+  background-color: #dc3545; /* Rojo para cancelar */
   color: white;
   border: none;
   padding: 12px 25px;
@@ -202,16 +196,14 @@
 }
 
 .cancelButtonLink:hover {
-  background-color: #5a6268; /* Gris más oscuro */
+  background-color: #c82333;
 }
 
-
-/* Notificación */
 .notification {
   position: fixed;
   bottom: 20px;
   left: 20px;
-  background-color: #28a745; /* Verde éxito */
+  background-color: #28a745;
   color: white;
   padding: 15px 20px;
   border-radius: 8px;
@@ -230,23 +222,25 @@
   transform: translateY(0);
 }
 
-.notificationIcon {
-  /* Ya tiene color blanco por defecto el icono si el stroke es white */
+.centeredLoader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  gap: 1rem;
+  color: #555;
 }
 
-/* Media queries para responsividad (opcional, pero recomendado) */
 @media (max-width: 992px) {
-  .topRow {
-    flex-direction: column;
-  }
-  .qrAndMapSection {
+  .topRow, .qrAndMapSection {
     flex-direction: column;
   }
   .qrSection {
-    margin-bottom: 20px; /* Espacio cuando está encima del mapa */
+    margin-bottom: 20px;
   }
   .waveBg {
-    height: 180px; /* Más pequeña en móviles */
+    height: 180px;
   }
   .mainContent {
     padding-top: 40px;
@@ -257,7 +251,7 @@
   .waveBg {
     height: 150px;
   }
-   .mainContent {
+  .mainContent {
     padding: 15px;
     padding-top: 30px;
   }
@@ -272,6 +266,6 @@
     font-size: 0.9rem;
   }
   .bottomActions {
-    justify-content: center; /* Centra el botón en móviles */
+    justify-content: center;
   }
 }

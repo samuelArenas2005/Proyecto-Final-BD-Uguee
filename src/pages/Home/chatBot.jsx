@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './chatBot.module.css'; // Importamos el CSS Module
 
-
 // ----- MessageBubble Component -----
 const MessageBubble = ({ message }) => {
-
-    
- 
-
   const { text, sender, timestamp, isError } = message;
   const messageClass = sender === 'user' ? styles.userMessage : styles.botMessage;
   const bubbleStyle = isError ? { backgroundColor: '#ffe0e0', color: '#d8000c', border: '1px solid #d8000c' } : {};
@@ -58,11 +53,9 @@ const ChatInput = ({ onSendMessage, disabled }) => {
 const ChatWindow = ({ messages, isLoading }) => {
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(scrollToBottom, [messages]); // Auto-scroll cuando llegan nuevos mensajes
+  }, [messages]);
 
   return (
     <div className={styles.chatWindow}>
@@ -76,18 +69,17 @@ const ChatWindow = ({ messages, isLoading }) => {
 };
 
 // ----- Función para llamar a la API real de OpenAI -----
-// Aquí es donde usamos la variable de entorno REACT_APP_OPENAI_API_KEY
 const sendMessageToOpenAI = async (history) => {
-   const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+  const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
   if (!API_KEY) {
-    throw new Error('Falta configurar la variable REACT_APP_OPENAI_API_KEY en .env');
+    throw new Error('Falta configurar la variable VITE_OPENAI_API_KEY en .env');
   }
 
   const endpoint = 'https://api.openai.com/v1/chat/completions';
   const payload = {
-    model: 'gpt-3.5-turbo',       // O el modelo que prefieras usar
-    messages: history,            // La historia de mensajes en formato [{ role, content }, …]
-    temperature: 0.7,             // Puedes ajustar temperatura, max_tokens, etc.
+    model: 'gpt-4o-mini',       // O el modelo que prefieras usar
+    messages: history,          // La historia de mensajes en formato [{ role, content }, …]
+    temperature: 0.7,           // Puedes ajustar temperatura, max_tokens, etc.
     max_tokens: 1000
   };
 
@@ -106,7 +98,6 @@ const sendMessageToOpenAI = async (history) => {
   }
 
   const data = await response.json();
-  // La respuesta de Chat Completion está en data.choices[0].message.content
   return data.choices[0].message.content;
 };
 
@@ -133,12 +124,20 @@ const ChatModal = ({ onClose, initialMessage }) => {
     };
 
     // 1) Agregamos el mensaje del usuario a la UI
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+    setMessages((prev) => [...prev, newUserMessage]);
     setIsLoading(true);
 
     try {
-      // 2) Preparamos el historial para enviar a OpenAI
+      // 2) Preparamos el historial para enviar a OpenAI, incluyendo mensaje de sistema
       const historyForAPI = [
+         {
+    role: 'system',
+    content: `Eres UgüeeBot, un asistente experto en la plataforma Ugüee (transporte universitario). Conoces toda la funcionalidad, arquitectura y flujo de la web: registro de instituciones y usuarios, geolocalización en tiempo real, gestión de rutas y vehículos, informes de movilidad, etc. Cada vez que un usuario inicie la conversación debes saludar así:
+
+“¡Bienvenido a Ugüee! Ir a clase jamás había sido tan fácil.”
+
+A partir de esa bienvenida, responde de forma clara, precisa y concisa a cualquier pregunta que el usuario haga sobre la página web o el proyecto Ugüee, usando el contexto del documento de diseño, requerimientos, API, tecnologías y objetivos del sistema. En caso tal de que pidan ayuda humana dile que se comunique al siguiente numero: 317 2715675`
+  },
         ...messages.map((msg) => ({
           role: msg.sender === 'bot' ? 'assistant' : 'user',
           content: msg.text
@@ -156,7 +155,7 @@ const ChatModal = ({ onClose, initialMessage }) => {
         sender: 'bot',
         timestamp: new Date()
       };
-      setMessages((prevMessages) => [...prevMessages, newBotMessage]);
+      setMessages((prev) => [...prev, newBotMessage]);
     } catch (error) {
       console.error('Error al contactar la API de OpenAI:', error);
       const errorMessage = {
@@ -166,7 +165,7 @@ const ChatModal = ({ onClose, initialMessage }) => {
         timestamp: new Date(),
         isError: true
       };
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -175,14 +174,10 @@ const ChatModal = ({ onClose, initialMessage }) => {
   // 5) Manejar la tecla Escape para cerrar el modal
   useEffect(() => {
     const handleEsc = (event) => {
-      if (event.keyCode === 27) {
-        onClose();
-      }
+      if (event.keyCode === 27) onClose();
     };
     window.addEventListener('keydown', handleEsc);
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
+    return () => window.removeEventListener('keydown', handleEsc);
   }, [onClose]);
 
   return (

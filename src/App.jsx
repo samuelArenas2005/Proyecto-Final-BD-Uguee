@@ -91,7 +91,7 @@ const App = () => {
           }
         />
         <Route
-          path="/conductor/viaje"
+          path="/conductor/viaje/:idruta"
           element={
             <ProtectedRoute role="conductor">
             <Layout2>

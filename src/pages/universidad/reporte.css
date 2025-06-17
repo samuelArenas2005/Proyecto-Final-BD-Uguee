@@ -1,5 +1,3 @@
-/* DashboardPage.css */
-
 :root {
   --primary-color: #7E00CB; /* Ajustado al morado de la imagen */
   --primary-hover-color: #6A00A0; /* Un poco más oscuro para hover */
@@ -9,8 +7,6 @@
   --text-gray-light-color: #9CA3AF;
   --background-gray-50: #F9FAFB; /* Fondo general del main content */
   --background-gray-100: #F3F4F6;
-  --background-gray-200: #E5E7EB;
-  --border-gray-100: #F3F4F6;
   --border-gray-200: #E5E7EB;
   --border-gray-300: #D1D5DB;
   --white-color: #FFFFFF;
@@ -24,17 +20,7 @@
 /* Estilo base para el contenedor del cuerpo del dashboard */
 .dashboard-body-container {
   display: flex;
-  /* Importante: Para que el sidebar y el contenido no se solapen con un header fijo externo,
-     debes gestionar el `padding-top` o `margin-top` en el layout que contiene
-     tanto el Header como este DashboardPage.
-     Por ejemplo, si tu Header tiene 60px de alto:
-     .layout-con-header-fijo .dashboard-body-container {
-       padding-top: 60px;
-     }
-     O, si el Header no es fijo, no necesitas esto aquí.
-  */
-  height: calc(100vh - var(--header-height)); /* Ajusta la altura para que no se salga de la pantalla si hay un header fijo */
-  /* Si el header NO es fijo, puedes usar simplemente: height: 100vh; y el scroll será natural */
+  height: calc(100vh - var(--header-height)); 
 }
 
 .sidebar {
@@ -43,39 +29,39 @@
   color: var(--sidebar-text-color);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición más suave */
-  position: fixed; /* Lo hacemos fijo */
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: fixed;
   left: 0;
-  top: var(--header-height); /* Comienza justo debajo del header global */
+  top: var(--header-height);
   bottom: 0;
-  z-index: 999; /* Debajo de un header global que podría tener z-index 1000 */
-  border-top-right-radius: 16px; /* Redondeo superior derecho como en la imagen */
-  padding-top: 10px; /* Espacio superior interno */
+  z-index: 999; 
+  border-top-right-radius: 16px; 
+  padding-top: 10px; 
 }
 
 .dashboard-body-container.sidebar-closed .sidebar {
   width: var(--sidebar-width-closed);
-  border-top-right-radius: 0px; /* Sin redondeo cuando está cerrado para que se vea como parte del borde */
+  border-top-right-radius: 0px; 
 }
 
-.sidebar-header-local { /* Nombre ajustado */
+.sidebar-header-local { 
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Centro el título cuando no está el botón o viceversa */
-  padding: 15px 20px; /* Padding ajustado */
+  justify-content: space-between;
+  padding: 15px 20px; 
   height: 50px;
   box-sizing: border-box;
-  margin-bottom: 10px; /* Espacio antes de los items */
+  margin-bottom: 10px;
 }
 
 .dashboard-body-container.sidebar-closed .sidebar-header-local {
-  justify-content: center; /* Centra el botón cuando el sidebar está cerrado */
+  justify-content: center; 
   padding: 15px 10px;
 }
 
 .sidebar-title {
-  font-size: 1.4rem; /* Tamaño de "Análisis" */
-  font-weight: 500; /* Más ligero que bold */
+  font-size: 1.4rem; 
+  font-weight: 500; 
   color: var(--white-color);
   white-space: nowrap;
   overflow: hidden;
@@ -84,23 +70,23 @@
 }
 .dashboard-body-container.sidebar-closed .sidebar-title {
   opacity: 0;
-  width: 0; /* Oculta el título cuando está cerrado */
+  width: 0; 
 }
 
 
 .sidebar-toggle-button {
-  background: rgba(255, 255, 255, 0.15); /* Botón con fondo semitransparente */
+  background: rgba(255, 255, 255, 0.15); 
   border: none;
   color: var(--white-color);
-  width: 36px; /* Tamaño fijo */
+  width: 36px; 
   height: 36px;
-  border-radius: 8px; /* Bordes redondeados */
+  border-radius: 8px; 
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease, transform 0.3s ease-in-out;
-  flex-shrink: 0; /* Evita que el botón se encoja */
+  flex-shrink: 0; 
 }
 
 .sidebar-toggle-button:hover {
@@ -116,18 +102,18 @@
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 14px 25px; /* Padding ajustado para más espacio */
+  padding: 14px 25px; 
   cursor: pointer;
   color: var(--sidebar-text-color);
   transition: background-color 0.25s ease, color 0.25s ease;
-  margin: 4px 15px; /* Margen ajustado */
-  border-radius: 10px; /* Bordes redondeados para items */
-  overflow: hidden; /* Para que el texto no se salga */
-  position: relative; /* Para el tooltip si se necesita fuera del :title */
+  margin: 4px 15px; 
+  border-radius: 10px; 
+  overflow: hidden; 
+  position: relative; 
 }
 .dashboard-body-container.sidebar-closed .sidebar-item {
-  justify-content: center; /* Centra el icono cuando está cerrado */
-  padding: 14px 10px; /* Menos padding horizontal cuando cerrado */
+  justify-content: center; 
+  padding: 14px 10px; 
   margin: 4px 8px;
 }
 
@@ -138,67 +124,69 @@
 }
 
 .sidebar-item.active {
-  background-color: var(--white-color); /* Fondo blanco para el activo */
-  color: var(--primary-color); /* Texto morado para el activo */
-  font-weight: 600; /* Letra en negrita para el activo */
+  background-color: var(--white-color); 
+  color: var(--primary-color); 
+  font-weight: 600; 
 }
 
 .sidebar-item.active .sidebar-item-icon {
-  color: var(--primary-color); /* Icono morado cuando está activo */
+  color: var(--primary-color); 
 }
 
 .sidebar-item-icon {
-  margin-right: 18px; /* Espacio entre icono y texto */
+  margin-right: 18px; 
   display: flex;
   align-items: center;
-  color: inherit; /* Hereda el color del padre (.sidebar-item) */
+  color: inherit; 
   transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dashboard-body-container.sidebar-closed .sidebar-item-icon {
-  margin-right: 0; /* Sin margen cuando está cerrado */
+  margin-right: 0; 
 }
 
 
 .sidebar-item-text {
-  font-size: 1rem; /* Tamaño de texto de los items */
+  font-size: 1rem; 
   white-space: nowrap;
   opacity: 1;
-  transition: opacity 0.2s ease-in-out 0.1s; /* Pequeño delay para la aparición del texto */
+  transition: opacity 0.2s ease-in-out 0.1s; 
 }
 
 .dashboard-body-container.sidebar-closed .sidebar-item-text {
   opacity: 0;
-  width: 0; /* Efectivamente oculta el texto */
-  display: none; /* Asegura que no ocupe espacio */
+  width: 0; 
+  display: none; 
 }
 
 .main-content {
   flex-grow: 1;
   padding: 25px 30px;
-  margin-left: var(--sidebar-width-open); /* Espacio para el sidebar abierto */
+  margin-left: var(--sidebar-width-open); 
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: var(--background-gray-50);
-  overflow-y: auto; /* Permite scroll solo en el contenido principal si es necesario */
-  height: 100%; /* Ocupa toda la altura del dashboard-body-container */
+  overflow-y: auto; 
+  height: 100%; 
 }
 .dashboard-body-container.sidebar-closed .main-content {
-  margin-left: var(--sidebar-width-closed); /* Espacio para el sidebar cerrado */
+  margin-left: var(--sidebar-width-closed); 
 }
 
-/* --- Estilos para FrecuenciaDeUsoView (ajustados) --- */
 .view-content {
   background-color: var(--white-color);
-  padding: 25px 30px; /* Más padding horizontal */
-  border-radius: 12px; /* Bordes más redondeados */
+  padding: 25px 30px; 
+  border-radius: 12px; 
   box-shadow: 0 4px 12px var(--shadow-color);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
 }
 
 .view-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px; /* Más espacio */
+  margin-bottom: 30px; 
   flex-wrap: wrap;
   gap: 15px;
 }
@@ -206,113 +194,81 @@
 .view-header h2 {
   margin: 0;
   color: var(--text-gray-medium-color);
-  font-size: 1.7rem; /* Ligeramente más pequeño */
+  font-size: 1.5rem; 
   font-weight: 600;
-}
-
-.view-controls {
-  display: flex;
-  align-items: center;
-  gap: 15px; /* Espacio reducido */
-}
-
-.search-bar-minimal {
-  display: flex;
-  align-items: center;
-  background-color: var(--background-gray-100); /* Fondo sutil */
-  padding: 10px 15px; /* Más padding */
-  border-radius: 8px;
-  min-width: 280px;
-  border: 1px solid var(--border-gray-200); /* Borde sutil */
-}
-
-.search-bar-minimal input {
-  flex-grow: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 0.9rem;
-  color: var(--text-gray-medium-color);
-}
-.search-bar-minimal input::placeholder {
-  color: var(--text-gray-light-color);
-}
-
-.search-icon-minimal {
-  color: var(--primary-color);
-  margin-right: 8px; /* Espacio antes del input */
-}
-.filter-icon-minimal {
-  color: var(--primary-color);
-  cursor: pointer;
-  margin-left: 8px; /* Espacio después del input o del icono de búsqueda */
-}
-
-
-.user-filter-dropdown {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 15px; /* Más padding */
-  border: 1px solid var(--border-gray-200); /* Borde sutil */
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: var(--white-color);
-  transition: background-color 0.2s;
-}
-
-.user-filter-dropdown:hover {
-  background-color: var(--background-gray-100);
-}
-
-.user-filter-dropdown span {
-  font-size: 0.9rem;
-  color: var(--text-gray-medium-color);
-}
-
-.user-filter-dropdown .lucide-users,
-.user-filter-dropdown .lucide-chevron-down {
-  color: var(--text-gray-color);
 }
 
 .chart-container {
   width: 100%;
-  /* height: 350px; definida en el JS con ResponsiveContainer */
-  margin-bottom: 30px;
+  flex-grow: 1;
 }
 
-.view-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
+.recharts-surface { 
+  overflow: visible !important;
 }
 
-.download-report-button {
-  background-color: var(--primary-color);
-  color: var(--white-color);
-  border: none;
-  padding: 12px 22px; /* Padding ajustado */
-  border-radius: 8px;
+/* ---- NUEVOS ESTILOS ---- */
+
+/* Estilos para tablas de datos */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+}
+
+.data-table thead {
+  border-bottom: 2px solid var(--border-gray-200);
+}
+
+.data-table th {
+  text-align: left;
+  padding: 12px 15px;
+  color: var(--text-gray-medium-color);
+  font-weight: 600;
+  background-color: var(--background-gray-50);
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--border-gray-100);
   transition: background-color 0.2s ease;
 }
 
-.download-report-button:hover {
-  background-color: var(--primary-hover-color);
+.data-table tbody tr:last-child {
+  border-bottom: none;
 }
 
-/* Estilos para Leyenda de Recharts */
-.recharts-legend-wrapper {
-  padding-top: 20px !important; /* Ajusta según sea necesario */
+.data-table tbody tr:hover {
+  background-color: var(--primary-light-bg);
 }
-.recharts-legend-item {
-  margin-right: 20px !important; /* Espacio entre items de la leyenda */
+
+.data-table td {
+  padding: 15px;
+  color: var(--text-gray-color);
 }
-.recharts-surface { /* Para evitar que los puntos del gráfico se corten */
-  overflow: visible !important;
+
+
+/* Estilos para Carga / Error / Vacío */
+.view-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  height: 100%;
+  min-height: 300px; /* Asegura un alto mínimo */
+  color: var(--text-gray-light-color);
+  text-align: center;
+}
+
+.view-state-container p {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: var(--text-gray-color);
+}
+
+.view-state-container.error p {
+    color: #D32F2F; /* Color para texto de error */
+}
+.view-state-container.error .lucide {
+    color: #D32F2F;
 }
