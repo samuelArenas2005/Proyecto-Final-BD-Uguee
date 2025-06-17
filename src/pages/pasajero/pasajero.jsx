@@ -207,17 +207,8 @@ const TravelPage = () => {
     //    ruta → rutaconductorviaje → conductor → usuario(*)
     const { data: rutas, error } = await supabase
       .from('ruta')
-      .select(`
-        idruta,
-        salidalatitud,
-        salidalongitud,
-        paradalatitud,
-        paradalongitud,
-        horadesalida,
-        fecha,
-        tipoderuta,
-        distancia,
-        asientosdisponibles,
+      .select(`idruta, salidalatitud, salidalongitud,  paradalatitud, paradalongitud horadesalida, fecha, tipoderuta, distancia,
+      asientosdisponibles,
         rutaconductorviaje (
           conductor (
             usuario (*)
