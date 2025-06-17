@@ -218,7 +218,7 @@ const TravelPage = () => {
       return;
     }
 
-    const RADIUS_METERS = 500;
+    const RADIUS_METERS = 1000;
     const filtradas = rutas.filter((ruta) => {
       const salidaRuta = {
         lat: parseFloat(ruta.salidalatitud),
