@@ -1,0 +1,98 @@
+/* src/components/RutasPage/RutaAnteriorCard.module.css */
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+  border: 1px solid #e0e0e04d;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.routeIconGlobal {
+  color: #6A1B9A; /* Morado principal */
+  background-color: #f3e5f5b3; /* Morado muy claro */
+  padding: 8px;
+  border-radius: 30%;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+.icon {
+  color: #845EC2; /* Un morado más claro para iconos internos */
+  flex-shrink: 0;
+}
+
+.info {
+  background-color: #f9f9f9f0;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.infoTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.departureTime {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #444;
+}
+
+.actionButton {
+  background-color: #845EC2; /* Morado principal o un tono más claro */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 5px;
+}
+
+.actionButton:hover {
+  background-color: #6A1B9A; /* Morado más oscuro */
+}
