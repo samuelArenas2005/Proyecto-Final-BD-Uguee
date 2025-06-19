@@ -130,7 +130,7 @@ useEffect(() => {
       .eq(estado, 'activo')
       .single();
 
-    if (estadoError || (!estadoData && roleActual != 'monitor') ) {
+    if (estadoError || !estadoData  ) {
       console.log(estadoError)
       setErrorMsg(`Tu usuario aún no ha sido aceptado, comunicate con tu institución`);
       await supabase.auth.signOut();
@@ -138,7 +138,7 @@ useEffect(() => {
     } 
 
     // 3. Redirigir al dashboard correspondiente
-    const from = location.state?.from?.pathname || `/${role}`;
+    const from = location.state?.from?.pathname || `/${roleActual}`;
     navigate(from, { replace: true });
   };
 
