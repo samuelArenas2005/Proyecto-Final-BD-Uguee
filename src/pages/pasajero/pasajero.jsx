@@ -1,14 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { 
-  MapPin, 
-  Search, 
-  SlidersHorizontal, 
-  MoreVertical, 
-  UserCircle2, 
-  Clock, 
-  Star, 
-  QrCode, 
-  X 
+import {
+  MapPin,
+  Search,
+  SlidersHorizontal,
+  MoreVertical,
+  UserCircle2,
+  Clock,
+  Star,
+  QrCode,
+  X
 } from 'lucide-react';
 import FilterDialog from './complementos/filterDialog';
 import TripDetailDialog from './complementos/tripDetailDialog';
@@ -16,11 +16,11 @@ import styles from './pasajero.module.css';
 import wave from '/wave.svg';
 import RutaAnteriorCard from './historialPasajeros/RutaAnteriorCard';
 
-import { 
-  GoogleMap, 
-  LoadScript, 
-  Autocomplete, 
-  DirectionsRenderer 
+import {
+  GoogleMap,
+  LoadScript,
+  Autocomplete,
+  DirectionsRenderer
 } from '@react-google-maps/api';
 
 import { supabase } from '../../supabaseClient.js';
@@ -32,11 +32,6 @@ const mapCustomStyles = [
 ];
 const libraries = ['places'];
 const DEFAULT_CENTER = { lat: 4.624335, lng: -74.063644 };
-
-  const rutasAnterioresData = [
-    { id: 1, title: 'Ruta 1', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Lunes, 10:00 am' },
-    { id: 2, title: 'Ruta 2', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Martes, 8:00 am' },
-  ];
 
 const FULL_ROUTE_QUERY = `
   idruta,
@@ -83,9 +78,65 @@ const TravelPage = () => {
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [acceptedRoute, setAcceptedRoute] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);
-  
+  const [previousRoutes, setPreviousRoutes] = useState([]);
+  const [showInfo,setShowInfo] = useState(true)
+
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
+
+  const fetchPreviousRoutes = async (userId) => {
+    const { data: historicalTripsAll, error } = await supabase
+      .from('pasajeroviaje')
+      .select(`idviaje,viaje(estadodelviaje)
+
+      `)
+      .eq('idpasajero', userId)
+      
+
+      const historicalTrips = historicalTripsAll.filter(trip => trip.viaje.estadodelviaje == "terminado")
+
+     if (
+        error ||!historicalTrips
+      ) {
+        console.log('El no tiene viajes anteriores.');
+        return ;
+      }
+
+    const rutas = historicalTrips.map(async (viaje) => {
+      const { data: historicalTripsruta, error2 } = await supabase
+        .from('rutaconductorviaje')
+        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
+      `)
+        .eq('idviaje', viaje.idviaje)
+      if (error2 || !historicalTripsruta) {
+        return []
+      }
+      return historicalTripsruta;
+    })
+
+    const rutasArray = await Promise.all(rutas);
+    const rutasArrayPlana = rutasArray.flat()
+
+    console.log(rutasArrayPlana)
+
+    if (error || !historicalTrips) {
+      console.error('Error fetching previous routes:', error);
+      return;
+    }
+    else {
+      setPreviousRoutes(
+        rutasArrayPlana.map((ruta, index) => ({
+          title: `Ruta ${index + 1}`,
+          originlat: ruta.ruta.salidalatitud,
+          originlong : ruta.ruta.salidalongitud,
+          destinationlat: ruta.ruta.paradalatitud,
+          destinationlong: ruta.ruta.paradalongitud,
+          departureTime: ruta.ruta.horadesalida
+        }))
+      )
+    }
+
+  };
 
   useEffect(() => {
     const checkForActiveTrip = async () => {
@@ -97,33 +148,43 @@ const TravelPage = () => {
 
       const { data: lastPassengerTrip, error: passengerError } = await supabase
         .from('pasajeroviaje')
-        .select(`idviaje` )
+        .select('idviaje, viaje(estadodelviaje)')
         .eq('idpasajero', user.id)
-        .order('idviaje', { ascending: false }) 
+        .order('idviaje', { ascending: false })
         .limit(1)
         .single();
 
-      if (passengerError || !lastPassengerTrip) {
+      console.log("hola", lastPassengerTrip);
+
+      if (
+        passengerError ||
+        !lastPassengerTrip ||
+        !['pendiente', 'proceso'].includes(lastPassengerTrip.viaje?.estadodelviaje)
+      ) {
         console.log('El usuario no está en ningún viaje activo.');
+        fetchPreviousRoutes(user.id)
         return;
       }
+
 
       const { data: activeRouteData, error: routeError } = await supabase
         .from('ruta')
         .select(FULL_ROUTE_QUERY)
-        .eq('estado', 'activo') 
+        .eq('estado', 'activo')
         .eq('rutaconductorviaje.idviaje', lastPassengerTrip.idviaje)
         .single();
-      
+
       if (routeError) {
         console.error('Error al verificar la ruta activa:', routeError);
         return;
       }
-      
+
       if (activeRouteData) {
         console.log('Se encontró un viaje activo. Mostrando panel...');
+        setShowInfo(false)
         setAcceptedRoute(activeRouteData);
       }
+
     };
 
     checkForActiveTrip();
@@ -147,7 +208,7 @@ const TravelPage = () => {
   const onLoadStart = (autocompleteInstance) => {
     autoStartRef.current = autocompleteInstance;
   };
-  
+
   const onPlaceChangedStart = () => {
     if (autoStartRef.current) {
       const place = autoStartRef.current.getPlace();
@@ -167,7 +228,7 @@ const TravelPage = () => {
   const onLoadDest = (autocompleteInstance) => {
     autoDestRef.current = autocompleteInstance;
   };
-  
+
   const onPlaceChangedDest = () => {
     if (autoDestRef.current) {
       const place = autoDestRef.current.getPlace();
@@ -281,11 +342,12 @@ const TravelPage = () => {
     if (insertError) {
       console.log('no se pudo ingresar el pasajero al viaje ', insertError);
     } else {
-        console.log('Pasajero añadido al viaje exitosamente.');
+      console.log('Pasajero añadido al viaje exitosamente.');
     }
   };
 
   const handleAcceptRoute = (tripId) => {
+    setShowInfo(false)
     setPasajeroViaje(tripId);
     setAcceptedRoute(selectedRoute);
     setIsTripDetailDialogOpen(false);
@@ -293,7 +355,7 @@ const TravelPage = () => {
 
   const handleCancelTrip = async () => {
     if (!acceptedRoute) return;
-  
+
     const viajeInfo = acceptedRoute.rutaconductorviaje?.[0];
     if (!viajeInfo || !viajeInfo.idviaje) {
       console.error("No se pudo encontrar el idviaje para cancelar.");
@@ -301,37 +363,31 @@ const TravelPage = () => {
       return;
     }
     const idviaje = viajeInfo.idviaje;
-  
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       console.error("No se encontró usuario para cancelar el viaje.");
       setAcceptedRoute(null);
       return;
     }
-  
+
     const { error: deleteError } = await supabase
       .from('pasajeroviaje')
       .delete()
       .match({ idpasajero: user.id, idviaje: idviaje });
-  
+
     if (deleteError) {
       console.error('Error al cancelar el viaje en la base de datos:', deleteError);
     } else {
+      setShowInfo(true)
       console.log('Viaje cancelado y registro eliminado exitosamente.');
     }
-  
+
     setAcceptedRoute(null);
     setMatchingRoutes([]);
     setSearchMessage('Tu viaje ha sido cancelado. Puedes buscar uno nuevo.');
   };
 
-  const mapOptions = {
-    disableDefaultUI: true,
-    zoomControl: true,
-    streetViewControl: false,
-    mapTypeControl: false,
-    styles: mapCustomStyles,
-  };
 
   const formatCoordsShort = (lat, lng) => {
     const round4 = (num) => Number(num).toFixed(4);
@@ -356,9 +412,8 @@ const TravelPage = () => {
       rating: 0,
       car: {
         plate: acceptedRoute.vehiculo?.vehiculopesado?.placa || '—',
-        model: `${acceptedRoute.vehiculo?.marca || ''} ${
-          acceptedRoute.vehiculo?.modelo || ''
-        }`.trim(),
+        model: `${acceptedRoute.vehiculo?.marca || ''} ${acceptedRoute.vehiculo?.modelo || ''
+          }`.trim(),
         imageUrl: '/car.png',
       },
       eta: acceptedRoute.horadesalida || '—',
@@ -382,10 +437,10 @@ const TravelPage = () => {
                   <div className={styles.inputGroup}>
                     <div className={styles.inputWrapper}>
                       <MapPin className={styles.inputIcon} size={20} />
-                      <Autocomplete 
-                        onLoad={onLoadStart} 
+                      <Autocomplete
+                        onLoad={onLoadStart}
                         onPlaceChanged={onPlaceChangedStart}
-                        fields={['formatted_address', 'geometry']} 
+                        fields={['formatted_address', 'geometry']}
                         restrictions={{ country: 'co' }}
                       >
                         <input
@@ -399,10 +454,10 @@ const TravelPage = () => {
                     </div>
                     <div className={styles.inputWrapper}>
                       <MapPin className={styles.inputIcon} size={20} />
-                      <Autocomplete 
-                        onLoad={onLoadDest} 
+                      <Autocomplete
+                        onLoad={onLoadDest}
                         onPlaceChanged={onPlaceChangedDest}
-                        fields={['formatted_address', 'geometry']} 
+                        fields={['formatted_address', 'geometry']}
                         restrictions={{ country: 'co' }}
                       >
                         <input
@@ -416,8 +471,8 @@ const TravelPage = () => {
                     </div>
                   </div>
                   <div className={styles.buttonGroup}>
-                    <button 
-                      className={styles.submitButton} 
+                    <button
+                      className={styles.submitButton}
                       onClick={handleSearchTrip}
                       disabled={loadingRoutes}
                     >
@@ -453,10 +508,10 @@ const TravelPage = () => {
                   </div>
                   <div className={styles.vehicleDetails}>
                     <div className={styles.carImageColumn}>
-                      <img 
-                        src={chosenDriverData.car.imageUrl} 
-                        alt={chosenDriverData.car.model} 
-                        className={styles.carImage} 
+                      <img
+                        src={chosenDriverData.car.imageUrl}
+                        alt={chosenDriverData.car.model}
+                        className={styles.carImage}
                       />
                     </div>
                     <div className={styles.vehicleInfo}>
@@ -474,13 +529,13 @@ const TravelPage = () => {
                     </div>
                   </div>
                   <div className={styles.actionButtons}>
-                    <button 
+                    <button
                       className={styles.cancelButton}
                       onClick={handleCancelTrip}
                     >
                       Cancelar viaje
                     </button>
-                    <button 
+                    <button
                       className={styles.qrButton}
                       onClick={handleOpenQrModal}
                     >
@@ -495,10 +550,10 @@ const TravelPage = () => {
                 center={mapCenter}
                 zoom={mapZoom}
                 mapContainerClassName={styles.mapContainer}
-                options={{ 
-                  styles: mapCustomStyles, 
-                  disableDefaultUI: true, 
-                  zoomControl: true 
+                options={{
+                  styles: mapCustomStyles,
+                  disableDefaultUI: true,
+                  zoomControl: true
                 }}
               >
                 {directionsResponse && (
@@ -517,12 +572,12 @@ const TravelPage = () => {
             </div>
           </div>
         </div>
-        
+
         <div className={styles.previousRoutesSection}>
           <h2 className={styles.sectionTitle}>
             {acceptedRoute ? 'Tu viaje actual' : matchingRoutes.length > 0 ? 'Rutas Disponibles' : 'Busca tu ruta'}
           </h2>
-          
+
           <div className={styles.cardsGrid}>
             {acceptedRoute && chosenDriverData ? (
               <div className={styles.activeTripCard}>
@@ -554,11 +609,11 @@ const TravelPage = () => {
                 {loadingRoutes && (
                   <div className={styles.loadingMessage}>Buscando rutas disponibles...</div>
                 )}
-                
+
                 {!loadingRoutes && searchMessage && (
                   <div className={styles.infoMessage}>{searchMessage}</div>
                 )}
-                
+
                 {matchingRoutes.map((ruta) => {
                   const rutaconductor = ruta.rutaconductorviaje?.[0];
                   const usuario = rutaconductor?.conductor?.usuario || {};
@@ -570,7 +625,7 @@ const TravelPage = () => {
                     ruta.salidalatitud,
                     ruta.salidalongitud
                   );
-                  
+
                   return (
                     <div key={ruta.idruta} className={styles.routeCard}>
                       <div className={styles.driverInfo}>
@@ -608,9 +663,9 @@ const TravelPage = () => {
             )}
           </div>
         </div>
-        
+
         <FilterDialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen} />
-        
+
         {selectedRoute && (
           <TripDetailDialog
             open={isTripDetailDialogOpen}
@@ -641,7 +696,7 @@ const TravelPage = () => {
             onAcceptTrip={handleAcceptRoute}
           />
         )}
-        
+
         {showQrModal && acceptedRoute && (
           <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -666,12 +721,26 @@ const TravelPage = () => {
             </div>
           </div>
         )}
-        <div className={styles.previousRoutesSection}>
-            <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
+        {showInfo ? (
+          <div className={styles.previousRoutesSection}>
+            <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
             <div className={styles.cardsGrid}>
-                {rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))}
+              {previousRoutes.length > 0 ? (
+                previousRoutes.map(rutaData => (
+                  <RutaAnteriorCard
+                    routeData={rutaData}
+                    onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes); }}
+                  />
+                ))
+              ) : (
+                <div className={styles.infoMessage}>No tienes viajes anteriores</div>
+              )}
             </div>
-        </div>
+          </div>
+        ) : (
+          <div>
+          </div>
+        )}
       </div>
     </LoadScript>
   );
