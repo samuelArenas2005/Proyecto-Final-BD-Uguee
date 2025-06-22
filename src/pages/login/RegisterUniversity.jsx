@@ -20,16 +20,41 @@ function RegisterUniversity({ handleChange }) {
     estado: "activo",
   };
 
+  const initialFiles = {
+    logo: null,
+    certificado: null,
+  };
+
   const [userData, setUserData] = useState(initialUserData);
   const [formData, setFormData] = useState(initialFormData);
+  const [files, setFiles] = useState(initialFiles); // Estado para los archivos
+  const [previewUrl, setPreviewUrl] = useState(""); // Nuevo estado para el preview
   const [infoMsg, setInfoMsg] = useState(""); // Mensaje de éxito o error
 
   const { createUniversity, submitting } = useLogin();
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const name = e.target.name; // Obtener el nombre del input
+      const file = e.target.files[0];
+      setFiles((prevFiles) => ({ ...prevFiles, [name]: file }));
+    }
+  };
+
+  const handlePreview = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result);
+    };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createUniversity(userData, formData);
+      await createUniversity(userData, formData, files);
       setUserData(initialUserData);
       setFormData(initialFormData);
       setInfoMsg("Universidad registrada con éxito");
@@ -159,17 +184,66 @@ function RegisterUniversity({ handleChange }) {
           </div>
         </div>
         <div className="rd-field">
-          <label>URL Imagen Logo</label>
-          <input
-            name="urllmglogo"
-            value={formData.urllmglogo}
-            required
-            placeholder="https://ejemplo.com/logo.png"
-            onChange={(e) => handleChange(e, setFormData)}
-          />
+          <label>Logo de la universidad (PNG o JPG)</label>
+          <div className="custom-file-input-container">
+            <input
+              type="file"
+              id="file-upload"
+              name="logo"
+              accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+              required
+              onChange={(e) => {
+                handleFileChange(e);
+                handlePreview(e);
+              }}
+            />
+            <label htmlFor="file-upload" className="custom-file-button">
+              Elegir archivo
+            </label>
+            <span className="file-name-display">
+              {files.logo ? files.logo.name : "No se eligió ningún archivo"}
+            </span>
+          </div>
+          {/* Preview de la imagen */}
+          {previewUrl && (
+            <div style={{ marginTop: "10px" }}>
+              <img
+                src={previewUrl}
+                alt="Preview logo"
+                style={{
+                  maxWidth: "120px",
+                  maxHeight: "120px",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                }}
+              />
+            </div>
+          )}
+        </div>
+        <div className="rd-field">
+          <label>Certificado (PDF)</label>
+          <div className="custom-file-input-container">
+            <input
+              type="file"
+              id="file-certificado"
+              name="certificado"
+              accept=".pdf,application/pdf"
+              required
+              onChange={(e) => {
+                handleFileChange(e);
+              }}
+            />
+            <label htmlFor="file-certificado" className="custom-file-button">
+              Elegir archivo
+            </label>
+            <span className="file-name-display">
+              {files.certificado
+                ? files.certificado.name
+                : "No se eligió ningún archivo"}
+            </span>
+          </div>
         </div>
       </div>
-
       <button type="submit" className="rd-submit">
         Registrarse como universidad
       </button>

@@ -16,8 +16,9 @@ export const LoginContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   //Funcion para crear una institucion
-  const createUniversity = async (userData, formData) => {
+  const createUniversity = async (userData, formData, files) => {
     setSubmitting(true);
+
     const { email, password } = userData;
     const { data, error } = await supabase.auth.signUp({
       email: email,
@@ -28,13 +29,54 @@ export const LoginContextProvider = ({ children }) => {
       setSubmitting(false);
       throw error;
     }
+    const logoPath = `${data.user.id}/logo.png`;
+    const certificadoPath = `${data.user.id}/certificado.pdf`;
+    formData.urllmglogo = logoPath;
     formData.idinstitucion = data.user.id;
     const result = await supabase
       .from("institucion")
       .insert([formData])
       .select();
+    if (result.error) {
+      setSubmitting(false);
+      throw result.error;
+    }
+
+    const { data: logoData, error: logoError } = await supabase.storage
+      .from("publico")
+      .upload(logoPath, files.logo, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+    if (logoError) {
+      setSubmitting(false);
+      throw result.error;
+    }
+    const { data: certificadoData, error: certificadoError } =
+      await supabase.storage
+        .from("publico")
+        .upload(certificadoPath, files.certificado, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+    const resultadoCertificado = await supabase
+      .from(
+        "urldocumentoinstitucion".insert({
+          idinstitucion: data.user.id,
+          urldocumento: certificadoPath,
+          nombreDocumento: "Certificado",
+        })
+      )
+      .select();
+
+    if (certificadoError) {
+      setSubmitting(false);
+      throw result.error;
+    }
+
     setSubmitting(false);
-    if (result.error) throw result.error;
+    if (certificadoError) throw logoError;
   };
 
   const listUniversities = async () => {

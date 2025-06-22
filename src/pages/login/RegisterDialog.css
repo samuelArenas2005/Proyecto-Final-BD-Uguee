@@ -180,3 +180,90 @@
   color: #000;           /* O el color que prefieras */
   opacity: 0.2 !important; /* Mucho más transparente */
 }
+
+/* Contenedor principal que imita un campo de texto */
+.custom-file-input-container {
+  display: flex; /* Para alinear el botón y el texto del nombre del archivo */
+  align-items: center;
+  background-color: #faf7ff;
+  border: 1px solid #e0e0e0; /* Borde gris claro, como en tu imagen */
+  border-radius: 8px; /* Bordes redondeados */
+  padding: 0;
+  margin-top: 4px; /* Pequeño espacio desde la label de arriba */
+  overflow: hidden; /* Para que el contenido respete los bordes redondeados */
+  font-family: inherit; /* Usa la misma fuente que el resto de la página */
+  width: 100%;
+}
+
+/* Ocultamos el input de archivo real */
+.custom-file-input-container input[type="file"] {
+  display: none;
+}
+
+/* Estilo para la label que ahora es nuestro botón morado */
+.custom-file-input-container .custom-file-button {
+  /* El color morado extraído de tu imagen */
+  background-color: #9D00FF; 
+  /* Color del texto */
+  color: #FFFFFF;
+  padding: 10px 16px;
+  margin: 0; /* Sin margen para que se ajuste al contenedor */
+  /* Quitamos el borde derecho para un look más integrado */
+  border-right: none; 
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Efecto hover para el botón morado (un tono ligeramente más oscuro) */
+.custom-file-input-container .custom-file-button:hover {
+  background-color: #8600DB;
+}
+
+/* Estilo para el área que muestra el nombre del archivo */
+.custom-file-input-container .file-name-display {
+  padding: 10px 12px;
+  flex-grow: 1; /* Hace que ocupe el espacio restante */
+  font-size: 0.9em;
+  color: #6b7280; /* Un color de texto más suave */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade "..." si el nombre del archivo es muy largo */
+}
+
+.custom-certificados-list {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.custom-certificados-input-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.certificados-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.certificado-item {
+  background: #f3eafe;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.95em;
+  color: #6b7280;
+  border: 1px solid #e0e0e0;
+  word-break: break-all;
+}
+
+.certificado-vacio {
+  color: #b0b0b0;
+  background: transparent;
+  border: none;
+  padding-left: 0;
+}
