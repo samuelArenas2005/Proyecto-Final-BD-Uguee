@@ -53,11 +53,6 @@ const Header = ({
           {currentConductor.text}
         </button>
 
-        <Link to={currentActivity.to} className={`${styles.navButton} ${styles.activityButton}`}>
-          <ListChecks size={20} className={styles.icon} />
-          {currentActivity.text}
-        </Link>
-
         <button
           className={`${styles.navButton} ${styles.profileButton}`}
           onClick={currentProfile}

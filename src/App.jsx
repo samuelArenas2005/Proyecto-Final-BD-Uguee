@@ -14,7 +14,7 @@ import ConductorPage from "./pages/conductor/conductor";
 import ConductorPageViaje from "./pages/conductor/viajeConductor";
 import ConductorPageReporteVia from "./pages/conductor/reporteVia";
 import AdminPage from "./pages/admin/adminPage";
-import HistorialPasajero from "./pages/pasajero/historialPasajeros/HistorialPasajerosPage";
+
 import Monitor from "./pages/monitor/monitor";
 
 import ProtectedRoute from "./private/privateRoutes";
@@ -66,16 +66,6 @@ const App = () => {
             <ProtectedRoute role="pasajero">
             <Layout2>
               <Pasajero />
-            </Layout2>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/pasajero/actividad"
-          element={
-            <ProtectedRoute role="pasajero">
-            <Layout2>
-              <HistorialPasajero />
             </Layout2>
             </ProtectedRoute>
           }

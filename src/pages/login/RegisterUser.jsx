@@ -237,6 +237,8 @@ function RegisterPassenger({ handleChange }) {
             value={usuarioData.nombrecompleto}
             required
             placeholder="Juan Pérez"
+            pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)+$"
+            title="Debe ingresar al menos dos palabras, solo letras y espacios."
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -266,17 +268,23 @@ function RegisterPassenger({ handleChange }) {
             value={usuarioData.edad}
             required
             placeholder="20"
+            min={13}
+            max={120}
             onChange={(e) => handleChange(e, setUsuarioData)}
+            style={{ appearance: "textfield" }}
           />
         </div>
         <div className="rd-field">
           <label>Teléfono</label>
           <input
-            type="number"
+            type="text"
             name="telefono"
             value={usuarioData.telefono}
             required
             placeholder="3001234567"
+            pattern="^\d{10}$"
+            title="El teléfono debe tener exactamente 10 números."
+            maxLength={10}
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -307,6 +315,8 @@ function RegisterPassenger({ handleChange }) {
             value={usuarioData.ciudad}
             required
             placeholder="Bogotá"
+            pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+            title="La ciudad solo debe contener letras y espacios, sin números."
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
@@ -349,12 +359,15 @@ function RegisterPassenger({ handleChange }) {
           <div className="rd-field">
             <label>Número de licencia</label>
             <input
-              type="number"
+              type="text"
               name="numerodelicencia"
               value={conductorData.numerodelicencia}
               required
               placeholder="1234567890"
+              pattern="^\d{3,}$"
+              title="El número de licencia debe tener al menos 3 números, solo números positivos."
               onChange={(e) => handleChange(e, setConductorData)}
+              inputMode="numeric"
             />
           </div>
 
@@ -393,6 +406,8 @@ function RegisterPassenger({ handleChange }) {
               value={vehiculoData.numeroasientos}
               required
               placeholder="4"
+              min={1}
+              max={100}
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
           </div>
@@ -451,6 +466,8 @@ function RegisterPassenger({ handleChange }) {
                   value={pesadoData.placa}
                   required
                   placeholder="ABC123"
+                  pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]{3}\d{3}$"
+                  title="La placa debe tener 3 letras seguidas de 3 números, por ejemplo: ABC123"
                   onChange={(e) => handleChange(e, setPesadoData)}
                 />
               </div>
