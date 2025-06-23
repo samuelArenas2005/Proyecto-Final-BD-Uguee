@@ -17,8 +17,8 @@ function RegisterUniversity({ handleChange }) {
     colorsecundario: "",
     urllmglogo: "",
     sede: "",
-    calle: "",
-    numerolugar: "",
+    via_principal: "",
+    placa: "",
     ciudad: "",
     estado: "pendiente",
   };
@@ -133,30 +133,34 @@ function RegisterUniversity({ handleChange }) {
             onChange={(e) => handleChange(e, setFormData)}
           />
           <FormField
-            label="Calle"
-            name="calle"
-            value={formData.calle}
+            label="Ciudad"
+            name="ciudad"
+            value={formData.ciudad}
             required
-            placeholder="12"
+            placeholder="Cali"
             onChange={(e) => handleChange(e, setFormData)}
           />
         </div>
         <div className="rd-two-col">
           <FormField
-            label="Número lugar"
-            name="numerolugar"
-            value={formData.numerolugar}
+            label="Via principal"
+            name="via_principal"
+            value={formData.via_principal}
+            required
+            placeholder="Cl 38"
+            onChange={(e) => handleChange(e, setFormData)}
+            pattern="^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+ [0-9]+( [a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)*$"
+            title="Debe ser una palabra, un espacio, un número, y opcionalmente más palabras separadas por espacio. Ejemplo: Cl 38 Sur, Av 5 Norte, Cra 10"
+          />
+          <FormField
+            label="Placa"
+            name="placa"
+            value={formData.placa}
             required
             placeholder="12-34"
             onChange={(e) => handleChange(e, setFormData)}
-          />
-          <FormField
-            label="Ciudad"
-            name="ciudad"
-            value={formData.ciudad}
-            required
-            placeholder="Ciudad de México"
-            onChange={(e) => handleChange(e, setFormData)}
+            pattern="^[0-9]+[a-zA-Z]?-[0-9]+[a-zA-Z]?$"
+            title="Debe ser un número, opcionalmente una letra, un guion, seguido de otro número y opcionalmente una letra. Ejemplo: 123A-45 o 123-45B o 123-45"
           />
         </div>
         <div className="rd-two-col">
