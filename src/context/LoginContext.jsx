@@ -15,6 +15,24 @@ export const LoginContextProvider = ({ children }) => {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  function limpiarNombre(nombreOriginal) {
+    // Añadimos el punto (.) a la lista de caracteres permitidos [^\w\s-.]
+    let nombreLimpio = nombreOriginal
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      // AQUÍ ESTÁ EL CAMBIO: \w\s-. se convierte en \w\s-.
+      .replace(/[^\w\s-.]/g, "") // Se eliminan caracteres no deseados, PERO se conserva el punto.
+      .trim()
+      .replace(/\s+/g, "-");
+
+    // Si el nombre supera los 60 caracteres, recorta las primeras letras hasta que quede de 60
+    if (nombreLimpio.length > 99) {
+      nombreLimpio = nombreLimpio.slice(nombreLimpio.length - 99);
+    }
+
+    return nombreLimpio;
+  }
   //Funcion para crear una institucion
   const createUniversity = async (userData, formData, files) => {
     setSubmitting(true);
@@ -29,8 +47,9 @@ export const LoginContextProvider = ({ children }) => {
       setSubmitting(false);
       throw error;
     }
-    const logoPath = `${data.user.id}/logo.png`;
-    const certificadoPath = `${data.user.id}/certificado.pdf`;
+    const logoPath = `Institucion/${data.user.id}/logo/${limpiarNombre(
+      files.logo.name
+    )}`;
     formData.urllmglogo = logoPath;
     formData.idinstitucion = data.user.id;
     const result = await supabase
@@ -41,7 +60,6 @@ export const LoginContextProvider = ({ children }) => {
       setSubmitting(false);
       throw result.error;
     }
-
     const { data: logoData, error: logoError } = await supabase.storage
       .from("publico")
       .upload(logoPath, files.logo, {
@@ -50,33 +68,39 @@ export const LoginContextProvider = ({ children }) => {
       });
     if (logoError) {
       setSubmitting(false);
-      throw result.error;
+      throw logoError;
     }
-    const { data: certificadoData, error: certificadoError } =
-      await supabase.storage
-        .from("publico")
-        .upload(certificadoPath, files.certificado, {
-          cacheControl: "3600",
-          upsert: false,
-        });
 
-    const resultadoCertificado = await supabase
-      .from(
-        "urldocumentoinstitucion".insert({
+    for (const file of files.certificados) {
+      const certificadoPath = `Institucion/${
+        data.user.id
+      }/documentos/${limpiarNombre(file.name)}`;
+      const { data: extraCertificadoData, error: extraCertificadoError } =
+        await supabase.storage
+          .from("documentos")
+          .upload(certificadoPath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+      if (extraCertificadoError) {
+        setSubmitting(false);
+        console.error("Error al subir el certificado:", extraCertificadoError);
+        throw extraCertificadoError;
+      }
+      const { data: certificadoData, error: certificadoError } = await supabase
+        .from("urldocumentoinstitucion")
+        .insert({
           idinstitucion: data.user.id,
           urldocumento: certificadoPath,
-          nombreDocumento: "Certificado",
-        })
-      )
-      .select();
-
-    if (certificadoError) {
-      setSubmitting(false);
-      throw result.error;
+          nombredocumento: file.name,
+        });
+      if (certificadoError) {
+        setSubmitting(false);
+        console.error("Error al registrar el certificado:", certificadoError);
+        throw certificadoError;
+      }
     }
-
     setSubmitting(false);
-    if (certificadoError) throw logoError;
   };
 
   const listUniversities = async () => {
