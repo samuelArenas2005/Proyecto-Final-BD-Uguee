@@ -1,6 +1,7 @@
 import FormField from "./components/FormField";
 import FileField from "./components/FileField";
 import MultiFileField from "./components/MultiFileField";
+import ComboField from "./components/ComboField";
 import { useLogin } from "../../context/LoginContext";
 import { useState } from "react";
 
@@ -33,6 +34,20 @@ function RegisterUniversity({ handleChange }) {
   const [files, setFiles] = useState(initialFiles); // Estado para los archivos
   const [previewUrl, setPreviewUrl] = useState(""); // Nuevo estado para el preview
   const [infoMsg, setInfoMsg] = useState(""); // Mensaje de éxito o error
+
+  const colorOptions = [
+    { label: "Violeta", value: "#b86fc6" },
+    { label: "Rosa", value: "#f7b6d2" },
+    { label: "Rojo", value: "#ff0000" },
+    { label: "Naranja", value: "#ff9900" },
+    { label: "Amarillo", value: "#ffe600" },
+    { label: "Gris", value: "#bdbdbd" },
+    { label: "Negro", value: "#000000" },
+    { label: "Blanco", value: "#ffffff" },
+    { label: "Verde", value: "#00b050" },
+    { label: "Azul", value: "#0070c0" },
+    { label: "Marrón", value: "#a97c50" },
+  ];
 
   const { createUniversity, submitting } = useLogin();
 
@@ -153,7 +168,7 @@ function RegisterUniversity({ handleChange }) {
             title="Debe ser una palabra, un espacio, un número, y opcionalmente más palabras separadas por espacio. Ejemplo: Cl 38 Sur, Av 5 Norte, Cra 10"
           />
           <FormField
-            label="Placa"
+            label="Placa de la direccion"
             name="placa"
             value={formData.placa}
             required
@@ -164,27 +179,28 @@ function RegisterUniversity({ handleChange }) {
           />
         </div>
         <div className="rd-two-col">
-          <FormField
+          <ComboField
             label="Color principal"
             name="colorprincipal"
             value={formData.colorprincipal}
             required
-            placeholder="Azul"
+            placeholder="Selecciona un color"
             onChange={(e) => handleChange(e, setFormData)}
+            options={colorOptions}
           />
-          <FormField
+          <ComboField
             label="Color secundario"
             name="colorsecundario"
             value={formData.colorsecundario}
             required
-            placeholder="Blanco"
+            placeholder="Selecciona un color"
             onChange={(e) => handleChange(e, setFormData)}
+            options={colorOptions}
           />
         </div>
         <FileField
           label="Logo de la universidad (PNG o JPG)"
           type="file"
-          id="file-upload"
           name="logo"
           file={files.logo}
           accept=".png,.jpg,.jpeg,image/png,image/jpeg"
