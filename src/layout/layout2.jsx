@@ -10,29 +10,25 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   
 
-  let headerProps = {}; // Objeto para las props del header
+  let headerProps = {}; 
 
   if (location.pathname.startsWith('/conductor')) {
     headerProps = {
       conductorConfig: { text: "ir al Panel de Pasajero", action: () => navigate('/pasajero') },
-      activityConfig: { text: "Mis viajes", to: "/conductor/dashboard" },
-      profileAction: () => navigate('/conductor/perfil'),
-      iconoComponent : User,
+      IconoComponent : User,
       userType: 'conductor'
     };
-  } else if (location.pathname.startsWith('/admin')) {
+  } else if (location.pathname.startsWith('/pasajero')) {
     headerProps = {
-      conductorConfig: { text: "Gestionar Conductores", action: () => navigate('/admin/conductores') },
-      activityConfig: { text: "Reportes", to: "/admin/reportes" },
-      profileAction: () => navigate('/admin/configuracion'),
-      userType: 'admin'
-    };
-  } else {
-    headerProps = {
-      activityConfig: { text: "Actividad", to: "/pasajero/actividad" },
-      profileAction: () => navigate('/perfil'),
-      iconoComponent : Car,
+      conductorConfig: { text: "Registrarse como conductor", action: () => navigate('/conductor') },
+      IconoComponent : Car,
       userType: 'pasajero'
+    };
+  }else if (location.pathname.startsWith('/configuracion') || location.pathname.startsWith('/minijuego') ) {
+    headerProps = {
+      conductorConfig: { text: "Ir al panel principal", action: () => navigate('/pasajero') },
+      IconoComponent : User,
+      userType: 'configuracion'
     };
   }
 
@@ -40,7 +36,7 @@ const Layout = ({ children }) => {
     <div>
       <Navbar {...headerProps} />
       <main>
-        {children} {/* El contenido de la página actual */}
+        {children} 
       </main>
        <Footer />
     </div>
