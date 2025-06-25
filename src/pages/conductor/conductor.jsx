@@ -69,6 +69,12 @@ const ConductorPage = () => {
 
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
+
+  // intento danicol
+
+  const [showInfo,setShowInfo] = useState(true)
+  
+
   
   // --- NUEVO USEEFFECT PARA VERIFICAR RUTA ACTIVA AL CARGAR ---
   useEffect(() => {
@@ -280,8 +286,6 @@ const ConductorPage = () => {
   };
 
   const rutasAnterioresData = [
-    { id: 1, title: 'Ruta 1', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Lunes, 10:00 am' },
-    { id: 2, title: 'Ruta 2', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Martes, 8:00 am' },
   ];
 
   // --- RENDERIZADO CONDICIONAL ---
@@ -345,17 +349,34 @@ const ConductorPage = () => {
                 </div>
             </div>
         </div>
-        <div className={styles.previousRoutesSection}>
-            <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
-            <div className={styles.cardsGrid}>
-                {rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))}
-            </div>
-        </div>
+        {showInfo ? (
+                  <div className={styles.previousRoutesSection}>
+                    <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
+                    <div className={styles.cardsGrid}>
+                      {rutasAnterioresData.length > 0 ? (
+                        rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))
+                        /*
+                        previousRoutes.map(rutaData => (
+                          <RutaAnteriorCard
+                            routeData={rutaData}
+                            onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes); }}
+                          />
+                        ))*/
+                      ) : (
+                        <div className={styles.infoMessage}>No tienes viajes anteriores</div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                  </div>
+                )}
         <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
         <FilterDialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen} />
       </div>
     </LoadScript>
   );
 };
+
 
 export default ConductorPage;
