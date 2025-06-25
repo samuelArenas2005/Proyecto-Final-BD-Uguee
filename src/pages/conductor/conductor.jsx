@@ -76,6 +76,8 @@ const ConductorPage = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
+        console.log(user)
+
         if (user) {
           // Busca una relación que pertenezca al conductor y cuya ruta interna tenga estado 'activo'
           const { data: activeRouteData, error } = await supabase

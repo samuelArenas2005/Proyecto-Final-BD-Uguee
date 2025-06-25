@@ -146,6 +146,8 @@ const TravelPage = () => {
         return;
       }
 
+      console.log(user)
+
       const { data: lastPassengerTrip, error: passengerError } = await supabase
         .from('pasajeroviaje')
         .select('idviaje, viaje(estadodelviaje)')
