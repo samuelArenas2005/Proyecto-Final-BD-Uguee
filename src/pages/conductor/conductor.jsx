@@ -73,11 +73,69 @@ const ConductorPage = () => {
   // intento danicol
 
   const [showInfo,setShowInfo] = useState(true)
+  const [previousRoutes, setPreviousRoutes] = useState([]);
   
+    const fetchPreviousRoutes = async (userId) => {
+      const { data: historicalTripsAll, error } = await supabase
+        .from('rutaconductorviaje')
+        .select(`idconductor,ruta(estado)
+  
+        `)
+        .eq('idconductor', userId)
+        
+  
+        const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo")
+  
+       if (
+          error ||!historicalTrips
+        ) {
+          console.log('El no tiene viajes anteriores.');
+          return ;
+        }
+  
+      const rutas = historicalTrips.map(async (viaje) => {
+        const { data: historicalTripsruta, error2 } = await supabase
+          .from('rutaconductorviaje')
+          .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
+        `)
+          .eq('idruta', ruta.idruta)
+        if (error2 || !historicalTripsruta) {
+          return []
+        }
+        return historicalTripsruta;
+      })
+  
+      const rutasArray = await Promise.all(rutas);
+      const rutasArrayPlana = rutasArray.flat()
+      
+      console.log(rutasArrayPlana)
+      console.log("HOla viejo, si soy yo el console log despues de arrays planos")
+      if (error || !historicalTrips) {
+        console.error('Error fetching previous routes:', error);
+        return;
+      }
+      else {
+        setPreviousRoutes(
+          rutasArrayPlana.map((ruta, index) => ({
+            title: `Ruta ${index + 1}`,
+            originlat: ruta.ruta.salidalatitud,
+            originlong : ruta.ruta.salidalongitud,
+            destinationlat: ruta.ruta.paradalatitud,
+            destinationlong: ruta.ruta.paradalongitud,
+            departureTime: ruta.ruta.horadesalida
+          }))
+        )
+      }
+  
+    };
+    
 
   
   // --- NUEVO USEEFFECT PARA VERIFICAR RUTA ACTIVA AL CARGAR ---
   useEffect(() => {
+
+    fetchPreviousRoutes()
+
     const checkForActiveRoute = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -94,6 +152,11 @@ const ConductorPage = () => {
           if (error) {
             console.error('Error verificando ruta activa:', error);
           }
+
+          fetchPreviousRoutes(user.id)
+          console.log("Hola papu")
+          console.log(user.id)
+
 
           // Si se encuentra una ruta activa, redirige al usuario a la página de información del viaje
           if (activeRouteData && activeRouteData.idruta) {
@@ -286,6 +349,7 @@ const ConductorPage = () => {
   };
 
   const rutasAnterioresData = [
+
   ];
 
   // --- RENDERIZADO CONDICIONAL ---

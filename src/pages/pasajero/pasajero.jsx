@@ -84,6 +84,8 @@ const TravelPage = () => {
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
 
+//vuelve papu
+
   const fetchPreviousRoutes = async (userId) => {
     const { data: historicalTripsAll, error } = await supabase
       .from('pasajeroviaje')
