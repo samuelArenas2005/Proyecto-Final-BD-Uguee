@@ -6,7 +6,7 @@ import {
   MapPin,
   CalendarIcon,
   Clock,
-  User,
+  User,  UserCircle2,Flag
 } from 'lucide-react';
 import './tripDetailDialog.css';
 
@@ -21,9 +21,11 @@ export default function TripDetailDialog({
 }) {
   if (!open) return null;
 
+  console.log(vehicleData.tipovehiculo)
+  console.log(vehicleData.placa)
+ 
   const {
     nombre =  '—',
-    // Si más adelante agregas avatar al driverData, cámbialo acá:
     avatarUrl = '/placeholder-avatar.png',
   } = driverData;
 
@@ -41,11 +43,11 @@ export default function TripDetailDialog({
     modelo = '—',
     placa = '—',
     tipovehiculo = '—',
+    numeroasientos = 0,
   } = vehicleData;
 
-  // Cantidad total de asientos: asumimos solo disponibles en routeData.
-  // Si más adelante tienes total de asientos, usa esa propiedad.
-  const totalSeats = asientosdisponibles; // como fallback
+  
+  const totalSeats = numeroasientos-1; 
   const availableSeats = asientosdisponibles;
 
   return (
@@ -58,7 +60,6 @@ export default function TripDetailDialog({
           </button>
         </header>
         <div className="td-body">
-          {/* Sección del conductor */}
           <div className="td-driver">
             <div className="td-photo-wrapper">
               <img
@@ -75,17 +76,15 @@ export default function TripDetailDialog({
           {/* Información básica: Origen / Destino / Fecha / Hora */}
           <div className="td-grid td-info-grid">
             <div>
-              <p className="td-label">Origen</p>
+              <p className="td-label"><MapPin className="td-icon" /> Origen </p>
               <p className="td-value">
-                <MapPin className="td-icon" />
-                {routeData.origen || 'Coordenadas no disponibles'}
+                {routeData.origen.slice(0, 20) + '...' || 'Coordenadas no disponibles'}
               </p>
             </div>
             <div>
-              <p className="td-label">Destino</p>
+              <p className="td-label"><Flag className="td-icon" /> Destino</p>
               <p className="td-value">
-                <MapPin className="td-icon" />
-                {routeData.destino || 'Coordenadas no disponibles'}
+                {routeData.destino.slice(0, 20) + '...' || 'Coordenadas no disponibles'}
               </p>
             </div>
             <div>
@@ -155,16 +154,6 @@ export default function TripDetailDialog({
         </div>
 
         <footer className="td-footer">
-          <Button
-            variant="outline"
-            className="td-btn"
-            onClick={() => {
-              /* Implementa si quieres abrir chat con el conductor */
-            }}
-          >
-            <MessageSquare className="td-btn-icon" />
-            Mensaje al conductor
-          </Button>
           <Button
             className="td-btn td-btn-primary"
             onClick={() => onAcceptTrip(tripId)}

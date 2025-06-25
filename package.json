@@ -36,6 +36,7 @@
     "leaflet-routing-machine": "^3.2.12",
     "react-google-autocomplete": "^2.7.5",
     "react-leaflet": "^4.2.1",
+    "react-qr-code": "^2.0.16",
     "recharts": "^2.15.3",
     "webfontloader": "^1.6.28"
   }
