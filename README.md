@@ -12,6 +12,8 @@ Dependencias a instalar:
 
 --react-google-maps/api
 
+--react-qr-code
+
 ***EXPLICACIÓN CODIGO***
 
 La organización del proyecto se divide en diferentes carpetas, las más importantes siendo:
@@ -39,6 +41,7 @@ La organización del proyecto se divide en diferentes carpetas, las más importa
     --npm install
     --npm install @fortawesome/react-fontawesome @fortawesome/free-brands-svg-icons webfontloader
     --npm install @react-google-maps/api
+    --npm install react-qr-code
 )
 
 
