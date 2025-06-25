@@ -181,6 +181,7 @@ const TravelInfoPage = () => {
         alert("Viaje cancelado exitosamente.");
         navigate('/conductor');
       } catch (error) {
+        console.log(idruta)
         console.error("Error al cancelar el viaje:", error.message);
         alert("No se pudo cancelar el viaje. Inténtalo de nuevo.");
       }

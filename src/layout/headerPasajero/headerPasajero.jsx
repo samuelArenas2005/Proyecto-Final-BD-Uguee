@@ -1,40 +1,90 @@
-import React from 'react';
+import { React, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Car, ListChecks, User } from 'lucide-react';
+import { Car, ListChecks, User, Home, Settings, LogOut, Gamepad2 } from 'lucide-react';
 import styles from './HeaderPasajero.module.css';
-import { useState } from 'react';
-import RegistroConductor from "../../pages/pasajero/RegistroAConductor/registroConductor.jsx";
 
+import { supabase } from '../../supabaseClient.js';
+import { useNavigate } from 'react-router-dom';
 
 
 
 
 const Header = ({
   conductorConfig, // Ejemplo: { text: "Ver Mis Viajes", action: () => navigate('/conductor/viajes') }
-  activityConfig,  // Ejemplo: { text: "Dashboard", to: "/conductor/dashboard" }
-  profileAction,
-  iconoComponent,   // Ejemplo: () => navigate('/perfil-conductor')
-  userType 
+  IconoComponent,   // Ejemplo: () => navigate('/perfil-conductor')
+  userType
 }) => {
-   const [isModalOpen, setIsModalOpen] = useState(false);
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
-  // Configuraciones por defecto si no se proveen props específicas
-  const defaultConductorConfig = {
-    text: "Quiero ser Conductor",
-    action:  openModal, // O navegar a una ruta por defecto
-  };
-  const defaultActivityConfig = {
-    text: "Actividad",
-    to: "/pasajero/actividad",
+  const [urlAvatar, setUrlAvatar] = useState(null)
+  const [userActual, setUserActual] = useState(null)
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef(null);
+
+
+  useEffect(() => {
+    const checkForActiveRoute = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: urlData } = await supabase
+        .from('usuario')
+        .select('urlAvatar , nombrecompleto')
+        .eq('nidentificacion', user.id)
+      console.log("hola soy urlData", urlData)
+      setUrlAvatar(urlData)
+      setUserActual(user)
+      console.log("hola soy id" , userActual.id)
+
+    }
+    checkForActiveRoute();
+  }, [])
+
+    
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (menuRef.current && !menuRef.current.contains(event.target)) {
+          setIsOpen(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, []);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
   };
 
-  
+  const handleActionGoStart = () => {
+    navigate('/');
+    setIsOpen(false);
+  };
 
-  const currentConductor = conductorConfig || defaultConductorConfig;
-  const currentActivity = activityConfig || defaultActivityConfig;
-  const currentProfile = profileAction || defaultProfileAction;
-  const IconoComponent = iconoComponent || Car
+  const handleActionGoPanel = () => {
+    conductorConfig.action()
+    setIsOpen(false);
+  };
+
+  const handleActionConfig = () => {
+    navigate(`/configuracion`)
+    setIsOpen(false);
+  }
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.log("no se pudo cerrar la sesion", error)
+    } else {
+      navigate('/');
+      setIsOpen(false);
+    }
+  }
+
+  const handleActionMiniGame = () => {
+    navigate(`/minijuego`)
+    setIsOpen(false);
+  }
+
 
   return (
     <header className={styles.appHeader}>
@@ -46,22 +96,56 @@ const Header = ({
       </div>
       <nav className={styles.navigation}>
         <button
-          className={`${styles.navButton} ${styles.conductorButton}`}
-          onClick={currentConductor.action}
-        >
-          <IconoComponent size={20} className={styles.icon} />
-          {currentConductor.text}
-        </button>
-
-        <button
           className={`${styles.navButton} ${styles.profileButton}`}
-          onClick={currentProfile}
+          onClick={toggleMenu}
         >
-          <User size={24} className={styles.iconProfile} />
+          {urlAvatar ? (
+            <img src={urlAvatar[0].urlAvatar} alt={urlAvatar[0].nombrecompleto} className={styles.avatar} />
+          ) : (
+            <User size={24} className={styles.iconProfile} />
+          )}
+
         </button>
-        <RegistroConductor isOpen={isModalOpen} onClose={closeModal} />
       </nav>
-       
+
+      {isOpen ? (
+        <nav className={styles.dropdownPanel}>
+          <ul className={styles.menuList}>
+            <li>
+              <button className={styles.menuItem} onClick={handleActionGoStart}>
+                <Home className={styles.menuIcon} size={20} />
+                <span>Ir al inicio</span>
+              </button>
+            </li>
+            <li>
+              <button className={styles.menuItem} onClick={handleActionGoPanel}>
+                <IconoComponent className={styles.menuIcon} size={20} />
+                <span>{conductorConfig.text}</span>
+              </button>
+            </li>
+            <li>
+              <button className={styles.menuItem} onClick={handleActionConfig}>
+                <Settings className={styles.menuIcon} size={20} />
+                <span>Configuración</span>
+              </button>
+            </li>
+            <li>
+              <button className={styles.menuItem} onClick={handleActionMiniGame}>
+                <Gamepad2 className={styles.menuIcon} size={20} />
+                <span>Ir a minijuego</span>
+              </button>
+            </li>
+            <li className={styles.separator}></li>
+            <li>
+              <button className={styles.menuItem} onClick={signOut}>
+                <LogOut className={styles.menuIcon} size={20} />
+                <span>Cerrar sesión</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      ) : null}
+
     </header>
   );
 };

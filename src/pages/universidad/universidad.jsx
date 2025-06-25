@@ -20,7 +20,7 @@ const UniversidadPage = () => {
   const openAssignModal = () => setIsAssignModalOpen(true);
   const closeAssignModal = () => setIsAssignModalOpen(false);
 
-  // Fetch data based on activeTab
+  
   useEffect(() => {
     const fetchRequests = async () => {
       if (activeTab === 'Pasajeros') {
@@ -140,7 +140,7 @@ const UniversidadPage = () => {
   const changeStateUser = async (id, accept) => {
     let tableName = '';
     let statusColumn = '';
-    let userIdColumn = 'idusuario'; // Assuming this is consistent for both tables
+    let userIdColumn = 'idusuario'; 
 
     if (activeTab === 'Pasajeros') {
       tableName = 'pasajero';
