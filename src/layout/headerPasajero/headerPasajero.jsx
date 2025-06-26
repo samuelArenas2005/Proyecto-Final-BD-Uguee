@@ -28,10 +28,12 @@ const Header = ({
         .from('usuario')
         .select('urlAvatar , nombrecompleto')
         .eq('nidentificacion', user.id)
-      console.log("hola soy urlData", urlData)
-      setUrlAvatar(urlData)
       setUserActual(user)
-      console.log("hola soy id" , userActual.id)
+        if (urlData[0].urlAvatar != 'NULL') {
+        console.log(urlData[0].urlAvatar)
+        setUrlAvatar(urlData) 
+      }
+
 
     }
     checkForActiveRoute();
@@ -99,7 +101,7 @@ const Header = ({
           className={`${styles.navButton} ${styles.profileButton}`}
           onClick={toggleMenu}
         >
-          {urlAvatar ? (
+          {urlAvatar !== null ? (
             <img src={urlAvatar[0].urlAvatar} alt={urlAvatar[0].nombrecompleto} className={styles.avatar} />
           ) : (
             <User size={24} className={styles.iconProfile} />

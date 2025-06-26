@@ -13,8 +13,6 @@ const navLinks = [
 ];
 
 
-
-
 const header = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -34,43 +32,48 @@ const header = () => {
         .from('usuario')
         .select('urlAvatar , nombrecompleto')
         .eq('nidentificacion', user.id)
-      setUrlAvatar(urlData)
-      setUserActual(user)
-      console.log(user)
+      
+        setUserActual(user)
+      if (urlData[0].urlAvatar != 'NULL') {
+        console.log(urlData[0].urlAvatar)
+        setUrlAvatar(urlData) 
+      }
+
     }
     checkForActiveRoute();
   }, [])
 
   const handleActionGoStart = () => {
+    navigate('/');
+    setIsOpen(false);
+  };
+
+  const handleActionGoPanel = () => {
+    /* conductorConfig.action() */
+    navigate(`/pasajero`)
+    setIsOpen(false);
+  };
+
+  const handleActionConfig = () => {
+    navigate(`/configuracion`)
+    setIsOpen(false);
+  }
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.log("no se pudo cerrar la sesion", error)
+    } else {
+      window.location.reload();
       navigate('/');
       setIsOpen(false);
-    };
-  
-    const handleActionGoPanel = () => {
-      conductorConfig.action()
-      setIsOpen(false);
-    };
-  
-    const handleActionConfig = () => {
-      navigate(`/configuracion`)
-      setIsOpen(false);
     }
-  
-    const signOut = async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.log("no se pudo cerrar la sesion", error)
-      } else {
-        window.location.reload();
-        navigate('/');
-        setIsOpen(false);
-      }
-    }
-  
-    const handleActionMiniGame = () => {
-      navigate(`/minijuego`)
-      setIsOpen(false);
-    }
+  }
+
+  const handleActionMiniGame = () => {
+    navigate(`/minijuego`)
+    setIsOpen(false);
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -114,12 +117,12 @@ const header = () => {
         </nav>
 
         <nav className="nav-links2">
-          {userActual ? (
+          {userActual != null ? (
             <button
               className={`${styles.navButton} ${styles.profileButton}`}
               onClick={toggleMenu}
             >
-              {urlAvatar ? (
+              {urlAvatar !== null ? (
                 <img src={urlAvatar[0].urlAvatar} alt={urlAvatar[0].nombrecompleto} className={styles.avatar} />
               ) : (
                 <User size={24} className={styles.iconProfile} />
