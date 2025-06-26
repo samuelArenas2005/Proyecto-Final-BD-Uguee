@@ -79,12 +79,14 @@ const ConductorPage = () => {
       const { data: historicalTripsAll, error } = await supabase
         .from('rutaconductorviaje')
         .select(`idconductor,ruta(estado)
-  
         `)
         .eq('idconductor', userId)
         
-  
-        const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo")
+        console.log("Hola soy el user:", userId)
+        console.log("hola daniel ,", historicalTripsAll)
+        const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "cancelado")
+
+        console.log("hola soy cosas, ", historicalTrips)
   
        if (
           error ||!historicalTrips
@@ -93,7 +95,7 @@ const ConductorPage = () => {
           return ;
         }
   
-      const rutas = historicalTrips.map(async (viaje) => {
+      const rutas = historicalTrips.map(async (ruta) => {
         const { data: historicalTripsruta, error2 } = await supabase
           .from('rutaconductorviaje')
           .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)

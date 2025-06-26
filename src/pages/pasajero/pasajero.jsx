@@ -278,6 +278,7 @@ const TravelPage = () => {
       setLoadingRoutes(false);
       return;
     }
+    
 
     const { data: rutas, error } = await supabase
       .from('ruta')
@@ -728,10 +729,10 @@ const TravelPage = () => {
             <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
             <div className={styles.cardsGrid}>
               {previousRoutes.length > 0 ? (
-                previousRoutes.map(rutaData => (
+                previousRoutes.map((rutaData,index) => (
                   <RutaAnteriorCard
                     routeData={rutaData}
-                    onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes); }}
+                    onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes, index); }}
                   />
                 ))
               ) : (
