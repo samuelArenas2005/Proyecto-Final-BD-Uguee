@@ -15,6 +15,10 @@ import ConductorPageViaje from "./pages/conductor/viajeConductor";
 import ConductorPageReporteVia from "./pages/conductor/reporteVia";
 import AdminPage from "./pages/admin/adminPage";
 
+import SettingUser from "./layout/headerPasajero/settingspage"
+
+import Minigame from "./layout/headerPasajero/game"
+
 import Monitor from "./pages/monitor/monitor";
 
 import ProtectedRoute from "./private/privateRoutes";
@@ -68,6 +72,24 @@ const App = () => {
               <Pasajero />
             </Layout2>
             </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/configuracion"
+          element={
+            <ProtectedRoute role="pasajero">
+            <Layout2>
+              <SettingUser />
+            </Layout2>
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/minijuego"
+          element={
+            <Layout2>
+              <Minigame />
+            </Layout2>
           }
         />
         <Route

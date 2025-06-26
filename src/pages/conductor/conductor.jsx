@@ -17,7 +17,6 @@ import { supabase } from '../../supabaseClient.js';
 import styles from './conductor.module.css';
 import RutaAnteriorCard from './componentes/RutaAnteriorCard';
 import SuccessModal from './componentes/succes';
-import FilterDialog from '../pasajero/complementos/filterDialog';
 import wave from '/wave.svg';
 
 const apigoogle = import.meta.env.VITE_APIS_GOOGLE;
@@ -30,9 +29,9 @@ const DEFAULT_CENTER = { lat: 3.3745, lng: -76.5308 };
 
 // --- COMPONENTE DE CARGA ---
 const LoadingScreen = () => (
-  <div className={styles.loadingScreen}>
-    <h2>Verificando rutas activas...</h2>
-    {/* Podrías agregar un spinner aquí */}
+  <div className={styles.loaderContainer}>
+    <div className={styles.spinner}></div>
+    <p className={styles.text}>Buscando Rutas Activas...</p>
   </div>
 );
 
@@ -47,12 +46,46 @@ const ConductorPage = () => {
   const [startCoords, setStartCoords] = useState(null);
   const [destCoords, setDestCoords] = useState(null);
   const [asientos, setAsientos] = useState(1);
-  const [dateTime, setDateTime] = useState(() => {
+
+  const [dateTime, setDateTime] = useState('');
+  const [minDateTime, setMinDateTime] = useState('');
+  const [maxDateTime, setMaxDateTime] = useState('');
+
+  useEffect(() => {
+    const getFormattedDateTimeColombia = (date) => {
+      const options = {
+        timeZone: 'America/Bogota',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      };
+      const formatted = new Date(date).toLocaleString('sv-SE', options);
+
+      return formatted.replace(' ', 'T');
+    };
+
     const now = new Date();
-    now.setHours(now.getHours() + 1);
-    now.setMinutes(0);
-    return now.toISOString().slice(0, 16);
-  });
+    const minVal = getFormattedDateTimeColombia(now);
+    setMinDateTime(minVal);
+    setDateTime(minVal);
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 2);
+    const maxVal = getFormattedDateTimeColombia(tomorrow);
+    setMaxDateTime(maxVal);
+
+  }, []);
+
+  const handleBlur = (e) => {
+    const value = e.target.value;
+    if (value < minDateTime) {
+      console.log("Valor muy bajo. Corrigiendo al mínimo.");
+      setDateTime(minDateTime);
+    }
+  };
 
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [mapZoom, setMapZoom] = useState(14);
@@ -61,9 +94,8 @@ const ConductorPage = () => {
   const [duration, setDuration] = useState(null);
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const [maxAsientosVehiculo, setMaxAsientosVehiculo] = useState(null);
   const [isVehicleInfoLoading, setIsVehicleInfoLoading] = useState(true);
 
@@ -143,10 +175,9 @@ const ConductorPage = () => {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (user) {
-          // Busca una relación que pertenezca al conductor y cuya ruta interna tenga estado 'activo'
           const { data: activeRouteData, error } = await supabase
             .from('rutaconductorviaje')
-            .select('idruta, ruta!inner(estado)') // !inner asegura que solo traiga registros si hay una ruta coincidente
+            .select('idruta, ruta!inner(estado)')
             .eq('idconductor', user.id)
             .eq('ruta.estado', 'activo')
             .maybeSingle(); // .maybeSingle() devuelve un solo registro o null, sin lanzar error si no encuentra nada.
@@ -160,42 +191,35 @@ const ConductorPage = () => {
           console.log(user.id)
 
 
-          // Si se encuentra una ruta activa, redirige al usuario a la página de información del viaje
           if (activeRouteData && activeRouteData.idruta) {
-            // El usuario ya tiene una ruta activa, lo redirigimos a la página de esa ruta.
-            // Asumo que la página de información del viaje es TravelInfoPage, montada en esta URL.
             navigate(`/conductor/viaje/${activeRouteData.idruta}`);
           } else {
-            // No hay ruta activa, permite que la página se cargue para crear una nueva.
             setIsCheckingForActiveRoute(false);
           }
         } else {
-          // No hay usuario, permite que la página cargue.
-          // Otras lógicas (como guardias de ruta) deberían manejar el caso de usuario no autenticado.
           setIsCheckingForActiveRoute(false);
         }
       } catch (e) {
         console.error("Error en la verificación de ruta:", e);
-        setIsCheckingForActiveRoute(false); // En caso de cualquier error, permite que la página cargue
+        setIsCheckingForActiveRoute(false);
       }
     };
 
     checkForActiveRoute();
-  }, [navigate]); // Se agrega navigate a las dependencias
+  }, [navigate]);
 
 
   useEffect(() => {
     const fetchVehicleInfo = async () => {
-      //... (el resto del código de este useEffect no cambia)
       setIsVehicleInfoLoading(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-            throw new Error("Usuario no autenticado.");
+          throw new Error("Usuario no autenticado.");
         }
         const { data: conductorData, error } = await supabase
           .from('conductor')
-          .select('vehiculo ( numeroasientos )')
+          .select('vehiculo ( numeroasientos ),idvehiculo')
           .eq('idusuario', user.id)
           .single();
         if (error) throw error;
@@ -203,7 +227,7 @@ const ConductorPage = () => {
           const capacidadPasajeros = conductorData.vehiculo.numeroasientos - 1;
           setMaxAsientosVehiculo(capacidadPasajeros > 0 ? capacidadPasajeros : 0);
           if (asientos > capacidadPasajeros) {
-              setAsientos(capacidadPasajeros);
+            setAsientos(capacidadPasajeros);
           }
         }
       } catch (error) {
@@ -214,15 +238,15 @@ const ConductorPage = () => {
       }
     };
     fetchVehicleInfo();
-  }, [asientos]);
+  }, []);
 
   const handleAsientosChange = (e) => {
     let value = parseInt(e.target.value, 10);
     if (isNaN(value) || value < 1) {
-        value = 1;
+      value = 1;
     }
     if (maxAsientosVehiculo !== null && value > maxAsientosVehiculo) {
-        value = maxAsientosVehiculo;
+      value = maxAsientosVehiculo;
     }
     setAsientos(value);
   };
@@ -231,15 +255,15 @@ const ConductorPage = () => {
   const onPlaceChangedStart = () => {
     //... (código sin cambios)
     if (autoStartRef.current) {
-        const place = autoStartRef.current.getPlace();
-        if (place.geometry) {
-            const location = place.geometry.location;
-            const coords = { lat: location.lat(), lng: location.lng() };
-            setStartPoint(place.formatted_address);
-            setStartCoords(coords);
-            setMapCenter(coords);
-            setMapZoom(16);
-        }
+      const place = autoStartRef.current.getPlace();
+      if (place.geometry) {
+        const location = place.geometry.location;
+        const coords = { lat: location.lat(), lng: location.lng() };
+        setStartPoint(place.formatted_address);
+        setStartCoords(coords);
+        setMapCenter(coords);
+        setMapZoom(16);
+      }
     }
   };
 
@@ -247,43 +271,43 @@ const ConductorPage = () => {
   const onPlaceChangedDest = () => {
     //... (código sin cambios)
     if (autoDestRef.current) {
-        const place = autoDestRef.current.getPlace();
-        if (place.geometry) {
-            const location = place.geometry.location;
-            const coords = { lat: location.lat(), lng: location.lng() };
-            setDestination(place.formatted_address);
-            setDestCoords(coords);
-        }
+      const place = autoDestRef.current.getPlace();
+      if (place.geometry) {
+        const location = place.geometry.location;
+        const coords = { lat: location.lat(), lng: location.lng() };
+        setDestination(place.formatted_address);
+        setDestCoords(coords);
+      }
     }
   };
 
   useEffect(() => {
-    //... (código sin cambios)
+
     if (startCoords && destCoords) {
-        const directionsService = new window.google.maps.DirectionsService();
-        directionsService.route(
-            {
-                origin: startCoords,
-                destination: destCoords,
-                travelMode: window.google.maps.TravelMode.DRIVING,
-            },
-            (result, status) => {
-                if (status === 'OK' && result) {
-                    setDirectionsResponse(result);
-                    const leg = result.routes[0].legs[0];
-                    setDistance(leg.distance.value);
-                    setDuration(leg.duration.value);
-                } else {
-                    console.error(`Error fetching directions ${result}`);
-                    setDuration(null);
-                }
-            }
-        );
+      const directionsService = new window.google.maps.DirectionsService();
+      directionsService.route(
+        {
+          origin: startCoords,
+          destination: destCoords,
+          travelMode: window.google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === 'OK' && result) {
+            setDirectionsResponse(result);
+            const leg = result.routes[0].legs[0];
+            setDistance(leg.distance.value);
+            setDuration(leg.duration.value);
+          } else {
+            console.error(`Error fetching directions ${result}`);
+            setDuration(null);
+          }
+        }
+      );
     }
   }, [startCoords, destCoords]);
 
   const handleEstablecerRuta = async () => {
-    //... (código de la función sin cambios)
+
     if (!startCoords || !destCoords || !dateTime || asientos <= 0 || !duration) {
       alert('Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente.');
       return;
@@ -293,9 +317,18 @@ const ConductorPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuario no autenticado.');
       const { data: conductorData, error: conductorError } = await supabase
-          .from('conductor').select('idvehiculo').eq('idusuario', user.id).single();
+        .from('conductor').select('idvehiculo').eq('idusuario', user.id).single();
       if (conductorError || !conductorData) throw new Error('No se pudo encontrar el vehículo del conductor.');
       const fechaHora = new Date(dateTime);
+
+      const yyyy = fechaHora.getFullYear();
+      const mm = String(fechaHora.getMonth() + 1).padStart(2, '0');
+      const dd = String(fechaHora.getDate()).padStart(2, '0');
+      const fechaLocal = `${yyyy}-${mm}-${dd}`
+
+      console.log("hola soy fecha", fechaHora)
+      console.log("hola soy dia", fechaLocal)
+      console.log("hola soy hora", fechaHora.toTimeString().split(' ')[0])
       const nuevaRuta = {
         idvehiculo: conductorData.idvehiculo,
         salidalatitud: startCoords.lat,
@@ -303,10 +336,10 @@ const ConductorPage = () => {
         paradalatitud: destCoords.lat,
         paradalongitud: destCoords.lng,
         distancia: distance / 1000,
-        fecha: fechaHora.toISOString().split('T')[0],
+        fecha: fechaLocal,
         horadesalida: fechaHora.toTimeString().split(' ')[0],
         asientosdisponibles: parseInt(asientos, 10),
-        tipoderuta: 'Diaria',
+        tipoderuta: 'Municipal',
         estado: 'activo',
       };
       const { data: rutaInsertada, error: rutaError } = await supabase
@@ -354,7 +387,6 @@ const ConductorPage = () => {
 
   ];
 
-  // --- RENDERIZADO CONDICIONAL ---
   if (isCheckingForActiveRoute) {
     return <LoadingScreen />;
   }
@@ -364,56 +396,54 @@ const ConductorPage = () => {
       <div className={styles.pageContainer}>
         {/* ... (resto del JSX sin cambios) ... */}
         <div className={styles.topSectionWave}>
-            <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
-            <div className={styles.contentWrapper}>
-                <div className={styles.routeSetupSection}>
-                    <h2 className={styles.greeting}>¡Hola Miguel Andrade! Establece tu ruta de hoy</h2>
-                    <div className={styles.inputGroup}>
-                        <div className={styles.inputWrapper}>
-                            <MapPin className={styles.inputIcon} size={20} />
-                            <Autocomplete onLoad={onLoadStart} onPlaceChanged={onPlaceChangedStart} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
-                                <input type="text" placeholder="Punto de partida" value={startPoint} onChange={(e) => setStartPoint(e.target.value)} className={styles.inputField} />
-                            </Autocomplete>
-                        </div>
-                        <div className={styles.inputWrapper}>
-                            <MapPin className={styles.inputIcon} size={20} />
-                            <Autocomplete onLoad={onLoadDest} onPlaceChanged={onPlaceChangedDest} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
-                                <input type="text" placeholder="Destino" value={destination} onChange={(e) => setDestination(e.target.value)} className={styles.inputField} />
-                            </Autocomplete>
-                        </div>
-                        <div className={styles.inputWrapper}>
-                            <Clock className={styles.inputIcon} size={20} />
-                            <input type="datetime-local" value={dateTime} onChange={(e) => setDateTime(e.target.value)} className={styles.inputField} />
-                        </div>
-                        <div className={styles.inputWrapper}>
-                            <Users className={styles.inputIcon} size={20} />
-                            <input
-                                type="number"
-                                value={asientos}
-                                onChange={handleAsientosChange}
-                                className={styles.inputField}
-                                min="1"
-                                max={maxAsientosVehiculo}
-                                disabled={isVehicleInfoLoading}
-                                title={isVehicleInfoLoading ? "Cargando capacidad del vehículo..." : `Máximo ${maxAsientosVehiculo} asientos disponibles`}
-                            />
-                        </div>
-                    </div>
-                    <div className={styles.buttonGroup}>
-                        <button className={styles.submitButton} onClick={handleEstablecerRuta} disabled={loading || isVehicleInfoLoading}>
-                            {loading ? 'Estableciendo...' : 'Establecer ruta'}
-                        </button>
-                        <button className={styles.filterButton} onClick={() => setIsFilterDialogOpen(true)} aria-label="Filtros">
-                            <SlidersHorizontal size={20} />
-                        </button>
-                    </div>
+          <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
+          <div className={styles.contentWrapper}>
+            <div className={styles.routeSetupSection}>
+              <h2 className={styles.greeting}>¡Hola Miguel Andrade! Establece tu ruta de hoy</h2>
+              <div className={styles.inputGroup}>
+                <div className={styles.inputWrapper}>
+                  <MapPin className={styles.inputIcon} size={20} />
+                  <Autocomplete onLoad={onLoadStart} onPlaceChanged={onPlaceChangedStart} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
+                    <input type="text" placeholder="Punto de partida" value={startPoint} onChange={(e) => setStartPoint(e.target.value)} className={styles.inputField} />
+                  </Autocomplete>
                 </div>
-                <div className={styles.mapSection}>
-                    <GoogleMap mapContainerClassName={styles.mapContainer} center={mapCenter} zoom={mapZoom} options={{ styles: mapCustomStyles, disableDefaultUI: true, zoomControl: true }}>
-                        {directionsResponse && (<DirectionsRenderer options={{ directions: directionsResponse, suppressMarkers: false, polylineOptions: { strokeColor: '#AA00FF', strokeWeight: 5 } }} />)}
-                    </GoogleMap>
+                <div className={styles.inputWrapper}>
+                  <MapPin className={styles.inputIcon} size={20} />
+                  <Autocomplete onLoad={onLoadDest} onPlaceChanged={onPlaceChangedDest} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
+                    <input type="text" placeholder="Destino" value={destination} onChange={(e) => setDestination(e.target.value)} className={styles.inputField} />
+                  </Autocomplete>
                 </div>
+                <div className={styles.inputWrapper}>
+                  <Clock className={styles.inputIcon} size={20} />
+                  <input type="datetime-local" min={minDateTime} onBlur={handleBlur}
+                    max={maxDateTime} value={dateTime} onChange={(e) => setDateTime(e.target.value)} className={styles.inputField} />
+                </div>
+                <div className={styles.inputWrapper}>
+                  <Users className={styles.inputIcon} size={20} />
+                  <input
+                    type="number"
+                    value={asientos}
+                    onChange={handleAsientosChange}
+                    className={styles.inputField}
+                    min="1"
+                    max={maxAsientosVehiculo}
+                    disabled={isVehicleInfoLoading}
+                    title={isVehicleInfoLoading ? "Cargando capacidad del vehículo..." : `Máximo ${maxAsientosVehiculo} asientos disponibles`}
+                  />
+                </div>
+              </div>
+              <div className={styles.buttonGroup}>
+                <button className={styles.submitButton} onClick={handleEstablecerRuta} disabled={loading || isVehicleInfoLoading}>
+                  {loading ? 'Estableciendo...' : 'Establecer ruta'}
+                </button>
+              </div>
             </div>
+            <div className={styles.mapSection}>
+              <GoogleMap mapContainerClassName={styles.mapContainer} center={mapCenter} zoom={mapZoom} options={{ styles: mapCustomStyles, disableDefaultUI: true, zoomControl: true }}>
+                {directionsResponse && (<DirectionsRenderer options={{ directions: directionsResponse, suppressMarkers: false, polylineOptions: { strokeColor: '#AA00FF', strokeWeight: 5 } }} />)}
+              </GoogleMap>
+            </div>
+          </div>
         </div>
         {showInfo ? (
                   <div className={styles.previousRoutesSection}>
@@ -437,8 +467,13 @@ const ConductorPage = () => {
                   <div>
                   </div>
                 )}
+        <div className={styles.previousRoutesSection}>
+          <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
+          <div className={styles.cardsGrid}>
+            {rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))}
+          </div>
+        </div>
         <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
-        <FilterDialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen} />
       </div>
     </LoadScript>
   );
