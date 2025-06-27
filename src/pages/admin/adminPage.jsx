@@ -18,6 +18,23 @@ const AdminPage = () => {
   const [universities, setUniversities] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [observacion, setObservacion] = useState("");
+  const [observacionError, setObservacionError] = useState(false);
+  const [adminid, setAdminid] = useState(null);
+
+  useEffect(() => {
+    const getAdminId = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user data:", error);
+        return;
+      }
+      console.log("User data:", data.user.id);
+      setAdminid(data.user.id);
+    };
+
+    getAdminId();
+  }, []);
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -90,31 +107,36 @@ const AdminPage = () => {
     setOpenMenuId(openMenuId === universityId ? null : universityId);
   };
 
-  const handleAcceptUniversity = async (universityId) => {
+  const handleSubmit = async (universityId, estado) => {
+    // Validar que la observación no esté vacía
+    if (!observacion.trim()) {
+      setObservacionError(true);
+      return;
+    }
+
     const { error } = await supabase
       .from("institucion")
-      .update({ estado: "activo" })
+      .update({ estado: estado })
       .eq("idinstitucion", universityId);
-
     if (!error) {
       setUniversities((prev) => prev.filter((u) => u.id != universityId));
       closeDetailsModal();
     } else {
       console.error("Error accepting university:", error);
+      return;
     }
-  };
 
-  const handleDenyUniversity = async (universityId) => {
-    const { error } = await supabase
-      .from("institucion")
-      .update({ estado: "inactivo" })
-      .eq("idinstitucion", universityId);
+    const result = await supabase.from("administradorinstitucion").insert({
+      idinstitucion: universityId,
+      idadministrador: adminid,
+      observacion: observacion,
+      estadoasignado: estado,
+    });
 
-    if (!error) {
-      setUniversities((prev) => prev.filter((u) => u.id !== universityId));
-      closeDetailsModal();
-    } else {
-      console.error("Error denying university:", error);
+    console.log("Admin institution record:", result);
+    if (result.error) {
+      console.error("Error inserting admin institution record:", result.error);
+      return;
     }
   };
 
@@ -146,6 +168,8 @@ const AdminPage = () => {
 
   const closeDetailsModal = () => {
     setSelectedUniversity(null);
+    setObservacion("");
+    setObservacionError(false);
   };
 
   const filteredUniversities = universities.filter(
@@ -223,14 +247,34 @@ const AdminPage = () => {
                       Ver detalles
                     </div>
                     <div
-                      className="action-menu-item accept"
-                      onClick={() => handleAcceptUniversity(university.id)}
+                      className={`action-menu-item accept ${
+                        !observacion.trim() ? "disabled" : ""
+                      }`}
+                      onClick={() =>
+                        !observacion.trim()
+                          ? null
+                          : handleSubmit(university.id, "activo")
+                      }
+                      style={{
+                        opacity: !observacion.trim() ? 0.5 : 1,
+                        cursor: !observacion.trim() ? "not-allowed" : "pointer",
+                      }}
                     >
                       <Check size={16} /> Aceptar Universidad
                     </div>
                     <div
-                      className="action-menu-item deny"
-                      onClick={() => handleDenyUniversity(university.id)}
+                      className={`action-menu-item deny ${
+                        !observacion.trim() ? "disabled" : ""
+                      }`}
+                      onClick={() =>
+                        !observacion.trim()
+                          ? null
+                          : handleSubmit(university.id, "denegado")
+                      }
+                      style={{
+                        opacity: !observacion.trim() ? 0.5 : 1,
+                        cursor: !observacion.trim() ? "not-allowed" : "pointer",
+                      }}
                     >
                       <X size={16} /> Denegar Universidad
                     </div>
@@ -261,6 +305,7 @@ const AdminPage = () => {
               </div>
             </div>
 
+            {/* --- SECCIÓN INFORMACIÓN --- */}
             <div className="modal-details-grid">
               <div className="detail-item">
                 <strong>Nombre</strong>
@@ -277,7 +322,11 @@ const AdminPage = () => {
               <div className="detail-item">
                 <strong>Color Principal</strong>
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
                 >
                   <span>{selectedUniversity.details.colorprincipal}</span>
                   <div
@@ -295,7 +344,11 @@ const AdminPage = () => {
               <div className="detail-item">
                 <strong>Color Secundario</strong>
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
                 >
                   <span>{selectedUniversity.details.colorsecundario}</span>
                   <div
@@ -310,7 +363,7 @@ const AdminPage = () => {
                   ></div>
                 </div>
               </div>
-              <div className="detail-item">
+              <div className="detail-item" style={{ gridColumn: "1/-1" }}>
                 <strong>Documentos de soporte</strong>
                 <div
                   style={{
@@ -348,14 +401,11 @@ const AdminPage = () => {
                           }
                           className="modal-document-button"
                           style={{
-                            marginLeft: "12px",
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
+                            padding: "4px",
                           }}
                           title="Descargar documento"
                         >
-                          <Download size={20} color="#3B82F6"/>
+                          <Download size={15} />
                         </button>
                       </div>
                     ))
@@ -368,16 +418,76 @@ const AdminPage = () => {
               </div>
             </div>
 
+            {/* --- SEPARADOR --- */}
+            <hr
+              style={{
+                margin: "32px 0 18px 0",
+                border: 0,
+                borderTop: "1px solid #eee",
+              }}
+            />
+
+            {/* --- SECCIÓN ADMINISTRAR --- */}
+            <div className="detail-item" style={{ marginBottom: 0 }}>
+              <strong>
+                Observación <span style={{ color: "red" }}>*</span>
+              </strong>
+              <textarea
+                value={observacion}
+                onChange={(e) => {
+                  setObservacion(e.target.value);
+                  setObservacionError(false);
+                }}
+                placeholder="Escribe una observación..."
+                rows={3}
+                style={{
+                  width: "100%",
+                  border: observacionError ? "1px solid red" : "1px solid #ccc",
+                  borderRadius: "6px",
+                  padding: "8px",
+                  marginTop: "6px",
+                  resize: "vertical",
+                }}
+                required
+              />
+              {observacionError && (
+                <span style={{ color: "red", fontSize: "0.9em" }}>
+                  La observación es obligatoria.
+                </span>
+              )}
+            </div>
             <div className="modal-actions">
               <button
-                className="modal-action-button deny"
-                onClick={() => handleDenyUniversity(selectedUniversity.id)}
+                className={`modal-action-button deny ${
+                  !observacion.trim() ? "disabled" : ""
+                }`}
+                onClick={() =>
+                  !observacion.trim()
+                    ? null
+                    : handleSubmit(selectedUniversity.id, "denegado")
+                }
+                style={{
+                  opacity: !observacion.trim() ? 0.5 : 1,
+                  cursor: !observacion.trim() ? "not-allowed" : "pointer",
+                }}
+                disabled={!observacion.trim()}
               >
                 <X size={20} /> Denegar
               </button>
               <button
-                className="modal-action-button accept"
-                onClick={() => handleAcceptUniversity(selectedUniversity.id)}
+                className={`modal-action-button accept ${
+                  !observacion.trim() ? "disabled" : ""
+                }`}
+                onClick={() =>
+                  !observacion.trim()
+                    ? null
+                    : handleSubmit(selectedUniversity.id, "activo")
+                }
+                style={{
+                  opacity: !observacion.trim() ? 0.5 : 1,
+                  cursor: !observacion.trim() ? "not-allowed" : "pointer",
+                }}
+                disabled={!observacion.trim()}
               >
                 <Check size={20} /> Admitir
               </button>
