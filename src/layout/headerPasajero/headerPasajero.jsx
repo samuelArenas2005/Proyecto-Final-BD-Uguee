@@ -147,7 +147,6 @@ const Header = ({
           </ul>
         </nav>
       ) : null}
-
     </header>
   );
 };

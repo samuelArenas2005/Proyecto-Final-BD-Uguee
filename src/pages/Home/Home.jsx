@@ -6,6 +6,7 @@ import homeImage from "../../../public/homeImage2.png";
 import { BusFront, Bot } from 'lucide-react';
 import ChatModal from './chatBot';
 
+
 // Importamos el componente de anuncio
 import GoogleAd from './googleAds';
 
