@@ -4,7 +4,7 @@ import { supabase } from "../../supabaseClient.js";
 import "./universidad.css";
 import AssignUserModal from "./components/asignarUser";
 
-const UniversidadPage = () => {
+const UniversidadPage = ({universityID, status}) => {
   const [activeTab, setActiveTab] = useState('Pasajeros');
   const [searchTerm, setSearchTerm] = useState('');
   const [requests, setRequests] = useState([]);

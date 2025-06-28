@@ -51,6 +51,7 @@
         .search-filter-container {
           display: flex;
           align-items: center;
+          justify-content: space-between;
           margin-bottom: 25px;
           background-color: var(--background-gray-100);
           border-radius: 8px;
@@ -82,10 +83,72 @@
           color: var(--text-gray-light-color);
         }
 
-        .filter-icon {
-          color: var(--primary-color);
+        .filter-container {
+          position: relative;
+        }
+
+        .filter-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 12px;
+          background-color: var(--primary-color);
+          color: var(--white-color);
+          border: none;
+          border-radius: 6px;
           cursor: pointer;
-          margin-left: 15px;
+          font-size: 14px;
+          font-weight: 500;
+          transition: background-color 0.3s ease;
+        }
+
+        .filter-button:hover {
+          background-color: var(--primary-hover-color);
+        }
+
+        .filter-menu {
+          position: absolute;
+          top: calc(100% + 5px);
+          right: 0;
+          background-color: var(--white-color);
+          border: 1px solid var(--border-gray-200);
+          border-radius: 6px;
+          box-shadow: 0 4px 10px var(--shadow-lg-color);
+          z-index: 10;
+          min-width: 150px;
+          overflow: hidden;
+        }
+
+        .filter-menu-item {
+          padding: 10px 15px;
+          cursor: pointer;
+          font-size: 14px;
+          color: var(--text-gray-medium-color);
+          transition: background-color 0.2s ease;
+        }
+
+        .filter-menu-item:hover {
+          background-color: var(--background-gray-100);
+        }
+
+        .filter-menu-item.active {
+          background-color: var(--background-gray-100);
+        }
+
+        .filter-menu-item.todos {
+          color: var(--text-gray-medium-color);
+        }
+
+        .filter-menu-item.pendiente {
+          color: var(--text-blue-600);
+        }
+
+        .filter-menu-item.activo {
+          color: var(--text-green-600);
+        }
+
+        .filter-menu-item.denegado {
+          color: var(--text-red-600);
         }
 
         .tabs {
@@ -173,7 +236,18 @@
           font-weight: 500;
           display: flex;
           align-items: center;
+          justify-content: flex-end;
           gap: 6px;
+          width: 140px;
+          text-align: right;
+          flex-shrink: 0;
+        }
+
+        .request-actions {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          flex-shrink: 0;
         }
 
         .status-icon { /* Para los iconos de check y X */
