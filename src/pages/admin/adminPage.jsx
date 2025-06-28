@@ -15,9 +15,14 @@ import "./adminPage.css";
 
 const AdminPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [universities, setUniversities] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [selectedUniversityHistory, setSelectedUniversityHistory] =
+    useState(null);
+  const [historialData, setHistorialData] = useState([]);
   const [observacion, setObservacion] = useState("");
   const [observacionError, setObservacionError] = useState(false);
   const [adminid, setAdminid] = useState(null);
@@ -36,12 +41,23 @@ const AdminPage = () => {
     getAdminId();
   }, []);
 
+  // Efecto para cerrar el menú de filtro al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showFilterMenu && !event.target.closest(".filter-container")) {
+        setShowFilterMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilterMenu]);
+
   useEffect(() => {
     const fetchUniversities = async () => {
-      const { data, error } = await supabase
-        .from("institucion")
-        .select("*")
-        .eq("estado", "pendiente");
+      const { data, error } = await supabase.from("institucion").select("*");
 
       if (error) {
         console.error("Error fetching universities:", error);
@@ -66,7 +82,7 @@ const AdminPage = () => {
               id: uni.idinstitucion,
               name: uni.nombre,
               requestType: `Sede: ${uni.sede}`,
-              status: "Pendiente de Aprobación",
+              status: uni.estado,
               avatar: (
                 <img
                   src={logo.data.publicUrl}
@@ -103,6 +119,28 @@ const AdminPage = () => {
     setSearchTerm(event.target.value);
   };
 
+  const toggleFilterMenu = () => {
+    setShowFilterMenu(!showFilterMenu);
+  };
+
+  const handleFilterChange = (filter) => {
+    setStatusFilter(filter);
+    setShowFilterMenu(false);
+  };
+
+  const getFilterLabel = () => {
+    switch (statusFilter) {
+      case "activo":
+        return "Activas";
+      case "pendiente":
+        return "Pendientes";
+      case "denegado":
+        return "Denegadas";
+      default:
+        return "Todas";
+    }
+  };
+
   const toggleActionMenu = (universityId) => {
     setOpenMenuId(openMenuId === universityId ? null : universityId);
   };
@@ -118,11 +156,23 @@ const AdminPage = () => {
       .from("institucion")
       .update({ estado: estado })
       .eq("idinstitucion", universityId);
+
     if (!error) {
-      setUniversities((prev) => prev.filter((u) => u.id != universityId));
+      // Actualizar el estado local en lugar de eliminar la universidad
+      setUniversities((prev) =>
+        prev.map((uni) =>
+          uni.id === universityId ? { ...uni, status: estado } : uni
+        )
+      );
+
+      // Actualizar también la universidad seleccionada si es la misma
+      setSelectedUniversity((prev) =>
+        prev && prev.id === universityId ? { ...prev, status: estado } : prev
+      );
+
       closeDetailsModal();
     } else {
-      console.error("Error accepting university:", error);
+      console.error("Error updating university:", error);
       return;
     }
 
@@ -161,9 +211,43 @@ const AdminPage = () => {
     URL.revokeObjectURL(url); // Limpia el objeto URL
   };
 
+  const fetchUniversityHistory = async (universityId) => {
+    console.log("Fetching history for university ID:", universityId);
+
+    const { data, error } = await supabase
+      .from("administradorinstitucion")
+      .select(
+        `
+        fecha,
+        observacion,
+        estadoasignado,
+        administrador:idadministrador (
+          nombre
+        )
+      `
+      )
+      .eq("idinstitucion", universityId)
+      .order("fecha", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching university history:", error);
+      setHistorialData([]);
+    } else {
+      console.log("University history data:", data);
+      setHistorialData(data);
+    }
+  };
+
   const openDetailsModal = (university) => {
     setSelectedUniversity(university);
     setOpenMenuId(null);
+  };
+
+  const openHistoryModal = (university) => {
+    setSelectedUniversityHistory(university);
+    setOpenMenuId(null);
+    // Llamar a la función para obtener el historial
+    fetchUniversityHistory(university.id);
   };
 
   const closeDetailsModal = () => {
@@ -172,23 +256,36 @@ const AdminPage = () => {
     setObservacionError(false);
   };
 
-  const filteredUniversities = universities.filter(
-    (uni) =>
+  const closeHistoryModal = () => {
+    setSelectedUniversityHistory(null);
+    setHistorialData([]);
+  };
+
+  const filteredUniversities = universities.filter((uni) => {
+    // Filtro por búsqueda de texto
+    const matchesSearch =
       uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (uni.details.ciudad &&
-        uni.details.ciudad.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+        uni.details.ciudad.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Filtro por estado
+    const matchesStatus =
+      statusFilter === "todos" || uni.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   const getStatusColor = (status) => {
-    if (status === "Universidad Aceptada") return "var(--text-green-600)";
-    if (status === "Universidad Denegada") return "var(--text-red-600)";
-    return "var(--text-blue-600)";
+    if (status === "activo") return "var(--text-green-600)";
+    if (status === "denegado") return "var(--text-red-600)";
+    if (status === "pendiente") return "var(--text-blue-600)";
+    return "var(--text-gray-color)";
   };
 
   const getStatusIcon = (status) => {
-    if (status === "Universidad Aceptada")
+    if (status === "activo")
       return <CheckCircle2 size={20} className="status-icon" />;
-    if (status === "Universidad Denegada")
+    if (status === "denegado")
       return <XCircle size={20} className="status-icon" />;
     return null;
   };
@@ -210,7 +307,49 @@ const AdminPage = () => {
             onChange={handleSearchChange}
           />
         </div>
-        <Filter size={24} className="filter-icon" />
+        <div className="filter-container">
+          <button onClick={toggleFilterMenu} className="filter-button">
+            <Filter size={18} />
+            {getFilterLabel()}
+          </button>
+
+          {showFilterMenu && (
+            <div className="filter-menu">
+              <div
+                onClick={() => handleFilterChange("todos")}
+                className={`filter-menu-item todos ${
+                  statusFilter === "todos" ? "active" : ""
+                }`}
+              >
+                Todo
+              </div>
+              <div
+                onClick={() => handleFilterChange("pendiente")}
+                className={`filter-menu-item pendiente ${
+                  statusFilter === "pendiente" ? "active" : ""
+                }`}
+              >
+                Pendientes
+              </div>
+              <div
+                onClick={() => handleFilterChange("activo")}
+                className={`filter-menu-item activo ${
+                  statusFilter === "activo" ? "active" : ""
+                }`}
+              >
+                Activas
+              </div>
+              <div
+                onClick={() => handleFilterChange("denegado")}
+                className={`filter-menu-item denegado ${
+                  statusFilter === "denegado" ? "active" : ""
+                }`}
+              >
+                Denegadas
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="requests-list">
@@ -224,67 +363,53 @@ const AdminPage = () => {
                   <span className="request-type">{university.requestType}</span>
                 </div>
               </div>
-              <div
-                className="request-status"
-                style={{ color: getStatusColor(university.status) }}
-              >
-                {university.status}
-                {getStatusIcon(university.status)}
-              </div>
-              <div className="actions-menu-container">
-                <button
-                  className="more-options-button"
-                  onClick={() => toggleActionMenu(university.id)}
+              <div className="request-actions">
+                <div
+                  className="request-status"
+                  style={{ color: getStatusColor(university.status) }}
                 >
-                  <MoreVertical size={24} />
-                </button>
-                {openMenuId === university.id && (
-                  <div className="action-menu">
-                    <div
-                      className="action-menu-item"
-                      onClick={() => openDetailsModal(university)}
-                    >
-                      Ver detalles
+                  {university.status === "activo"
+                    ? "Activo"
+                    : university.status === "pendiente"
+                    ? "Pendiente"
+                    : university.status === "denegado"
+                    ? "Denegado"
+                    : university.status}
+                  {getStatusIcon(university.status)}
+                </div>{" "}
+                <div className="actions-menu-container">
+                  <button
+                    className="more-options-button"
+                    onClick={() => toggleActionMenu(university.id)}
+                  >
+                    <MoreVertical size={24} />
+                  </button>
+                  {openMenuId === university.id && (
+                    <div className="action-menu">
+                      <div
+                        className="action-menu-item"
+                        onClick={() => openDetailsModal(university)}
+                      >
+                        Administrar
+                      </div>
+                      <div
+                        className="action-menu-item"
+                        onClick={() => openHistoryModal(university)}
+                      >
+                        Historial
+                      </div>
                     </div>
-                    <div
-                      className={`action-menu-item accept ${
-                        !observacion.trim() ? "disabled" : ""
-                      }`}
-                      onClick={() =>
-                        !observacion.trim()
-                          ? null
-                          : handleSubmit(university.id, "activo")
-                      }
-                      style={{
-                        opacity: !observacion.trim() ? 0.5 : 1,
-                        cursor: !observacion.trim() ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      <Check size={16} /> Aceptar Universidad
-                    </div>
-                    <div
-                      className={`action-menu-item deny ${
-                        !observacion.trim() ? "disabled" : ""
-                      }`}
-                      onClick={() =>
-                        !observacion.trim()
-                          ? null
-                          : handleSubmit(university.id, "denegado")
-                      }
-                      style={{
-                        opacity: !observacion.trim() ? 0.5 : 1,
-                        cursor: !observacion.trim() ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      <X size={16} /> Denegar Universidad
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           ))
         ) : (
-          <p>No hay solicitudes de universidades pendientes.</p>
+          <p>
+            {statusFilter === "todos"
+              ? "No hay universidades disponibles."
+              : `No hay universidades ${getFilterLabel().toLowerCase()}.`}
+          </p>
         )}
       </div>
 
@@ -362,6 +487,10 @@ const AdminPage = () => {
                     }}
                   ></div>
                 </div>
+              </div>
+              <div className="detail-item">
+                <strong>Estado</strong>
+                <span>{selectedUniversity.status}</span>
               </div>
               <div className="detail-item" style={{ gridColumn: "1/-1" }}>
                 <strong>Documentos de soporte</strong>
@@ -459,38 +588,220 @@ const AdminPage = () => {
             <div className="modal-actions">
               <button
                 className={`modal-action-button deny ${
-                  !observacion.trim() ? "disabled" : ""
+                  !observacion.trim() ||
+                  selectedUniversity.status === "denegado"
+                    ? "disabled"
+                    : ""
                 }`}
                 onClick={() =>
-                  !observacion.trim()
+                  !observacion.trim() ||
+                  selectedUniversity.status === "denegado"
                     ? null
                     : handleSubmit(selectedUniversity.id, "denegado")
                 }
                 style={{
-                  opacity: !observacion.trim() ? 0.5 : 1,
-                  cursor: !observacion.trim() ? "not-allowed" : "pointer",
+                  opacity:
+                    !observacion.trim() ||
+                    selectedUniversity.status === "denegado"
+                      ? 0.5
+                      : 1,
+                  cursor:
+                    !observacion.trim() ||
+                    selectedUniversity.status === "denegado"
+                      ? "not-allowed"
+                      : "pointer",
                 }}
-                disabled={!observacion.trim()}
+                disabled={
+                  !observacion.trim() ||
+                  selectedUniversity.status === "denegado"
+                }
+                title={
+                  selectedUniversity.status === "denegado"
+                    ? "Esta universidad ya está denegada"
+                    : ""
+                }
               >
                 <X size={20} /> Denegar
               </button>
               <button
                 className={`modal-action-button accept ${
-                  !observacion.trim() ? "disabled" : ""
+                  !observacion.trim() || selectedUniversity.status === "activo"
+                    ? "disabled"
+                    : ""
                 }`}
                 onClick={() =>
-                  !observacion.trim()
+                  !observacion.trim() || selectedUniversity.status === "activo"
                     ? null
                     : handleSubmit(selectedUniversity.id, "activo")
                 }
                 style={{
-                  opacity: !observacion.trim() ? 0.5 : 1,
-                  cursor: !observacion.trim() ? "not-allowed" : "pointer",
+                  opacity:
+                    !observacion.trim() ||
+                    selectedUniversity.status === "activo"
+                      ? 0.5
+                      : 1,
+                  cursor:
+                    !observacion.trim() ||
+                    selectedUniversity.status === "activo"
+                      ? "not-allowed"
+                      : "pointer",
                 }}
-                disabled={!observacion.trim()}
+                disabled={
+                  !observacion.trim() || selectedUniversity.status === "activo"
+                }
+                title={
+                  selectedUniversity.status === "activo"
+                    ? "Esta universidad ya está activa"
+                    : ""
+                }
               >
                 <Check size={20} /> Admitir
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedUniversityHistory && (
+        <div
+          className={`modal-overlay ${selectedUniversityHistory ? "open" : ""}`}
+          onClick={closeHistoryModal}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={closeHistoryModal}>
+              <X size={28} />
+            </button>
+            <div className="modal-header">
+              <div className="modal-avatar">
+                {selectedUniversityHistory.avatar}
+              </div>
+              <div className="modal-user-info">
+                <h2>Historial - {selectedUniversityHistory.name}</h2>
+                <p>{selectedUniversityHistory.requestType}</p>
+              </div>
+            </div>
+
+            <div style={{ padding: "20px" }}>
+              {historialData && historialData.length > 0 ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "15px",
+                    maxHeight: "400px",
+                    overflowY: "auto",
+                  }}
+                >
+                  {historialData.map((record, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        backgroundColor: "var(--background-gray-50)",
+                        border: "1px solid var(--border-gray-200)",
+                        borderRadius: "8px",
+                        padding: "15px",
+                        boxShadow: "0 2px 4px var(--shadow-color)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        <div>
+                          <strong
+                            style={{
+                              color: "var(--text-gray-medium-color)",
+                              fontSize: "14px",
+                            }}
+                          >
+                            Administrador:{" "}
+                            {record.administrador?.nombre || "N/A"}
+                          </strong>
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "var(--text-gray-color)",
+                            }}
+                          >
+                            {new Date(record.fecha).toLocaleDateString(
+                              "es-ES",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: "8px" }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                            backgroundColor:
+                              record.estadoasignado === "activo"
+                                ? "var(--text-green-600)"
+                                : record.estadoasignado === "denegado"
+                                ? "var(--text-red-600)"
+                                : "var(--text-blue-600)",
+                            color: "white",
+                          }}
+                        >
+                          {record.estadoasignado === "activo"
+                            ? "Aprobado"
+                            : record.estadoasignado === "denegado"
+                            ? "Denegado"
+                            : record.estadoasignado}
+                        </span>
+                      </div>
+
+                      <div style={{ marginTop: "8px" }}>
+                        <strong
+                          style={{
+                            fontSize: "13px",
+                            color: "var(--text-gray-color)",
+                          }}
+                        >
+                          Observación:
+                        </strong>
+                        <p
+                          style={{
+                            margin: "4px 0 0 0",
+                            fontSize: "14px",
+                            color: "var(--text-gray-medium-color)",
+                            lineHeight: "1.4",
+                          }}
+                        >
+                          {record.observacion || "Sin observaciones"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "var(--text-gray-color)",
+                  }}
+                >
+                  <p>No hay historial disponible para esta universidad</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
