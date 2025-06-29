@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { PointerLockControls, Box, Text } from "@react-three/drei";
 import * as THREE from "three";
 
-import styles from "./TaxiGame.module.css";
+import styles from "./taxigame3d.module.css";
 
 // — Enhanced Keyboard Hook —
 function useKeyboard() {
@@ -1547,128 +1547,618 @@ function GasStations({ playerPosition, isInVehicle, onRefuel, fuel }) {
               </mesh>
             </group>
           ))}
-        </div>
-      )}
-      
-      <div 
-        ref={gameAreaRef} 
-        className={styles.gameArea}
-        style={{ backgroundColor: '#1a1a1a' }}
-      >
-        {/* Obstáculos */}
-        {obstacles.map(obstacle => (
-          <div 
-            key={obstacle.id}
-            className={styles.obstacle}
-            style={{ 
-              left: obstacle.x, 
-              top: obstacle.y,
-              width: obstacle.width,
-              height: obstacle.height
-            }}
-          />
-        ))}
-        
-        {/* Power-ups */}
-        {powerUps.map(powerUp => (
-          <div 
-            key={powerUp.id}
-            className={`${styles.powerUp} ${styles[powerUp.type]}`}
-            style={{ 
-              left: powerUp.x, 
-              top: powerUp.y,
-            }}
-          >
-            {powerUp.type === 'speed' ? (
-              <Zap size={24} color="#00ffaa" />
-            ) : (
-              <Users size={24} color="#ffaa00" />
-            )}
-          </div>
-        ))}
-        
-        {/* Personas */}
-        {people.map(person => (
-          <div key={person.id}>
-            {!person.collected && (
-              <div 
-                className={styles.person}
-                style={{ left: person.x, top: person.y }}
-              >
-                <PersonStanding size={24} color="#00ffaa" />
-              </div>
-            )}
-            
-            {/* Destinos */}
-            <div 
-              className={styles.destination}
-              style={{ 
-                left: person.destination.x, 
-                top: person.destination.y,
-                border: `2px dashed ${person.collected ? '#aa00ff' : '#ffaa00'}`
-              }}
+
+          {/* Station sign with text */}
+          <group position={[0, 6, 3.2]}>
+            <Text
+              fontSize={0.8}
+              color="#ffffff"
+              anchorX="center"
+              anchorY="middle"
             >
-              <Star size={20} color={person.collected ? '#aa00ff' : '#ffaa00'} />
-            </div>
-          </div>
-        ))}
-        
-        {/* Jugador */}
-        <div 
-          className={styles.player}
-          style={{ 
-            left: player.x, 
-            top: player.y,
-            transform: `rotate(${player.rotation}deg)`,
-            backgroundColor: player.carrying ? '#aa00ff' : '#2c2c2c'
-          }}
+              {station.name}
+            </Text>
+          </group>
+        </group>
+      ))}
+    </>
+  );
+}
+
+// — Traffic Cars (AI vehicles) —
+function TrafficCars() {
+  const [trafficCars] = useState([
+    { id: 1, pos: [20, 1, 0], direction: [1, 0, 0], color: "#0066cc" },
+    { id: 2, pos: [-20, 1, 0], direction: [-1, 0, 0], color: "#cc6600" },
+    { id: 3, pos: [0, 1, 20], direction: [0, 0, -1], color: "#006600" },
+    { id: 4, pos: [0, 1, -20], direction: [0, 0, 1], color: "#990099" },
+  ]);
+
+  const carRefs = useRef([]);
+
+  useFrame((state, delta) => {
+    carRefs.current.forEach((car, i) => {
+      if (car && trafficCars[i]) {
+        const speed = 15 * delta;
+        const direction = trafficCars[i].direction;
+
+        car.position.x += direction[0] * speed;
+        car.position.z += direction[2] * speed;
+
+        // Reset position when out of bounds
+        if (Math.abs(car.position.x) > 100 || Math.abs(car.position.z) > 100) {
+          car.position.set(...trafficCars[i].pos);
+        }
+      }
+    });
+  });
+
+  return (
+    <>
+      {trafficCars.map((car, i) => (
+        <group
+          key={`traffic-car-${i}`}
+          ref={(el) => (carRefs.current[i] = el)}
+          position={car.pos}
         >
-          <Car size={28} color="#ffffff" />
-          {player.carrying && (
-            <div className={styles.passengerIndicator}>
-              <PersonStanding size={16} color="#ffffff" />
-              {player.maxPassengers > 1 && player.carrying.length > 1 && (
-                <span className={styles.passengerCount}>{player.carrying.length}</span>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Indicadores de efectos activos */}
-      
-      
-      <div className={styles.controls}>
-        <div className={styles.controlRow}>
-          <div className={styles.key}><ArrowUp size={24} /></div>
-        </div>
-        <div className={styles.controlRow}>
-          <div className={styles.key}><ArrowLeft size={24} /></div>
-          <div className={styles.key}><ArrowDown size={24} /></div>
-          <div className={styles.key}><ArrowRight size={24} /></div>
-        </div>
-        <p className={styles.instructions}>Usa las teclas WASD para mover el taxi</p>
-      </div>
-      
-      <div className={styles.footer}>
-        <button onClick={resetGame} className={styles.resetButton}>
-          {gameOver ? 'Jugar de Nuevo' : 'Reiniciar Juego'}
-        </button>
-      </div>
-      
-      {/* Pantalla de Game Over */}
-      {gameOver && (
-        <div className={styles.gameOver}>
-          <h2>¡Tiempo Agotado!</h2>
-          <p>Puntuación Final: <strong>{score}</strong></p>
-          <p>Nivel Alcanzado: <strong>{level}</strong></p>
-          <button onClick={resetGame} className={styles.resetButton}>
-            Jugar de Nuevo
+          {/* Car body */}
+          <mesh>
+            <boxGeometry args={[3, 1.2, 5]} />
+            <meshStandardMaterial
+              color={car.color}
+              metalness={0.7}
+              roughness={0.3}
+            />
+          </mesh>
+
+          {/* Car roof */}
+          <mesh position={[0, 0.4, -0.5]}>
+            <boxGeometry args={[2.8, 0.8, 3]} />
+            <meshStandardMaterial
+              color={car.color}
+              metalness={0.6}
+              roughness={0.4}
+            />
+          </mesh>
+
+          {/* Wheels */}
+          {[
+            [1.3, -0.4, 1.8],
+            [-1.3, -0.4, 1.8],
+            [1.3, -0.4, -1.8],
+            [-1.3, -0.4, -1.8],
+          ].map((pos, j) => (
+            <mesh
+              key={`wheel-${j}`}
+              position={pos}
+              rotation={[Math.PI / 2, 0, 0]}
+            >
+              <cylinderGeometry args={[0.4, 0.4, 0.3]} />
+              <meshStandardMaterial color="#1a1a1a" />
+            </mesh>
+          ))}
+
+          {/* Headlights */}
+          <mesh position={[0.8, 0, 2.6]}>
+            <sphereGeometry args={[0.2]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              emissive="#ffffff"
+              emissiveIntensity={0.4}
+            />
+          </mesh>
+          <mesh position={[-0.8, 0, 2.6]}>
+            <sphereGeometry args={[0.2]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              emissive="#ffffff"
+              emissiveIntensity={0.4}
+            />
+          </mesh>
+        </group>
+      ))}
+    </>
+  );
+}
+
+// — Componente principal mejorado —
+export default function TaxiGame() {
+  const [score, setScore] = useState(0);
+  const [playerPosition, setPlayerPosition] = useState([0, 0, 0]);
+  const [vehiclePosition, setVehiclePosition] = useState([0, 1, 10]);
+  const [isInVehicle, setIsInVehicle] = useState(false);
+  const [velocity, setVelocity] = useState(0);
+  const [onGround, setOnGround] = useState(true);
+  const [distanceToVehicle, setDistanceToVehicle] = useState(100);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [currentPassenger, setCurrentPassenger] = useState(null);
+  const [fuel, setFuel] = useState(100);
+  const [timeOfDay, setTimeOfDay] = useState(0.6);
+  const [achievements, setAchievements] = useState([]);
+  const [totalTrips, setTotalTrips] = useState(0);
+  const [combo, setCombo] = useState(1);
+  const [lastHonkTime, setLastHonkTime] = useState(0);
+  const [headlightsOn, setHeadlightsOn] = useState(false);
+
+  // Instrucciones iniciales
+  const [showInstructions, setShowInstructions] = useState(false);
+
+  // Sistema de pasajeros
+  const [passengers, setPassengers] = useState([
+    {
+      id: 1,
+      name: "Ana",
+      pos: [20, 0, 15],
+      color: "#4a90e2",
+      pickedUp: false,
+      destinationId: 0,
+    },
+    {
+      id: 2,
+      name: "Carlos",
+      pos: [-25, 0, -20],
+      color: "#f5a623",
+      pickedUp: false,
+      destinationId: 1,
+    },
+    {
+      id: 3,
+      name: "María",
+      pos: [35, 0, -10],
+      color: "#d0021b",
+      pickedUp: false,
+      destinationId: 2,
+    },
+    {
+      id: 4,
+      name: "Luis",
+      pos: [-15, 0, 30],
+      color: "#7ed321",
+      pickedUp: false,
+      destinationId: 3,
+    },
+  ]);
+
+  const [destinations] = useState([
+    { id: 0, pos: [-40, 0, 25], name: "Centro Comercial" },
+    { id: 1, pos: [40, 0, 20], name: "Aeropuerto" },
+    { id: 2, pos: [-20, 0, -35], name: "Hospital" },
+    { id: 3, pos: [25, 0, 35], name: "Universidad" },
+  ]);
+
+  // Manejar recogida de pasajeros
+  const handlePickupPassenger = (passengerIndex) => {
+    const passenger = passengers[passengerIndex];
+    if (!passenger.pickedUp && !currentPassenger) {
+      setPassengers((prev) =>
+        prev.map((p, i) =>
+          i === passengerIndex ? { ...p, pickedUp: true } : p
+        )
+      );
+      setCurrentPassenger(passenger);
+      setScore((prev) => prev + 10); // Puntos por recoger
+    }
+  };
+
+  // Verificar entrega en destino
+  useEffect(() => {
+    if (currentPassenger && isInVehicle) {
+      const destination = destinations.find(
+        (d) => d.id === currentPassenger.destinationId
+      );
+      if (destination) {
+        const distance = Math.sqrt(
+          Math.pow(vehiclePosition[0] - destination.pos[0], 2) +
+            Math.pow(vehiclePosition[2] - destination.pos[2], 2)
+        );
+
+        if (distance < 4) {
+          // Pasajero entregado
+          setScore((prev) => prev + 50); // Puntos por entrega
+          setCurrentPassenger(null);
+          setTotalTrips((prev) => prev + 1); // Aumentar contador de viajes
+          setCombo((prev) => prev + 1); // Aumentar combo
+
+          // Lograr combo
+          if (combo >= 3) {
+            setScore((prev) => prev + 20); // Puntos adicionales por combo
+            setAchievements((prev) => [...prev, `Combo x${combo} logrado!`]);
+          }
+
+          // Generar nuevo pasajero después de un tiempo
+          setTimeout(() => {
+            const availablePositions = [
+              [Math.random() * 80 - 40, 0, Math.random() * 80 - 40],
+              [Math.random() * 60 + 20, 0, Math.random() * 60 + 20],
+              [Math.random() * -60 - 20, 0, Math.random() * 60 + 20],
+              [Math.random() * 60 + 20, 0, Math.random() * -60 - 20],
+            ];
+
+            const names = [
+              "Pedro",
+              "Elena",
+              "Jorge",
+              "Carmen",
+              "Diego",
+              "Sofia",
+            ];
+            const colors = [
+              "#9013fe",
+              "#50e3c2",
+              "#b8e986",
+              "#ff9500",
+              "#4bd5ff",
+            ];
+
+            const newPassenger = {
+              id: Date.now(),
+              name: names[Math.floor(Math.random() * names.length)],
+              pos: availablePositions[
+                Math.floor(Math.random() * availablePositions.length)
+              ],
+              color: colors[Math.floor(Math.random() * colors.length)],
+              pickedUp: false,
+              destinationId: Math.floor(Math.random() * destinations.length),
+            };
+
+            setPassengers((prev) => [...prev, newPassenger]);
+          }, 3000);
+        }
+      }
+    }
+  }, [vehiclePosition, currentPassenger, isInVehicle, destinations]);
+
+  // Prevenir scroll y otros comportamientos cuando el juego está activo
+  useEffect(() => {
+    const preventDefaults = (e) => {
+      if (
+        [
+          "Space",
+          "KeyW",
+          "KeyA",
+          "KeyS",
+          "KeyD",
+          "KeyF",
+          "Tab",
+          "Escape",
+        ].includes(e.code)
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    // Prevenir menú contextual
+    const preventContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    // Prevenir selección de texto
+    const preventSelection = (e) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener("keydown", preventDefaults);
+    document.addEventListener("contextmenu", preventContextMenu);
+    document.addEventListener("selectstart", preventSelection);
+
+    // Hacer que el body sea no scrolleable
+    document.body.style.overflow = "hidden";
+    document.body.style.margin = "0";
+    document.body.style.padding = "0";
+
+    return () => {
+      document.removeEventListener("keydown", preventDefaults);
+      document.removeEventListener("contextmenu", preventContextMenu);
+      document.removeEventListener("selectstart", preventSelection);
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  // Ciclo día/noche - 10 minutos de duración
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeOfDay((prev) => (prev + 0.00028) % 1); // 10 minutos = 600 segundos, 1/600 ≈ 0.00167, pero más lento
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStartGame = () => {
+    setShowInstructions(false);
+    setGameStarted(true);
+  };
+
+  if (showInstructions) {
+    return (
+      <div className={styles.instructionsScreen}>
+        <div className={styles.instructionsContent}>
+          <h1>🚕 Uguee Taxi Game 3D</h1>
+          <div className={styles.instructionsText}>
+            <h2>🎮 Cómo Jugar:</h2>
+            <ul>
+              <li>
+                🖱️ <strong>Haz clic</strong> para bloquear el cursor y mirar
+                alrededor
+              </li>
+              <li>
+                🚶 <strong>WASD:</strong> Caminar/Conducir
+              </li>
+              <li>
+                🦘 <strong>Espacio:</strong> Saltar (solo a pie)
+              </li>
+              <li>
+                🚗 <strong>F:</strong> Entrar/Salir del taxi
+              </li>
+              <li>
+                �‍🤝‍🧑 <strong>Objetivo:</strong> Recoge pasajeros (NPCs
+                verdes) y llévalos a su destino
+              </li>
+              <li>
+                🏢 <strong>Explora:</strong> Una ciudad 3D completa con
+                edificios
+              </li>
+              <li>
+                🗺️ <strong>Minimapa:</strong> Usa el minimapa para encontrar
+                pasajeros y destinos
+              </li>
+            </ul>
+            <h2>🌟 Características:</h2>
+            <ul>
+              <li>✨ Gráficos 3D inmersivos con Three.js</li>
+              <li>🚙 Experiencia de conducción realista</li>
+              <li>🏙️ Entorno urbano detallado</li>
+              <li>🎯 Sistema de colisiones avanzado</li>
+              <li>🌅 Iluminación dinámica y sombras</li>
+              <li>🧑‍🤝‍🧑 Sistema de pasajeros con IA</li>
+            </ul>
+          </div>
+          <button className={styles.startButton} onClick={handleStartGame}>
+            🚀 ¡Comenzar Aventura!
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      <UI
+        score={score}
+        isInVehicle={isInVehicle}
+        velocity={velocity}
+        onGround={onGround}
+        distanceToVehicle={distanceToVehicle}
+        passengers={passengers}
+        destinations={destinations}
+        playerPosition={playerPosition}
+        currentPassenger={currentPassenger}
+        fuel={fuel}
+        timeOfDay={timeOfDay}
+        achievements={achievements}
+        totalTrips={totalTrips}
+        combo={combo}
+      />
+      <Canvas
+        shadows
+        camera={{ fov: 75, position: [0, 2, 0] }}
+        onCreated={({ gl, camera }) => {
+          gl.shadowMap.enabled = true;
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+          gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.2;
+          camera.far = 300;
+        }}
+        style={{
+          background: "linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%)",
+          height: "100vh",
+          width: "100vw",
+        }}
+      >
+        <Suspense fallback={null}>
+          {/* Dynamic lighting system */}
+          <DynamicLighting timeOfDay={timeOfDay} />
+
+          {/* Sound and effect visualizers */}
+          <SoundVisualizer
+            isHonking={Date.now() - lastHonkTime < 500}
+            headlightsOn={headlightsOn}
+          />
+
+          {/* Niebla atmosférica para realismo */}
+          <fog attach="fog" args={["#87CEEB", 100, 280]} />
+
+          <PlayerController
+            playerPosition={playerPosition}
+            setPlayerPosition={setPlayerPosition}
+            isInVehicle={isInVehicle}
+            setIsInVehicle={setIsInVehicle}
+            vehiclePosition={vehiclePosition}
+            setVehiclePosition={setVehiclePosition}
+            setVelocity={setVelocity}
+            setOnGround={setOnGround}
+            setDistanceToVehicle={setDistanceToVehicle}
+          />
+
+          <Ground />
+          <CityEnvironment />
+          <RealisticVehicle
+            position={vehiclePosition}
+            isPlayerInVehicle={isInVehicle}
+          />
+
+          {/* Interior del vehículo solo visible cuando está dentro */}
+          {isInVehicle && (
+            <group position={vehiclePosition}>
+              <VehicleInterior />
+            </group>
+          )}
+
+          {/* NPCs y destinos */}
+          <NPCs
+            playerPosition={vehiclePosition}
+            isInVehicle={isInVehicle}
+            onPickup={handlePickupPassenger}
+            passengers={passengers}
+            destinations={destinations}
+          />
+
+          <Coins
+            onCollect={() => setScore((s) => s + 1)}
+            playerPosition={playerPosition}
+          />
+
+        
+          <WeatherSystem />
+          <NPCs
+            playerPosition={playerPosition}
+            isInVehicle={isInVehicle}
+            onPickup={(index) => {
+              setScore((s) => s + 5);
+              setPassengers((prev) =>
+                prev.map((p, i) => (i === index ? { ...p, pickedUp: true } : p))
+              );
+            }}
+            passengers={passengers}
+            destinations={destinations}
+          />
+
+          <EnvironmentalElements />
+          <GasStations
+            playerPosition={playerPosition}
+            isInVehicle={isInVehicle}
+            onRefuel={() => setFuel(100)}
+            fuel={fuel}
+          />
+          <TrafficCars />
+
+          <PointerLockControls makeDefault />
+        </Suspense>
+      </Canvas>
     </div>
   );
-};
+}
 
-export default TaxiGame;
+// — Dynamic Day/Night Lighting System —
+function DynamicLighting({ timeOfDay }) {
+  const sunRef = useRef();
+  const moonRef = useRef();
+
+  useFrame(() => {
+    // Sun movement
+    if (sunRef.current) {
+      const sunAngle = (timeOfDay - 0.5) * Math.PI;
+      sunRef.current.position.set(
+        Math.cos(sunAngle) * 100,
+        Math.sin(sunAngle) * 100,
+        50
+      );
+      sunRef.current.intensity = Math.max(0, Math.sin(sunAngle) * 1.5);
+    }
+
+    // Moon movement
+    if (moonRef.current) {
+      const moonAngle = (timeOfDay - 0.5) * Math.PI + Math.PI;
+      moonRef.current.position.set(
+        Math.cos(moonAngle) * 80,
+        Math.sin(moonAngle) * 80,
+        30
+      );
+      moonRef.current.intensity = Math.max(0, Math.sin(moonAngle) * 0.4);
+    }
+  });
+
+  return (
+    <>
+      {/* Sun */}
+      <directionalLight
+        ref={sunRef}
+        castShadow
+        color="#ffffff"
+        shadow-mapSize-width={4096}
+        shadow-mapSize-height={4096}
+        shadow-camera-far={300}
+        shadow-camera-left={-100}
+        shadow-camera-right={100}
+        shadow-camera-top={100}
+        shadow-camera-bottom={-100}
+        shadow-bias={-0.0001}
+      />
+
+      {/* Moon */}
+      <directionalLight ref={moonRef} color="#b0c4de" />
+
+      {/* Ambient light varies with time - Improved night lighting */}
+      <ambientLight
+        intensity={0.4 + Math.sin(timeOfDay * Math.PI) * 0.4}
+        color={timeOfDay < 0.3 || timeOfDay > 0.7 ? "#6495ed" : "#ffffff"}
+      />
+
+      {/* Additional night lighting for better visibility */}
+      {(timeOfDay < 0.3 || timeOfDay > 0.7) && (
+        <directionalLight
+          position={[0, 50, 0]}
+          intensity={0.3}
+          color="#87ceeb"
+        />
+      )}
+    </>
+  );
+}
+
+// — Enhanced Sound System (Visual feedback since we can't use actual audio) —
+function SoundVisualizer({ isHonking, headlightsOn }) {
+  const hornRef = useRef();
+
+  useFrame((state) => {
+    if (hornRef.current && isHonking) {
+      hornRef.current.scale.setScalar(
+        1 + Math.sin(state.clock.elapsedTime * 20) * 0.3
+      );
+    }
+  });
+
+  return (
+    <>
+      {/* Horn visual effect */}
+      {isHonking && (
+        <mesh ref={hornRef} position={[0, 2, 0]}>
+          <sphereGeometry args={[2]} />
+          <meshStandardMaterial
+            color="#ffff00"
+            transparent
+            opacity={0.3}
+            emissive="#ffff00"
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+      )}
+
+      {/* Headlight beams */}
+      {headlightsOn && (
+        <>
+          <mesh position={[1, 0, 3]} rotation={[-0.1, 0, 0]}>
+            <coneGeometry args={[2, 10, 8]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              transparent
+              opacity={0.1}
+              emissive="#ffffff"
+              emissiveIntensity={0.2}
+            />
+          </mesh>
+          <mesh position={[-1, 0, 3]} rotation={[-0.1, 0, 0]}>
+            <coneGeometry args={[2, 10, 8]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              transparent
+              opacity={0.1}
+              emissive="#ffffff"
+              emissiveIntensity={0.2}
+            />
+          </mesh>
+        </>
+      )}
+    </>
+  );
+}

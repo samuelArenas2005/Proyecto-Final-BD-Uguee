@@ -13,11 +13,15 @@ const navLinks = [
 ];
 
 
-const header = () => {
+const header = ({
+  conductorConfig, // Ejemplo: { text: "Ver Mis Viajes", action: () => navigate('/conductor/viajes') }
+  IconoComponent,   // Ejemplo: () => navigate('/perfil-conductor')
+  userType
+}) => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const [userActual, setUserActual] = useState(null)
-  const [urlAvatar, setUrlAvatar] = useState(null)
+  const [userActual, setUserActual] = useState(null);
+  const [urlAvatar, setUrlAvatar] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -26,21 +30,23 @@ const header = () => {
   };
 
   useEffect(() => {
-    const checkForActiveRoute = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    async function checkSessionActive() {
+      const { data: { user } , error: erroUser} = await supabase.auth.getUser();
+      if(!user || erroUser){
+        return
+      }
       const { data: urlData } = await supabase
         .from('usuario')
         .select('urlAvatar , nombrecompleto')
-        .eq('nidentificacion', user.id)
-      
-        setUserActual(user)
-      if (urlData[0].urlAvatar != 'NULL') {
-        console.log(urlData[0].urlAvatar)
-        setUrlAvatar(urlData) 
-      }
+        .eq('nidentificacion', user.id);
 
+      setUserActual(user);
+      if (urlData[0].urlAvatar != 'NULL') {
+        console.log(urlData[0].urlAvatar);
+        setUrlAvatar(urlData);
+      }
     }
-    checkForActiveRoute();
+    checkSessionActive();
   }, [])
 
   const handleActionGoStart = () => {

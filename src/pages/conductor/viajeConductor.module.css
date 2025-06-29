@@ -232,6 +232,91 @@
   color: #555;
 }
 
+/*modal*/
+
+.modalOverlayOpen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirmModalContent {
+  background-color: #FFFFFF;
+  padding: 35px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+
+.modalCloseButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9CA3AF;
+    transition: color 0.2s ease;
+}
+.modalCloseButton:hover {
+    color: #4B5563;
+}
+
+.confirmModalActions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.confirmModalButton {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    background-color: #E5E7EB;
+    color: #4B5563;
+}
+
+.confirmModalButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+    background-color:  #D1D5DB;
+}
+
+.confirmModalButtonCancelar {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    background-color: var(--text-red-600);
+    color: var(--white-color);
+}
+
+.confirmModalButtonCancelar:hover {
+    background-color: #B02020;
+}
+
 @media (max-width: 992px) {
   .topRow, .qrAndMapSection {
     flex-direction: column;
