@@ -116,7 +116,6 @@ useEffect(() => {
       .from(tableName)
       .select(estado)
       .eq(idName, user.id) 
-      .eq(estado, 'activo')
       .single();
 
     if (estadoError || !estadoData  ) {
