@@ -6,6 +6,7 @@ import homeImage from "../../../public/homeImage2.png";
 import { BusFront, Bot } from 'lucide-react';
 import ChatModal from './chatBot';
 
+
 // Importamos el componente de anuncio
 import GoogleAd from './googleAds';
 
@@ -97,12 +98,11 @@ const Home = () => {
             padding: '1rem 0',
           }}
         >
-          <GoogleAd
-            adSlot="9876543210"         /* Reemplaza con tu propio adSlot */
+         {/*  <GoogleAd
+            adSlot="9876543210"         
             style={{ display: 'block', margin: '0 auto', width: '100%', maxWidth: '728px' }}
             adFormat="auto"
-            fullWidthResponsive={true}
-          />
+            fullWidthResponsive={true} /> */}
         </div>
       </section>
 

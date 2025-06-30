@@ -14,18 +14,18 @@ import ConductorPage from "./pages/conductor/conductor";
 import ConductorPageViaje from "./pages/conductor/viajeConductor";
 import ConductorPageReporteVia from "./pages/conductor/reporteVia";
 import AdminPage from "./pages/admin/adminPage";
-
 import SettingUser from "./layout/headerPasajero/settingspage"
-
-import Minigame from "./layout/headerPasajero/game"
-
+import Minigame from "./pages/games/gameMenu"
+import MinigameTaxi2d from "./pages/games/taxigame2d"
+import MinigameTaxi3d from "./pages/games/taxigame3d"
 import Monitor from "./pages/monitor/monitor";
-
 import ProtectedRoute from "./private/privateRoutes";
-
 import Prueba from "./pages/prueba/prueba";
-
 import NotFoundPage from "./pages/notFound";
+
+
+
+
 
 import "./App.css";
 
@@ -81,9 +81,31 @@ const App = () => {
          <Route
           path="/minijuego"
           element={
+          <ProtectedRoute role="pasajero">
             <Layout2>
               <Minigame />
             </Layout2>
+             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/minijuego/taxigame2d"
+          element={
+          <ProtectedRoute role="pasajero">
+            <Layout2>
+              <MinigameTaxi2d />
+            </Layout2>
+             </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/minijuego/taxigame3d"
+          element={
+          <ProtectedRoute role="pasajero">
+            <Layout2>
+              <MinigameTaxi3d />
+            </Layout2>
+             </ProtectedRoute>
           }
         />
         <Route

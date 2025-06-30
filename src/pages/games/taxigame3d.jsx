@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { PointerLockControls, Box, Text } from "@react-three/drei";
 import * as THREE from "three";
 
-import styles from "./TaxiGame.module.css";
+import styles from "./taxigame3d.module.css";
 
 // — Enhanced Keyboard Hook —
 function useKeyboard() {
@@ -1681,7 +1681,7 @@ export default function TaxiGame() {
   const [headlightsOn, setHeadlightsOn] = useState(false);
 
   // Instrucciones iniciales
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   // Sistema de pasajeros
   const [passengers, setPassengers] = useState([

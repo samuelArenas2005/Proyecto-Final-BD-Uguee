@@ -7,9 +7,20 @@ import {
 } from '@react-google-maps/api';
 import { supabase } from '../../supabaseClient.js';
 
+
+/*
+DANIEL ANDRADE
+
+preguntale a la chat xd, ya tienes el atributo fecha en ruta y
+ el atributo estado en viaje (no se los nombres literal anyways)
+ solo recuerda que en caso de pasar 10 minutos poner el estado de la ruta en cancelado,
+  ya lo de borrar viaje se realiza solo :D
+
+*/
+
 import styles from './viajeConductor.module.css';
 import PassengerCard from './componentes/pasajeroCard';
-import { MapPin, Clock, Users, CheckCircle2, AlertCircle, ExternalLink, Loader } from 'lucide-react';
+import { MapPin, Clock, Users, CheckCircle2, AlertCircle, ExternalLink, Loader, X } from 'lucide-react';
 import waveImage from "../../../public/wave.svg";
 
 // --- CONFIGURACIÓN DE GOOGLE MAPS ---
@@ -37,6 +48,9 @@ const TravelInfoPage = () => {
   const [passengers, setPassengers] = useState([]);
   const [passengersLoading, setPassengersLoading] = useState(true);
   const [passengerError, setPassengerError] = useState(null);
+
+
+  const[showConfirmModal,setShowConfirmModal] = useState(false)
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apigoogle,
@@ -95,8 +109,8 @@ const TravelInfoPage = () => {
 
     const fetchPassengers = async () => {
       try {
-        setPassengersLoading(true); // Aseguramos que el estado de carga se active al inicio de cada intento
-        setPassengerError(null); // Limpiamos cualquier error previo
+        setPassengersLoading(true); 
+        setPassengerError(null); 
 
         const { data: viajeData, error: viajeError } = await supabase
           .from('rutaconductorviaje')
@@ -169,23 +183,22 @@ const TravelInfoPage = () => {
   };
 
   const handleCancelTrip = async () => {
-    if (window.confirm("¿Estás seguro de que quieres cancelar este viaje? Esta acción no se puede deshacer.")) {
       try {
         const { error: supabaseError } = await supabase
           .from('ruta')
-          .update({ estado: 'inactivo' })
+          .update({ estado: 'cancelado' })
           .eq('idruta', idruta);
 
         if (supabaseError) throw supabaseError;
 
         alert("Viaje cancelado exitosamente.");
+        setShowConfirmModal(false)
         navigate('/conductor');
       } catch (error) {
         console.log(idruta)
         console.error("Error al cancelar el viaje:", error.message);
         alert("No se pudo cancelar el viaje. Inténtalo de nuevo.");
       }
-    }
   };
 
   if (loadError) return <div className={styles.centeredLoader}><AlertCircle size={48} color="red" /> <p>Error al cargar API de Google Maps: {loadError.message}</p></div>;
@@ -285,8 +298,8 @@ const TravelInfoPage = () => {
         </div>
 
         <div className={styles.bottomActions}>
-          <button onClick={handleCancelTrip} className={styles.cancelButtonLink}>
-            Cancelar viaje
+          <button onClick={() => setShowConfirmModal(true)} className={styles.cancelButtonLink}>
+            Cancelar ruta
           </button>
         </div>
       </div>
@@ -297,6 +310,38 @@ const TravelInfoPage = () => {
           <span>¡Viaje comenzado con éxito!</span>
         </div>
       )}
+
+      {showConfirmModal && (
+          <div className={styles.modalOverlayOpen}>
+            <div className={styles.confirmModalContent} onClick={e => e.stopPropagation()}>
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className={styles.modalCloseButton}
+              >
+                <X size={28} />
+              </button>
+              <h3>
+                ¿Estás seguro de cancelar esta ruta?
+              </h3>
+              <div className={styles.confirmModalActions}>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className={styles.confirmModalButton}
+                >
+                  Volver
+                </button>
+                <button
+                  onClick={handleCancelTrip}
+                  className={styles.confirmModalButtonCancelar}
+                >
+                  Cancelar ruta
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
     </div>
   );
 };

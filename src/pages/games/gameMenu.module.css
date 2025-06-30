@@ -1,0 +1,157 @@
+/* GameSelectionPage.module.css */
+
+/* Definimos nuestras variables de color para mantener la consistencia */
+:root {
+  --primary-glow: #aa00ff;
+  --dark-background: #F5F5F5;
+  --light-text: #f0f0f0;
+}
+
+/* Contenedor principal de la página */
+.pageContainer {
+  background-color: var(--dark-background);
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  padding-top: 0;
+  margin-top: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  overflow: hidden; /* Evita barras de scroll por las animaciones */
+}
+
+.mainTitle {
+  color: #2c2c2c;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.3rem;
+  margin-bottom: 3rem;
+  /* text-shadow: 0 0 7px #aa00ff; */
+}
+
+/* Animación para el título */
+/* @keyframes flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    text-shadow:
+      0 0 4px var(--light-text),
+      0 0 10px var(--light-text),
+      0 0 20px var(--primary-glow),
+      0 0 40px var(--primary-glow);
+  }
+  20%, 24%, 55% {
+    text-shadow: none;
+  }
+} */
+
+
+.cardsWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4rem; /* Espacio entre las tarjetas */
+  flex-wrap: wrap; /* Permite que se apilen en pantallas pequeñas */
+}
+
+/* El estilo de la tarjeta individual */
+.gameCard {
+  position: relative; /* Clave para superponer elementos */
+  width: 300px;
+  height: 450px;
+  border-radius: 25px;
+  overflow: hidden; /* Esconde lo que se salga de los bordes redondeados */
+  cursor: pointer;
+  box-shadow: 0 0 10px -5px var(--primary-glow);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Animación de Hover para la tarjeta */
+.gameCard:hover {
+  transform: scale(1.05) translateY(-10px);
+  box-shadow: 0 0 25px var(--primary-glow);
+}
+
+/* Imagen de fondo de la tarjeta */
+.cardImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen cubra todo sin deformarse */
+  transition: transform 0.6s ease-out, filter 0.4s ease;
+}
+
+.gameCard:hover .cardImage {
+  transform: scale(1.1); /* Sutil zoom a la imagen al hacer hover */
+}
+
+/* Capa oscura que aparece sobre la imagen en el hover */
+.cardOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 20%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.gameCard:hover .cardOverlay {
+  opacity: 1;
+}
+
+/* Contenido de texto y el ícono */
+.cardContent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  color: var(--light-text);
+  z-index: 2; /* Asegura que esté por encima de la imagen y el overlay */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cardTitle {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  text-transform: uppercase;
+  /* Sube el título al hacer hover */
+  transform: translateY(80px); /* Posición inicial, fuera de la vista */
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.gameCard:hover .cardTitle {
+  /* Posición final, centrado y visible */
+  transform: translateY(0px); 
+}
+
+/* Contenedor del ícono y texto "PLAY" */
+.playIconWrapper {
+  margin-top: 1rem;
+  opacity: 0; /* Oculto por defecto */
+  transform: translateY(20px);
+  transition: opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s; /* El 0.2s es un delay */
+}
+
+.gameCard:hover .playIconWrapper {
+  opacity: 1; /* Aparece en hover */
+  transform: translateY(0);
+}
+
+.playText {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 0.2rem;
+  color: var(--light-text);
+  margin-top: 0.5rem;
+}

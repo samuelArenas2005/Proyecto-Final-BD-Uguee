@@ -22,36 +22,38 @@ const Header = ({
 
 
   useEffect(() => {
-    const checkForActiveRoute = async () => {
+    async function checkSessionActive() {
+
       const { data: { user } } = await supabase.auth.getUser();
       const { data: urlData } = await supabase
         .from('usuario')
         .select('urlAvatar , nombrecompleto')
-        .eq('nidentificacion', user.id)
-      setUserActual(user)
+        .eq('nidentificacion', user.id);
+      setUserActual(user);
+      if (urlData.length !== 0) {
         if (urlData[0].urlAvatar != 'NULL') {
-        console.log(urlData[0].urlAvatar)
-        setUrlAvatar(urlData) 
+          console.log(urlData[0].urlAvatar);
+          setUrlAvatar(urlData);
+        }
+        return
       }
-
-
     }
-    checkForActiveRoute();
+    checkSessionActive();
   }, [])
 
-    
-    useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (menuRef.current && !menuRef.current.contains(event.target)) {
-          setIsOpen(false);
-        }
-      };
 
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -111,7 +113,7 @@ const Header = ({
       </nav>
 
       {isOpen ? (
-        <nav className={styles.dropdownPanel}>
+        <nav ref={menuRef} className={styles.dropdownPanel}>
           <ul className={styles.menuList}>
             <li>
               <button className={styles.menuItem} onClick={handleActionGoStart}>
@@ -124,12 +126,14 @@ const Header = ({
                 <IconoComponent className={styles.menuIcon} size={20} />
                 <span>{conductorConfig.text}</span>
               </button>
+
             </li>
             <li>
               <button className={styles.menuItem} onClick={handleActionConfig}>
                 <Settings className={styles.menuIcon} size={20} />
                 <span>Configuración</span>
               </button>
+
             </li>
             <li>
               <button className={styles.menuItem} onClick={handleActionMiniGame}>
@@ -147,7 +151,6 @@ const Header = ({
           </ul>
         </nav>
       ) : null}
-
     </header>
   );
 };
