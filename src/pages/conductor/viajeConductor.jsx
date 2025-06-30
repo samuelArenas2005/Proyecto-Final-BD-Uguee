@@ -7,6 +7,17 @@ import {
 } from '@react-google-maps/api';
 import { supabase } from '../../supabaseClient.js';
 
+
+/*
+DANIEL ANDRADE
+
+preguntale a la chat xd, ya tienes el atributo fecha en ruta y
+ el atributo estado en viaje (no se los nombres literal anyways)
+ solo recuerda que en caso de pasar 10 minutos poner el estado de la ruta en cancelado,
+  ya lo de borrar viaje se realiza solo :D
+
+*/
+
 import styles from './viajeConductor.module.css';
 import PassengerCard from './componentes/pasajeroCard';
 import { MapPin, Clock, Users, CheckCircle2, AlertCircle, ExternalLink, Loader, X } from 'lucide-react';

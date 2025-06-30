@@ -11,7 +11,7 @@ import {
   Route,
   Armchair,
   X,
-  Car, Phone, Palette, Tag, Shapes
+  Car, Phone, Palette, Tag, Shapes,TicketX
 } from 'lucide-react';
 import TripDetailDialog from './complementos/tripDetailDialog';
 import styles from './pasajero.module.css';
@@ -90,7 +90,7 @@ const TravelPage = () => {
   const [showQrModal, setShowQrModal] = useState(false);
   const [previousRoutes, setPreviousRoutes] = useState([]);
   const [showInfo, setShowInfo] = useState(true)
-  const [showConfirmModal,setShowConfirmModal] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   const [origen, setOrigen] = useState(null);
   const [destino, setDestino] = useState(null);
@@ -210,6 +210,7 @@ const TravelPage = () => {
         .single();
 
       console.log("hola", lastPassengerTrip);
+      setIdViajeActual(lastPassengerTrip.idviaje)
 
       if (
         passengerError ||
@@ -281,10 +282,10 @@ const TravelPage = () => {
           );
         }
 
+        setAcceptedRoute(activeRouteData);
         console.log('Se encontró un viaje activo. Mostrando panel...');
         setShowInfo(false)
-        setAcceptedRoute(activeRouteData);
-
+     
       }
 
     };
@@ -437,6 +438,9 @@ const TravelPage = () => {
     setIsTripDetailDialogOpen(true);
   };
 
+  const [idViajeActual, setIdViajeActual] = useState(null)
+
+
   const setPasajeroViaje = async (tripId) => {
     const { data: viaje, error } = await supabase
       .from('rutaconductorviaje')
@@ -449,7 +453,7 @@ const TravelPage = () => {
       return;
     }
 
-    console.log("hola soy idviaje", viaje.idviaje)
+    setIdViajeActual(viaje.idviaje)
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -475,6 +479,31 @@ const TravelPage = () => {
     setAcceptedRoute(selectedRoute);
     setIsTripDetailDialogOpen(false);
   };
+
+  const [isDesactive, setIsDesactive] = useState(false);
+
+  useEffect(() => {
+    let intervalId;
+
+    const fetchStatus = async () => {
+      console.log("me llamo muchas veces")
+      const { data, error } = await supabase
+        .from('pasajeroviaje')
+        .select('idviaje')
+        .eq('idviaje', idViajeActual)
+        .single();
+
+      if(data === null || error){
+        setIsDesactive(true)
+      }
+    }
+      if( acceptedRoute !== null && idViajeActual !== null) { 
+        fetchStatus();
+        intervalId = setInterval(fetchStatus, 5000);
+      }
+      return () => clearInterval(intervalId);
+    }, [acceptedRoute,idViajeActual]);
+
 
   const handleCancelTripInfo = async () => {
 
@@ -936,6 +965,28 @@ const TravelPage = () => {
             </div>
           </div>
         )}
+
+        {isDesactive && (
+           <div className={styles.modalOverlayOpen}>
+            <div className={styles.confirmModalContent} onClick={e => e.stopPropagation()}>
+              <TicketX size={40} color={'#aa00ff'}/>
+              <h3>
+                &nbsp;El conductor a cancelado la ruta.
+              </h3>
+              <div className={styles.confirmModalActions}>
+                <button
+                  onClick={() => {setIsDesactive(false)
+                    window.location.reload();
+                  }}
+                  className={styles.confirmModalButton}
+                >
+                  Volver
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+        }
       </div>
     </LoadScript>
   );
