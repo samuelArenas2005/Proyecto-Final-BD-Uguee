@@ -10,7 +10,6 @@ function FileField({ label, name, file, onFileChange, accept, previewUrl }) {
           id={`file-${name}`}
           name={name}
           accept={accept}
-          required
           onChange={onFileChange}
         />
         <label htmlFor={`file-${name}`} className="custom-file-button">

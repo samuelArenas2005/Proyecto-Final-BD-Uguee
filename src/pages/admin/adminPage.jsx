@@ -718,8 +718,9 @@ const AdminPage = () => {
                               fontSize: "14px",
                             }}
                           >
-                            Administrador:{" "}
-                            {record.administrador?.nombre || "N/A"}
+                            {record.administrador?.nombre
+                              ? `Administrador: ${record.administrador.nombre}`
+                              : "Cambio de datos"}
                           </strong>
                         </div>
                         <div style={{ textAlign: "right" }}>

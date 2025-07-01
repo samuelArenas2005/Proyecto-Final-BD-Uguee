@@ -120,8 +120,9 @@ const NotActive = ({ universityId, universityStatus }) => {
                         <div className={styles.historyHeader}>
                           <div className={styles.adminInfo}>
                             <strong>
-                              Administrador:{" "}
-                              {record.administrador?.nombre || "N/A"}
+                              {record.administrador?.nombre
+                                ? `Administrador: ${record.administrador.nombre}`
+                                : "Cambio de datos de la universidad"}
                             </strong>
                           </div>
                           <div className={styles.dateInfo}>
