@@ -102,11 +102,98 @@ const ConductorPage = () => {
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
 
+  async function getAddressFromCoords(lat, lng) {
+    const apiKey = import.meta.env.VITE_APIS_GOOGLE;
+    const endpoint = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
 
+    try {
+      const response = await fetch(endpoint);
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.results.length > 0) {
+        return data.results[0].formatted_address;
+      } else {
+        console.warn('No se encontró una dirección para estas coordenadas.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error al obtener dirección:', error);
+      return null;
+    }
+  }
+
+  // intento danicol
+
+  const [previousRoutes, setPreviousRoutes] = useState([]);
+
+  const fetchPreviousRoutes = async (userId) => {
+    const { data: historicalTripsAll, error } = await supabase
+      .from('rutaconductorviaje')
+      .select(`idruta,ruta(estado),idconductor
+        `)
+      .eq('idconductor', userId)
+
+    console.log("Hola soy el user:", userId)
+    console.log("hola daniel ,", historicalTripsAll)
+    const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo")
+
+    console.log("hola soy cosas, ", historicalTrips)
+
+    if (
+      error || !historicalTrips
+    ) {
+      console.log('El no tiene viajes anteriores.');
+      return;
+    }
+
+    const rutas = historicalTrips.map(async (ruta) => {
+      const { data: historicalTripsruta, error2 } = await supabase
+        .from('rutaconductorviaje')
+        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
+        `)
+        .eq('idruta', ruta.idruta)
+      if (error2 || !historicalTripsruta) {
+        return []
+      }
+      return historicalTripsruta;
+    })
+
+    const rutasArray = await Promise.all(rutas);
+    const rutasArrayPlana = rutasArray.flat()
+
+    console.log("hola soy plana", rutasArrayPlana)
+    console.log("HOla viejo, si soy yo el console log despues de arrays planos")
+    if (error || !historicalTrips) {
+      console.error('Error fetching previous routes:', error);
+      return;
+    }
+    else {
+      setPreviousRoutes(
+        rutasArrayPlana.map((ruta, index) => ({
+          title: `Ruta ${index + 1}`,
+          originlat: ruta.ruta.salidalatitud,
+          originlong: ruta.ruta.salidalongitud,
+          destinationlat: ruta.ruta.paradalatitud,
+          destinationlong: ruta.ruta.paradalongitud,
+          departureTime: ruta.ruta.horadesalida
+        }))
+      )
+      console.log("Numero de rutas previas", previousRoutes.length)
+    }
+
+  };
+
+
+
+  // --- NUEVO USEEFFECT PARA VERIFICAR RUTA ACTIVA AL CARGAR ---
   useEffect(() => {
+
+
     const checkForActiveRoute = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
+
+        console.log(user)
 
         if (user) {
           const { data: activeRouteData, error } = await supabase
@@ -114,11 +201,16 @@ const ConductorPage = () => {
             .select('idruta, ruta!inner(estado)')
             .eq('idconductor', user.id)
             .eq('ruta.estado', 'activo')
-            .maybeSingle();
+            .maybeSingle(); // .maybeSingle() devuelve un solo registro o null, sin lanzar error si no encuentra nada.
 
           if (error) {
             console.error('Error verificando ruta activa:', error);
           }
+
+          fetchPreviousRoutes(user.id)
+          console.log("Hola papu")
+          console.log(user.id)
+
 
           if (activeRouteData && activeRouteData.idruta) {
             navigate(`/conductor/viaje/${activeRouteData.idruta}`);
@@ -182,7 +274,7 @@ const ConductorPage = () => {
 
   const onLoadStart = (autocomplete) => (autoStartRef.current = autocomplete);
   const onPlaceChangedStart = () => {
-    //... (código sin cambios)
+
     if (autoStartRef.current) {
       const place = autoStartRef.current.getPlace();
       if (place.geometry) {
@@ -235,9 +327,42 @@ const ConductorPage = () => {
     }
   }, [startCoords, destCoords]);
 
+  //Función creada por DAniel pa probar
+
+  const getInfoRutaAnterior = async (rutaData) => {
+
+    console.log(rutaData)
+
+    const coordsI = { lat: rutaData.originlat, lng: rutaData.originlong };
+    setStartCoords(coordsI)
+    const direccion = await getAddressFromCoords(
+      rutaData.originlat,
+      rutaData.originlong);
+    setStartPoint(direccion);
+
+    const coordsF={lat: rutaData.destinationlat, lng: rutaData.destinationlong};
+    setDestCoords(coordsF)
+    console.log(coordsF)
+
+    const direcciondestino = await getAddressFromCoords(
+      rutaData.destinationlat,
+      rutaData.destinationlong);
+    setDestination(direcciondestino); 
+    
+
+
+    setAsientos(3)
+
+
+
+
+  }
+
+
+  //aqui termina mi prueba pa
   const handleEstablecerRuta = async () => {
 
-    if (!startCoords || !destCoords || !dateTime || asientos <= 0 || !duration) {
+    if (!startCoords || !destCoords || !dateTime || asientos <= 0 ) {
       alert('Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente.');
       return;
     }
@@ -313,8 +438,7 @@ const ConductorPage = () => {
   };
 
   const rutasAnterioresData = [
-    { id: 1, title: 'Ruta 1', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Lunes, 10:00 am' },
-    { id: 2, title: 'Ruta 2', origin: 'Partida El Caney', destination: 'Destino Univalle', departureTime: 'Martes, 8:00 am' },
+
   ];
 
   if (isCheckingForActiveRoute) {
@@ -375,17 +499,32 @@ const ConductorPage = () => {
             </div>
           </div>
         </div>
+
         <div className={styles.previousRoutesSection}>
           <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
           <div className={styles.cardsGrid}>
-            {rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))}
+            {previousRoutes.length > 0 ? (
+
+              previousRoutes.map((rutaData, index) => (
+                <RutaAnteriorCard
+                  routeData={rutaData}
+
+                  onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
+                />
+              ))
+            ) : (
+              <div className={styles.infoMessage}>No tienes viajes anteriores</div>
+            )}
           </div>
         </div>
+
+
         <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
-          
+
       </div>
     </LoadScript>
   );
 };
+
 
 export default ConductorPage;

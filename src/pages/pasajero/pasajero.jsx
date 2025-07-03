@@ -139,6 +139,8 @@ const TravelPage = () => {
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
 
+//vuelve papu
+
   const fetchPreviousRoutes = async (userId) => {
     const { data: historicalTripsAll, error } = await supabase
       .from('pasajeroviaje')
@@ -200,6 +202,8 @@ const TravelPage = () => {
         console.log('No hay usuario logueado.');
         return;
       }
+
+      console.log(user)
 
       const { data: lastPassengerTrip, error: passengerError } = await supabase
         .from('pasajeroviaje')
@@ -379,6 +383,7 @@ const TravelPage = () => {
       setLoadingRoutes(false);
       return;
     }
+    
 
     const { data: rutas, error } = await supabase
       .from('ruta')
@@ -921,10 +926,10 @@ const TravelPage = () => {
             <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
             <div className={styles.cardsGrid}>
               {previousRoutes.length > 0 ? (
-                previousRoutes.map(rutaData => (
+                previousRoutes.map((rutaData,index) => (
                   <RutaAnteriorCard
                     routeData={rutaData}
-                    onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes); }}
+                    onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes, index); }}
                   />
                 ))
               ) : (
