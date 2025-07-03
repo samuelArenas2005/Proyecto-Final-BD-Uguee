@@ -1,7 +1,7 @@
 // src/components/RutasPage/RutaAnteriorCard.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './RutaAnteriorCard.module.css';
-import { MapPinCheck, Clock, Route as RouteIcon , MapPinHouse} from 'lucide-react';
+import { MapPinCheck, Clock, Route as RouteIcon , MapPinHouse,Trash2} from 'lucide-react';
 
 const RutaAnteriorCard = ({ routeData, onEstablecerRuta }) => {
   const [origen, setOrigen] = useState(null);
@@ -51,6 +51,10 @@ return (
       <div className={styles.header}>
         <RouteIcon size={30} className={styles.routeIconGlobal} />
         <h3 className={styles.title}>{routeData.title}</h3>
+        <h3 className={styles.translucent}>{"CongitoJrProtei"}</h3>
+        <button className={styles.translucidActionButton} onClick={onEstablecerRuta}>
+          <Trash2 size={18} className={styles.icon} />
+        </button>
       </div>
       <div className={styles.details}>
         <div className={styles.location}>
