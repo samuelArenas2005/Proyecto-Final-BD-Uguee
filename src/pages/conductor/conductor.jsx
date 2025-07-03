@@ -104,19 +104,18 @@ const ConductorPage = () => {
 
   // intento danicol
 
-  const [showInfo,setShowInfo] = useState(true)
   const [previousRoutes, setPreviousRoutes] = useState([]);
   
     const fetchPreviousRoutes = async (userId) => {
       const { data: historicalTripsAll, error } = await supabase
         .from('rutaconductorviaje')
-        .select(`idconductor,ruta(estado)
+        .select(`idruta,ruta(estado),idconductor
         `)
         .eq('idconductor', userId)
         
         console.log("Hola soy el user:", userId)
         console.log("hola daniel ,", historicalTripsAll)
-        const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "cancelado")
+        const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo")
 
         console.log("hola soy cosas, ", historicalTrips)
   
@@ -142,7 +141,7 @@ const ConductorPage = () => {
       const rutasArray = await Promise.all(rutas);
       const rutasArrayPlana = rutasArray.flat()
       
-      console.log(rutasArrayPlana)
+      console.log("hola soy plana",rutasArrayPlana)
       console.log("HOla viejo, si soy yo el console log despues de arrays planos")
       if (error || !historicalTrips) {
         console.error('Error fetching previous routes:', error);
@@ -159,6 +158,7 @@ const ConductorPage = () => {
             departureTime: ruta.ruta.horadesalida
           }))
         )
+        console.log("Numero de rutas previas",previousRoutes.length)
       }
   
     };
@@ -168,7 +168,6 @@ const ConductorPage = () => {
   // --- NUEVO USEEFFECT PARA VERIFICAR RUTA ACTIVA AL CARGAR ---
   useEffect(() => {
 
-    fetchPreviousRoutes()
 
     const checkForActiveRoute = async () => {
       try {
@@ -445,34 +444,25 @@ const ConductorPage = () => {
             </div>
           </div>
         </div>
-        {showInfo ? (
+        
                   <div className={styles.previousRoutesSection}>
-                    <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
+                    <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
                     <div className={styles.cardsGrid}>
-                      {rutasAnterioresData.length > 0 ? (
-                        rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))
-                        /*
+                      {previousRoutes.length > 0 ? (
+                        
                         previousRoutes.map(rutaData => (
                           <RutaAnteriorCard
                             routeData={rutaData}
                             onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes); }}
                           />
-                        ))*/
+                        ))
                       ) : (
                         <div className={styles.infoMessage}>No tienes viajes anteriores</div>
                       )}
                     </div>
                   </div>
-                ) : (
-                  <div>
-                  </div>
-                )}
-        <div className={styles.previousRoutesSection}>
-          <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
-          <div className={styles.cardsGrid}>
-            {rutasAnterioresData.map((ruta) => (<RutaAnteriorCard key={ruta.id} routeData={ruta} onEstablecerRuta={() => { }} />))}
-          </div>
-        </div>
+      
+
         <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
       </div>
     </LoadScript>
