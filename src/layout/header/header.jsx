@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./header.css";
 import { supabase } from '../../supabaseClient.js';
-import { User, Home, Settings, LogOut, Gamepad2 } from 'lucide-react';
+import { User, Home, Settings, LogOut, Gamepad2, Loader } from 'lucide-react';
 import styles from '../headerPasajero/HeaderPasajero.module.css';
 
 
@@ -13,13 +13,15 @@ const navLinks = [
 ];
 
 
-
-
-const header = () => {
+const header = ({
+  Config,
+  IconoComponent,
+  userType
+}) => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const [userActual, setUserActual] = useState(null)
-  const [urlAvatar, setUrlAvatar] = useState(null)
+  const [userActual, setUserActual] = useState(null);
+  const [urlAvatar, setUrlAvatar] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -28,49 +30,83 @@ const header = () => {
   };
 
   useEffect(() => {
-    const checkForActiveRoute = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    async function checkSessionActive() {
+      const { data: { user }, error: erroUser } = await supabase.auth.getUser();
+      if (!user || erroUser) {
+        return
+      }
+
+      setUserActual(user);
+
       const { data: urlData } = await supabase
         .from('usuario')
         .select('urlAvatar , nombrecompleto')
-        .eq('nidentificacion', user.id)
-      setUrlAvatar(urlData)
-      setUserActual(user)
-      console.log(user)
+        .eq('nidentificacion', user.id);
+
+
+      if (urlData.length !== 0) {
+        if (urlData[0].urlAvatar !== 'NULL') {
+          console.log("no soy usuario");
+          setUrlAvatar(urlData);
+        }
+        return
+      }
+
+      const { data: urlDataUni } = await supabase
+        .from('institucion')
+        .select('urllmglogo , nombre')
+        .eq('idinstitucion', user.id);
+
+        console.log(urlDataUni)
+
+      if (urlDataUni.length !== 0) {
+        if (urlDataUni[0].urllmglogo !== 'NULL') {
+          const urlDataModificate = [{
+            urlAvatar: urlDataUni[0].urllmglogo,
+            nombrecompleto: urlDataUni[0].nombre
+          }]
+          setUrlAvatar(urlDataModificate);
+        }
+        return
+      }
+
+      return
+
     }
-    checkForActiveRoute();
+    checkSessionActive();
+    console.log(urlAvatar)
   }, [])
 
   const handleActionGoStart = () => {
+    navigate('/');
+    setIsOpen(false);
+  };
+
+  const handleActionGoPanel = () => {
+    Config.action()
+    setIsOpen(false);
+  };
+
+  const handleActionConfig = () => {
+    navigate(`/configuracion`)
+    setIsOpen(false);
+  }
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.log("no se pudo cerrar la sesion", error)
+    } else {
       navigate('/');
-      setIsOpen(false);
-    };
-  
-    const handleActionGoPanel = () => {
-      conductorConfig.action()
-      setIsOpen(false);
-    };
-  
-    const handleActionConfig = () => {
-      navigate(`/configuracion`)
+      window.location.reload();
       setIsOpen(false);
     }
-  
-    const signOut = async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.log("no se pudo cerrar la sesion", error)
-      } else {
-        window.location.reload();
-        navigate('/');
-        setIsOpen(false);
-      }
-    }
-  
-    const handleActionMiniGame = () => {
-      navigate(`/minijuego`)
-      setIsOpen(false);
-    }
+  }
+
+  const handleActionMiniGame = () => {
+    navigate(`/minijuego`)
+    setIsOpen(false);
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,6 +128,14 @@ const header = () => {
       }
     }
   };
+  
+
+  const FinalIcon = IconoComponent ?? Loader;
+  const FinalUserType = userType ?? '';
+  const configFinal = Config ?? {
+    text: 'Cargando...',
+    action: () => { alert('cargando..') }
+  }
 
   return (
     <header className={`header ${scrolled ? "scrolled" : ""}`}>
@@ -114,13 +158,14 @@ const header = () => {
         </nav>
 
         <nav className="nav-links2">
-          {userActual ? (
+          {userActual != null ? (
             <button
               className={`${styles.navButton} ${styles.profileButton}`}
               onClick={toggleMenu}
             >
               {urlAvatar ? (
-                <img src={urlAvatar[0].urlAvatar} alt={urlAvatar[0].nombrecompleto} className={styles.avatar} />
+                <img src={urlAvatar[0].urlAvatar}
+                  alt={urlAvatar[0].nombrecompleto} className={styles.avatar} />
               ) : (
                 <User size={24} className={styles.iconProfile} />
               )}
@@ -137,6 +182,8 @@ const header = () => {
           )}
         </nav>
       </div>
+
+
       {isOpen ? (
         <nav className={styles.dropdownPanel}>
           <ul className={styles.menuList}>
@@ -148,22 +195,26 @@ const header = () => {
             </li>
             <li>
               <button className={styles.menuItem} onClick={handleActionGoPanel}>
-                <User className={styles.menuIcon} size={20} />
-                <span>ir a panel pasajero</span>
+                <FinalIcon className={styles.menuIcon} size={20} />
+                <span>{configFinal.text}</span>
               </button>
             </li>
-            <li>
-              <button className={styles.menuItem} onClick={handleActionConfig}>
-                <Settings className={styles.menuIcon} size={20} />
-                <span>Configuración</span>
-              </button>
-            </li>
-            <li>
-              <button className={styles.menuItem} onClick={handleActionMiniGame}>
-                <Gamepad2 className={styles.menuIcon} size={20} />
-                <span>Ir a minijuego</span>
-              </button>
-            </li>
+            {(FinalUserType == 'pasajero' || FinalUserType === 'conductor') && (
+              <li>
+                <button className={styles.menuItem} onClick={handleActionConfig}>
+                  <Settings className={styles.menuIcon} size={20} />
+                  <span>Configuración</span>
+                </button>
+              </li>
+            )}
+            {(FinalUserType === 'administrador' || FinalUserType === 'pasajero' || FinalUserType === 'conductor') && (
+              <li>
+                <button className={styles.menuItem} onClick={handleActionMiniGame}>
+                  <Gamepad2 className={styles.menuIcon} size={20} />
+                  <span>Ir a minijuego</span>
+                </button>
+              </li>
+            )}
             <li className={styles.separator}></li>
             <li>
               <button className={styles.menuItem} onClick={signOut}>

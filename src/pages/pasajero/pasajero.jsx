@@ -11,7 +11,7 @@ import {
   Route,
   Armchair,
   X,
-  Car, Phone, Palette, Tag, Shapes
+  Car, Phone, Palette, Tag, Shapes,TicketX
 } from 'lucide-react';
 import TripDetailDialog from './complementos/tripDetailDialog';
 import styles from './pasajero.module.css';
@@ -53,7 +53,8 @@ const FULL_ROUTE_QUERY = `
     idviaje,
     conductor (
       usuario (*)
-    )
+    ),
+    viaje(estadodelviaje)
   ),
   vehiculo (
     color,
@@ -89,6 +90,7 @@ const TravelPage = () => {
   const [showQrModal, setShowQrModal] = useState(false);
   const [previousRoutes, setPreviousRoutes] = useState([]);
   const [showInfo, setShowInfo] = useState(true)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   const [origen, setOrigen] = useState(null);
   const [destino, setDestino] = useState(null);
@@ -210,6 +212,7 @@ const TravelPage = () => {
         .single();
 
       console.log("hola", lastPassengerTrip);
+      setIdViajeActual(lastPassengerTrip.idviaje)
 
       if (
         passengerError ||
@@ -281,10 +284,10 @@ const TravelPage = () => {
           );
         }
 
+        setAcceptedRoute(activeRouteData);
         console.log('Se encontró un viaje activo. Mostrando panel...');
         setShowInfo(false)
-        setAcceptedRoute(activeRouteData);
-
+     
       }
 
     };
@@ -382,7 +385,8 @@ const TravelPage = () => {
     const { data: rutas, error } = await supabase
       .from('ruta')
       .select(FULL_ROUTE_QUERY)
-      .eq('estado', 'activo');
+      .eq('estado', 'activo')
+
 
     console.log(rutas)
 
@@ -418,7 +422,10 @@ const TravelPage = () => {
       const distSalida = getDistanceMeters(startCoords, salidaRuta);
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
       const dentroDeNMin = Math.abs(diffMs) <= umbralN;
-      return distSalida <= RADIUS_METERS && distDestino <= RADIUS_METERS && dentroDeNMin && fechaLocal == ruta.fecha;
+      const asientosDisponibles = ruta.asientosdisponibles
+      const viajeEnCurso = ruta.rutaconductorviaje[ruta.rutaconductorviaje.length - 1].viaje.estadodelviaje
+      return distSalida <= RADIUS_METERS && distDestino <= RADIUS_METERS && dentroDeNMin && fechaLocal == ruta.fecha
+        && asientosDisponibles >= 1 && viajeEnCurso == 'pendiente';
     });
 
     if (filtradas.length === 0) {
@@ -433,6 +440,9 @@ const TravelPage = () => {
     setIsTripDetailDialogOpen(true);
   };
 
+  const [idViajeActual, setIdViajeActual] = useState(null)
+
+
   const setPasajeroViaje = async (tripId) => {
     const { data: viaje, error } = await supabase
       .from('rutaconductorviaje')
@@ -445,7 +455,7 @@ const TravelPage = () => {
       return;
     }
 
-    console.log("hola soy idviaje", viaje.idviaje)
+    setIdViajeActual(viaje.idviaje)
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -472,9 +482,34 @@ const TravelPage = () => {
     setIsTripDetailDialogOpen(false);
   };
 
-  const handleCancelTrip = async () => {
-    if (!acceptedRoute) return;
+  const [isDesactive, setIsDesactive] = useState(false);
 
+  useEffect(() => {
+    let intervalId;
+
+    const fetchStatus = async () => {
+      console.log("me llamo muchas veces")
+      const { data, error } = await supabase
+        .from('pasajeroviaje')
+        .select('idviaje')
+        .eq('idviaje', idViajeActual)
+        .single();
+
+      if(data === null || error){
+        setIsDesactive(true)
+      }
+    }
+      if( acceptedRoute !== null && idViajeActual !== null) { 
+        fetchStatus();
+        intervalId = setInterval(fetchStatus, 5000);
+      }
+      return () => clearInterval(intervalId);
+    }, [acceptedRoute,idViajeActual]);
+
+
+  const handleCancelTripInfo = async () => {
+
+    if (!acceptedRoute) return;
     const viajeInfo = acceptedRoute.rutaconductorviaje?.[0];
     if (!viajeInfo || !viajeInfo.idviaje) {
       console.error("No se pudo encontrar el idviaje para cancelar.");
@@ -505,6 +540,7 @@ const TravelPage = () => {
     setAcceptedRoute(null);
     setMatchingRoutes([]);
     setSearchMessage('Tu viaje ha sido cancelado. Puedes buscar uno nuevo.');
+
   };
 
 
@@ -691,7 +727,7 @@ const TravelPage = () => {
                   <div className={styles.actionButtons}>
                     <button
                       className={styles.cancelButton}
-                      onClick={handleCancelTrip}
+                      onClick={() => setShowConfirmModal(true)}
                     >
                       Cancelar viaje
                     </button>
@@ -902,6 +938,57 @@ const TravelPage = () => {
           <div>
           </div>
         )}
+        {showConfirmModal && (
+          <div className={styles.modalOverlayOpen}>
+            <div className={styles.confirmModalContent} onClick={e => e.stopPropagation()}>
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className={styles.modalCloseButton}
+              >
+                <X size={28} />
+              </button>
+              <h3>
+                ¿Estás seguro de cancelar el viaje?
+              </h3>
+              <div className={styles.confirmModalActions}>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className={styles.confirmModalButton}
+                >
+                  Volver
+                </button>
+                <button
+                  onClick={handleCancelTripInfo}
+                  className={styles.confirmModalButtonCancelar}
+                >
+                  Cancelar viaje
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isDesactive && (
+           <div className={styles.modalOverlayOpen}>
+            <div className={styles.confirmModalContent} onClick={e => e.stopPropagation()}>
+              <TicketX size={40} color={'#aa00ff'}/>
+              <h3>
+                &nbsp;El conductor a cancelado la ruta.
+              </h3>
+              <div className={styles.confirmModalActions}>
+                <button
+                  onClick={() => {setIsDesactive(false)
+                    window.location.reload();
+                  }}
+                  className={styles.confirmModalButton}
+                >
+                  Volver
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+        }
       </div>
     </LoadScript>
   );

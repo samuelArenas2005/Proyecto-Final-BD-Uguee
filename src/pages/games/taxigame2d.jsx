@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from './TaxiGame.module.css';
+import styles from './taxigame2d.module.css';
 import { 
   Car, PersonStanding, Star, Trophy, Zap, Users, Clock, AlertTriangle, 
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight 
@@ -421,7 +421,7 @@ const TaxiGame = () => {
         className={styles.gameArea}
         style={{ backgroundColor: '#1a1a1a' }}
       >
-        {/* Obstáculos */}
+      
         {obstacles.map(obstacle => (
           <div 
             key={obstacle.id}
@@ -435,7 +435,7 @@ const TaxiGame = () => {
           />
         ))}
         
-        {/* Power-ups */}
+        
         {powerUps.map(powerUp => (
           <div 
             key={powerUp.id}
@@ -453,7 +453,7 @@ const TaxiGame = () => {
           </div>
         ))}
         
-        {/* Personas */}
+      
         {people.map(person => (
           <div key={person.id}>
             {!person.collected && (
@@ -465,7 +465,7 @@ const TaxiGame = () => {
               </div>
             )}
             
-            {/* Destinos */}
+           
             <div 
               className={styles.destination}
               style={{ 
@@ -479,7 +479,7 @@ const TaxiGame = () => {
           </div>
         ))}
         
-        {/* Jugador */}
+  
         <div 
           className={styles.player}
           style={{ 
@@ -501,7 +501,7 @@ const TaxiGame = () => {
         </div>
       </div>
       
-      {/* Indicadores de efectos activos */}
+    
       
       
       <div className={styles.controls}>
@@ -522,7 +522,6 @@ const TaxiGame = () => {
         </button>
       </div>
       
-      {/* Pantalla de Game Over */}
       {gameOver && (
         <div className={styles.gameOver}>
           <h2>¡Tiempo Agotado!</h2>
