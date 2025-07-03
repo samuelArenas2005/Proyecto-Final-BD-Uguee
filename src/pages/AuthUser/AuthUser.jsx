@@ -83,18 +83,6 @@ useEffect(() => {
     }
     const user = data.user;
 
-    // Si el rol es admin, solo verifica el correo
-    if (role === 'admin') {
-        if (user.id !== 'bfe65c8d-48f5-4186-b01f-d7e9795f6047') {
-         setErrorMsg('Acceso denegado.');
-         await supabase.auth.signOut();
-         return;
-       }
-       
-      navigate('/admin', { replace: true });
-      return;
-    }
-
     // 2. Verificar rol en tablas personalizadas
     let tableName;
     let idName;
@@ -102,7 +90,8 @@ useEffect(() => {
     if (roleActual === 'pasajero') {tableName = 'pasajero'; idName = 'idusuario'; estado = 'estadopasajero'}
     else if (roleActual === 'universidad') {tableName = 'institucion'; idName = 'idinstitucion'; estado = 'estado'}
     else if  (roleActual === 'conductor') {tableName = 'conductor'; idName = 'idusuario'; estado = 'estadoconductor'}
-    else if (roleActual === 'monitor') {tableName = 'administrador'; idName = 'idadmin'; estado = 'estado'}
+    else if (roleActual === 'monitor') {tableName = 'monitor'; idName = 'idmonitor'; estado = 'estado'}
+    else if (roleActual === 'administrador') {tableName = 'administrador'; idName = 'idadministrador'; estado = 'estado'}
     else {
       setErrorMsg('Rol inválido en la URL');
       await supabase.auth.signOut();
@@ -132,7 +121,7 @@ useEffect(() => {
 
     if (estadoError || !estadoData  ) {
       console.log(estadoError)
-      setErrorMsg(`Tu usuario aún no ha sido aceptado, comunicate con tu institución`);
+      setErrorMsg(`Tu usuario no esta habilidato`);
       await supabase.auth.signOut();
       return;
     } 

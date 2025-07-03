@@ -14,19 +14,18 @@ import ConductorPage from "./pages/conductor/conductor";
 import ConductorPageViaje from "./pages/conductor/viajeConductor";
 import ConductorPageReporteVia from "./pages/conductor/reporteVia";
 import AdminPage from "./pages/admin/adminPage";
-
 import SettingUser from "./layout/headerPasajero/settingspage"
-
-import Minigame from "./layout/headerPasajero/game"
-
+import Minigame from "./pages/games/gameMenu"
+import MinigameTaxi2d from "./pages/games/taxigame2d"
+import MinigameTaxi3d from "./pages/games/taxigame3d"
 import Monitor from "./pages/monitor/monitor";
-
 import ProtectedRoute from "./private/privateRoutes";
-
-
-import Prueba from "./pages/prueba/prueba"
-
+import Prueba from "./pages/prueba/prueba";
 import NotFoundPage from "./pages/notFound";
+
+
+
+
 
 import "./App.css";
 
@@ -50,12 +49,7 @@ const App = () => {
             </Layout1>
           }
         />
-        <Route
-          path="/prueba"
-          element={
-            <Prueba />
-          }
-        />
+        <Route path="/prueba" element={<Prueba />} />
         <Route
           path="/authUser/:role"
           element={
@@ -68,9 +62,9 @@ const App = () => {
           path="/pasajero"
           element={
             <ProtectedRoute role="pasajero">
-            <Layout2>
-              <Pasajero />
-            </Layout2>
+              <Layout2>
+                <Pasajero />
+              </Layout2>
             </ProtectedRoute>
           }
         />
@@ -87,18 +81,40 @@ const App = () => {
          <Route
           path="/minijuego"
           element={
+          <ProtectedRoute role="pasajero">
             <Layout2>
               <Minigame />
             </Layout2>
+             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/minijuego/taxigame2d"
+          element={
+          <ProtectedRoute role="pasajero">
+            <Layout2>
+              <MinigameTaxi2d />
+            </Layout2>
+             </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/minijuego/taxigame3d"
+          element={
+          <ProtectedRoute role="pasajero">
+            <Layout2>
+              <MinigameTaxi3d />
+            </Layout2>
+             </ProtectedRoute>
           }
         />
         <Route
           path="/conductor"
           element={
             <ProtectedRoute role="conductor">
-            <Layout2>
-              <ConductorPage />
-            </Layout2>
+              <Layout2>
+                <ConductorPage />
+              </Layout2>
             </ProtectedRoute>
           }
         />
@@ -106,9 +122,9 @@ const App = () => {
           path="/conductor/viaje/:idruta"
           element={
             <ProtectedRoute role="conductor">
-            <Layout2>
-              <ConductorPageViaje />
-            </Layout2>
+              <Layout2>
+                <ConductorPageViaje />
+              </Layout2>
             </ProtectedRoute>
           }
         />
@@ -116,9 +132,9 @@ const App = () => {
           path="/conductor/reporte"
           element={
             <ProtectedRoute role="conductor">
-            <Layout2>
-              <ConductorPageReporteVia />
-            </Layout2>
+              <Layout2>
+                <ConductorPageReporteVia />
+              </Layout2>
             </ProtectedRoute>
           }
         />
@@ -126,19 +142,19 @@ const App = () => {
           path="/universidad"
           element={
             <ProtectedRoute role="universidad">
-            <LayoutUni>
-              <UniversidadPage />
-            </LayoutUni>
+              <LayoutUni>
+                <UniversidadPage />
+              </LayoutUni>
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/monitor"
           element={
             <ProtectedRoute role="monitor">
-            <Layout1>
-              <Monitor />
-            </Layout1>
+              <Layout1>
+                <Monitor />
+              </Layout1>
             </ProtectedRoute>
           }
         />
@@ -146,9 +162,9 @@ const App = () => {
           path="/universidad/reportes"
           element={
             <ProtectedRoute role="universidad">
-            <LayoutUni>
-              <ReportesPage />
-            </LayoutUni>
+              <LayoutUni>
+                <ReportesPage />
+              </LayoutUni>
             </ProtectedRoute>
           }
         />
@@ -156,19 +172,19 @@ const App = () => {
           path="/universidad/monitoreo"
           element={
             <ProtectedRoute role="universidad">
-            <LayoutUni>
-              <MonitoreoPage />
-            </LayoutUni>
+              <LayoutUni>
+                <MonitoreoPage />
+              </LayoutUni>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/admin"
+          path="/administrador"
           element={
-            <ProtectedRoute role="admin">
-            <Layout1>
-              <AdminPage />
-            </Layout1>
+            <ProtectedRoute role="administrador">
+              <Layout1>
+                <AdminPage />
+              </Layout1>
             </ProtectedRoute>
           }
         />
@@ -186,4 +202,3 @@ const App = () => {
 };
 
 export default App;
-

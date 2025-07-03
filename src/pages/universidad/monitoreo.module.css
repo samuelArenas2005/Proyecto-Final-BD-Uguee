@@ -1,259 +1,136 @@
-/* UserMonitoring.module.css */
+/* /monitoring/styles.module.css */
 
-.userMonitoringPage {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: #F4F6F8;
-  max-width: 1400px; /* Ancho máximo para la página entera */
-  margin: 0 auto; /* Centrar la página si es más ancha que max-width */
-  box-shadow: 0 0 15px rgba(0,0,0,0.1); /* Sombra suave si la página no ocupa todo el ancho */
-  margin-bottom: 5rem;
+/* --- Contenedor Principal de la Página --- */
+.monitorContainer {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #E8EAED; /* Fondo gris claro para la página */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
 }
 
-.monitoringMainHeader {
-  padding: 20px 30px;
-  background-color: #FFFFFF;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-  z-index: 1000;
+/* --- Wrapper para el Mapa y sus Controles --- */
+.mapAndControlsWrapper {
+    position: relative; /* Contenedor de referencia para los controles absolutos */
+    width: 100%;
+    height: 100%;
+    max-width: 1200px; /* Ancho máximo para el panel del mapa */
+    max-height: 90vh; /* Altura máxima */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.monitoringMainHeader h1 {
-  color: #3C0078;
-  font-size: 22px;
-  font-weight: 700;
-  text-align: center;
-  margin: 0 0 18px 0;
+
+/* --- Contenedor del Mapa (Ahora es una tarjeta) --- */
+.mapWrapper {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px; /* Bordes redondeados */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); /* Sombra para profundidad */
+    overflow: hidden; /* Asegura que el mapa no se salga de los bordes redondeados */
+    position: relative; /* Contexto para el zoom nativo */
 }
 
-.searchAndFilterBar {
-  display: flex;
-  align-items: center;
-  background-color: #F0F0F0;
-  border-radius: 8px;
-  padding: 10px 15px;
-  width: 100%;
-  max-width: 550px;
-  margin: 0 auto;
+/* --- Controles que flotan sobre el mapa --- */
+
+.topControls {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 90%;
+    max-width: 500px;
 }
 
-.mainSearchInput {
-  flex-grow: 1;
-  border: none;
-  background-color: transparent;
-  font-size: 14px;
-  color: #333333;
-  margin-left: 10px;
-  margin-right: 10px;
-  outline: none;
+.title {
+    color: #3c4043; /* Color de texto más oscuro para mejor contraste */
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: none; /* Quitamos la sombra de texto, no es necesaria sobre el panel */
 }
 
-.mainSearchInput::placeholder {
-  color: #757575;
-  font-weight: 500;
+.searchBar {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 0.8rem 1rem;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    border: 1px solid #dfe1e5;
 }
 
-.searchBarIcon { /* Para el icono de Lucide dentro de la barra */
-  flex-shrink: 0;
+.searchBar input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    background: transparent;
 }
 
-.mainFilterIcon { /* Para el icono de Lucide dentro de la barra */
-  flex-shrink: 0;
-  cursor: pointer;
-  color: #7A00FF;
+.searchIcon {
+    color: #888;
+    margin: 0 0.5rem;
 }
 
-.mapContentArea {
-  flex-grow: 1;
-  position: relative;
-  /* El mapa tomará el ancho del .userMonitoringPage que tiene max-width */
-}
-
-/* Estilos para el icono de coche personalizado */
-/* Esta clase se inyecta en el HTML del L.DivIcon, por lo que debe ser global o definida aquí */
-.customCarMarker {
-  background-color: #FFFFFF;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  border: 2px solid #3C0078;
-}
-.customCarMarker svg { /* Estilo para el SVG dentro del DivIcon */
-    width: 20px;
+.separator {
+    width: 1px;
     height: 20px;
-    fill: #3C0078;
-    stroke: #FFFFFF;
-    stroke-width: 1.5px;
+    background-color: #e0e0e0;
+    margin: 0 0.5rem;
 }
 
-/* Clase para el L.DivIcon para evitar estilos por defecto de Leaflet en divIcon */
-.emptyMarkerClass {
-  border: none !important;
-  background: transparent !important;
+.filterIcon {
+    color: #555;
+    cursor: pointer;
 }
 
+/* Eliminamos los estilos para .bottomControls y .userSelector 
+   para permitir que el control de zoom nativo de Google Maps aparezca.
+   Google Maps posicionará el control de zoom (activado con zoomControl: true)
+   generalmente en la esquina inferior derecha por defecto. */
 
-/* Estilos para el Popup Personalizado de Leaflet */
-/* Usamos :global porque estas clases son aplicadas por Leaflet directamente */
-:global(.trip-info-custom-popup) .leaflet-popup-content-wrapper {
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
-  padding: 0;
-  border: 1px solid #EAEAEA;
-}
-
-:global(.trip-info-custom-popup) .leaflet-popup-content {
-  margin: 0 !important;
-  padding: 18px;
-  min-width: 280px;
-  font-family: inherit;
+/* --- Estilos para la Ventana de Información (InfoWindow) --- */
+/* (Sin cambios, ya estaban bien) */
+.infoWindow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #333;
+    max-width: 250px;
 }
 
-:global(.trip-info-custom-popup) .leaflet-popup-close-button {
-  color: #757575;
-  font-size: 20px;
-  padding: 8px 8px 0 0;
-  border: none;
-  background-color: transparent;
-}
-:global(.trip-info-custom-popup) .leaflet-popup-close-button:hover {
-  color: #333;
+.infoHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
-:global(.trip-info-custom-popup) .leaflet-popup-tip {
-  background: #FFFFFF;
-  border-left-color: #EAEAEA;
-  border-right-color: #EAEAEA;
-  box-shadow: none;
+.infoHeader h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
-/* Estilos para el contenido DENTRO del popup (estos sí pueden ser module-scoped si el contenido es un componente React)
-   Pero como el contenido del Popup se renderiza directamente, es más fácil mantenerlos como globales o usar nombres de clase únicos.
-   Aquí los mantendremos como si fueran clases globales para simplicidad de la migración.
-   Si el contenido del Popup fuera un componente React separado, podríamos usar CSS Modules para él.
-*/
-.tripInfoContent {} /* No necesita mucho si .leaflet-popup-content ya está bien */
-
-.tripInfoHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #F0F0F0;
+.infoBody p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
 }
 
-.tripInfoHeader h2 {
-  font-size: 15px;
-  font-weight: 600;
-  color: #3C0078;
-  margin: 0;
-}
-
-.tripInfoHeader .optionsIcon { /* Dando un nombre de clase al icono MoreVertical */
-  cursor: pointer;
-}
-
-.tripInfoDetail {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-.tripInfoDetail:last-child {
-  margin-bottom: 0;
-}
-
-.tripInfoDetail svg {
-  margin-right: 10px;
-  margin-top: 3px;
-  flex-shrink: 0;
-}
-
-.tripInfoDetail div span {
-  display: block;
-  font-size: 11px;
-  color: #666666;
-  font-weight: 500;
-  margin-bottom: 2px;
-  text-transform: uppercase;
-}
-
-.tripInfoDetail div p {
-  font-size: 14px;
-  color: #222222;
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* Footer */
-.monitoringMainFooter {
-  padding: 12px 30px;
-  background-color: #FFFFFF;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.03);
-  display: flex;
-  justify-content: flex-start;
-  z-index: 1000;
-}
-
-.userViewFilterButton {
-  display: flex;
-  align-items: center;
-  background-color: #F7F7F7;
-  border: 1px solid #E0E0E0;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
-  color: #333333;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.userViewFilterButton svg {
-  margin-right: 6px;
-}
-.userViewFilterButton span {
-  margin-right: 6px;
-}
-
-.userViewFilterButton:hover {
-  background-color: #EDEDED;
-}
-
-/* Estilo para los controles de Zoom de Leaflet (usando :global ya que son clases de Leaflet) */
-:global(.leaflet-control-zoom) {
-  border: 1px solid #BDBDBD !important;
-  border-radius: 8px !important;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.15) !important;
-  margin-bottom: 10px !important;
-  margin-right: 10px !important;
-}
-
-:global(.leaflet-control-zoom-in),
-:global(.leaflet-control-zoom-out) {
-  width: 32px !important;
-  height: 32px !important;
-  line-height: 32px !important;
-  font-size: 20px !important;
-  color: #3C0078 !important;
-  background-color: #FFFFFF !important;
-  font-weight: normal !important;
-}
-
-:global(.leaflet-control-zoom-in) {
-  border-bottom: 1px solid #D6D6D6 !important;
-  border-radius: 8px 8px 0 0 !important;
-}
-
-:global(.leaflet-control-zoom-out) {
-  border-radius: 0 0 8px 8px !important;
-}
-
-:global(.leaflet-control-zoom-in:hover),
-:global(.leaflet-control-zoom-out:hover) {
-  background-color: #F4F4F4 !important;
+.infoBody p strong {
+    color: #000;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
 }

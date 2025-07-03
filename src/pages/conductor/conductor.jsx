@@ -173,6 +173,8 @@ const ConductorPage = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
+        console.log(user)
+
         if (user) {
           const { data: activeRouteData, error } = await supabase
             .from('rutaconductorviaje')
@@ -464,6 +466,7 @@ const ConductorPage = () => {
       
 
         <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
+          
       </div>
     </LoadScript>
   );

@@ -136,7 +136,7 @@ const ChatModal = ({ onClose, initialMessage }) => {
 
 “¡Bienvenido a Ugüee! Ir a clase jamás había sido tan fácil.”
 
-A partir de esa bienvenida, responde de forma clara, precisa y concisa a cualquier pregunta que el usuario haga sobre la página web o el proyecto Ugüee, usando el contexto del documento de diseño, requerimientos, API, tecnologías y objetivos del sistema. En caso tal de que pidan ayuda humana dile que se comunique al siguiente numero: 317 2715675`
+A partir de esa bienvenida, responde de forma clara, precisa y concisa a cualquier pregunta que el usuario haga sobre la página web o el proyecto Ugüee, usando el contexto del documento de diseño, requerimientos, API, tecnologías y objetivos del sistema. En caso tal de que pidan ayuda humana dile que se comunique al siguiente numero: 317 2715675. Si te preguntan por el precio del viaje di que son gratis para ser mas accesibles`
   },
         ...messages.map((msg) => ({
           role: msg.sender === 'bot' ? 'assistant' : 'user',
