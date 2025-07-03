@@ -110,15 +110,72 @@ body {
     color: var(--text-gray-light-color);
 }
 
-.filter-icon {
-    color: var(--primary-color);
-    cursor: pointer;
-    margin-left: 25px;
-    transition: color 0.2s ease, transform 0.2s ease;
+.filter-container {
+    position: relative;
 }
-.filter-icon:hover {
-    color: var(--primary-hover-color);
-    transform: scale(1.1);
+
+.filter-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.filter-button:hover {
+    background-color: var(--primary-hover-color);
+}
+
+.filter-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    background-color: var(--white-color);
+    border: 1px solid var(--border-gray-200);
+    border-radius: 6px;
+    box-shadow: 0 4px 10px var(--shadow-lg-color);
+    z-index: 10;
+    min-width: 150px;
+    overflow: hidden;
+}
+
+.filter-menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-gray-medium-color);
+    transition: background-color 0.2s ease;
+}
+
+.filter-menu-item:hover {
+    background-color: var(--background-gray-100);
+}
+
+.filter-menu-item.active {
+    background-color: var(--background-gray-100);
+}
+
+.filter-menu-item.todos {
+    color: var(--text-gray-medium-color);
+}
+
+.filter-menu-item.pendiente {
+    color: var(--text-blue-600);
+}
+
+.filter-menu-item.activo {
+    color: var(--text-green-600);
+}
+
+.filter-menu-item.inactivo {
+    color: var(--text-red-600);
 }
 
 .tabs {
@@ -205,6 +262,12 @@ body {
     font-size: 15px;
     color: var(--text-gray-color);
     font-weight: 500;
+}
+
+.request-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .request-status {
@@ -537,7 +600,7 @@ body {
 
 /* Nested detail item for vehicle info */
 .detail-item-nested {
-    /* No background or border for minimal style */
+    margin-bottom: 10px;
 }
 .detail-item-nested strong {
     display: block;
@@ -551,4 +614,66 @@ body {
     color: var(--text-gray-medium-color);
     word-break: break-word;
     line-height: 1.4;
+}
+
+/* Document container styles */
+.documents-container {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 6px;
+    background: #fafbfc;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.document-item:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+.document-name {
+    font-size: 0.75em;
+    color: #222;
+}
+
+.document-button {
+    padding: 4px;
+}
+
+.no-documents {
+    color: #888;
+    font-size: 0.95em;
+}
+
+/* Vehicle details container */
+.vehicle-details-container {
+    margin-top: 15px;
+    border-top: 1px solid var(--border-gray-200);
+    padding-top: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.vehicle-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-gray-medium-color);
+}
+
+.vehicle-chevron {
+    transition: transform 0.2s;
+}
+
+.vehicle-chevron.expanded {
+    transform: rotate(180deg);
 }

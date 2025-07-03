@@ -110,7 +110,7 @@ function RegisterUniversity({ handleChange }) {
 
         {/* Email y Password */}
         <FormField
-          label="Email"
+          label="Email *"
           type="email"
           name="email"
           value={userData.email}
@@ -119,7 +119,7 @@ function RegisterUniversity({ handleChange }) {
           onChange={(e) => handleChange(e, setUserData)}
         />
         <FormField
-          label="Contraseña"
+          label="Contraseña *"
           type="password"
           name="password"
           minLength={6}
@@ -131,7 +131,7 @@ function RegisterUniversity({ handleChange }) {
 
         {/* Campos de la universidad */}
         <FormField
-          label="Nombre oficial de la Universidad"
+          label="Nombre oficial de la Universidad *"
           name="nombre"
           value={formData.nombre}
           required
@@ -140,7 +140,7 @@ function RegisterUniversity({ handleChange }) {
         />
         <div className="rd-two-col">
           <FormField
-            label="Sede"
+            label="Sede *"
             name="sede"
             value={formData.sede}
             required
@@ -148,7 +148,7 @@ function RegisterUniversity({ handleChange }) {
             onChange={(e) => handleChange(e, setFormData)}
           />
           <FormField
-            label="Ciudad"
+            label="Ciudad *"
             name="ciudad"
             value={formData.ciudad}
             required
@@ -158,7 +158,7 @@ function RegisterUniversity({ handleChange }) {
         </div>
         <div className="rd-two-col">
           <FormField
-            label="Via principal"
+            label="Via principal *"
             name="via_principal"
             value={formData.via_principal}
             required
@@ -168,7 +168,7 @@ function RegisterUniversity({ handleChange }) {
             title="Debe ser una palabra, un espacio, un número, y opcionalmente más palabras separadas por espacio. Ejemplo: Cl 38 Sur, Av 5 Norte, Cra 10"
           />
           <FormField
-            label="Placa de la direccion"
+            label="Placa de la direccion *"
             name="placa"
             value={formData.placa}
             required
@@ -180,7 +180,7 @@ function RegisterUniversity({ handleChange }) {
         </div>
         <div className="rd-two-col">
           <ComboField
-            label="Color principal"
+            label="Color principal *"
             name="colorprincipal"
             value={formData.colorprincipal}
             required
@@ -189,7 +189,7 @@ function RegisterUniversity({ handleChange }) {
             options={colorOptions}
           />
           <ComboField
-            label="Color secundario"
+            label="Color secundario *"
             name="colorsecundario"
             value={formData.colorsecundario}
             required
@@ -199,7 +199,7 @@ function RegisterUniversity({ handleChange }) {
           />
         </div>
         <FileField
-          label="Logo de la universidad (PNG o JPG)"
+          label="Logo de la universidad (PNG o JPG) *"
           type="file"
           name="logo"
           file={files.logo}
@@ -212,7 +212,7 @@ function RegisterUniversity({ handleChange }) {
           previewUrl={previewUrl}
         />
         <MultiFileField
-          label="Documentos de Soporte (PDF)"
+          label="Documentos de Soporte (PDF) *"
           name="certificados"
           files={files.certificados} // Le pasamos el estado actual.
           onFilesChange={handleFileCertificadoChange} // Le pasamos la función para actualizar el estado.

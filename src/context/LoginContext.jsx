@@ -27,8 +27,8 @@ export const LoginContextProvider = ({ children }) => {
       .replace(/\s+/g, "-");
 
     // Si el nombre supera los 60 caracteres, recorta las primeras letras hasta que quede de 60
-    if (nombreLimpio.length > 99) {
-      nombreLimpio = nombreLimpio.slice(nombreLimpio.length - 99);
+    if (nombreLimpio.length > 59) {
+      nombreLimpio = nombreLimpio.slice(nombreLimpio.length - 59);
     }
 
     return nombreLimpio;
@@ -107,7 +107,8 @@ export const LoginContextProvider = ({ children }) => {
     setLoading(true);
     const { data, error } = await supabase
       .from("institucion")
-      .select("nombre, idinstitucion, sede");
+      .select("nombre, idinstitucion, sede")
+      .eq("estado", "activo");
     setLoading(false);
     if (error) throw Error("No se pudo consultar");
     return data;
@@ -215,6 +216,154 @@ export const LoginContextProvider = ({ children }) => {
     return result;
   };
 
+  const submitPassengerFiles = async (files, userId) => {
+    setSubmitting(true);
+
+    try {
+      // Configuración de archivos: bucket y si debe registrarse en la tabla
+      const fileConfig = {
+        avatar: { bucket: "publico", registerInDB: false },
+        carneInstitucional: { bucket: "documentos", registerInDB: true },
+        registroAcademico: { bucket: "documentos", registerInDB: true },
+        documentoIdentidad: { bucket: "documentos", registerInDB: true },
+      };
+
+      let avatarPath = null; // Variable para guardar el path del avatar
+
+      // Recorrer cada archivo
+      for (const [fileKey, file] of Object.entries(files)) {
+        if (!file) continue; // Saltar si no hay archivo
+
+        const config = fileConfig[fileKey];
+        if (!config) continue; // Saltar si no está configurado
+
+        // Crear path del archivo
+        const filePath = `Usuario/${userId}/${fileKey}/${limpiarNombre(
+          file.name
+        )}`;
+
+        // Subir archivo al storage
+        const { data, error } = await supabase.storage
+          .from(config.bucket)
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (error) {
+          console.error("Error al subir el archivo:", error);
+          setSubmitting(false);
+          throw error;
+        }
+
+        // Guardar el path del avatar para actualizar el usuario después
+        if (fileKey === "avatar") {
+          avatarPath = filePath;
+        }
+
+        // Registrar en la tabla si está configurado para hacerlo
+        if (config.registerInDB) {
+          const { data: docData, error: docError } = await supabase
+            .from("urllmgdocumentousuario")
+            .insert([
+              {
+                idusuario: userId,
+                urllmgdocumento: filePath,
+                nombredocumento: fileKey, // Usar el nombre del atributo como nombre del documento
+              },
+            ])
+            .select();
+
+          if (docError) {
+            console.error(
+              "Error al registrar el documento en la base de datos:",
+              docError
+            );
+            setSubmitting(false);
+            throw docError;
+          }
+        }
+      }
+
+      // Actualizar el urlAvatar del usuario si se subió un avatar
+      if (avatarPath) {
+        const { data: userData, error: userError } = await supabase
+          .from("usuario")
+          .update({ urlAvatar: avatarPath })
+          .eq("nidentificacion", userId);
+
+        if (userError) {
+          console.error(
+            "Error al actualizar el avatar del usuario:",
+            userError
+          );
+          setSubmitting(false);
+          throw userError;
+        }
+      }
+
+      setSubmitting(false);
+    } catch (error) {
+      console.error("Error general en submitPassengerFiles:", error);
+      setSubmitting(false);
+      throw error;
+    }
+  };
+
+  const submitVehicleFiles = async (files, vehicleId, userId) => {
+    setSubmitting(true);
+
+    try {
+      // Iterar sobre los documentos del vehículo
+      for (const file of files.documents) {
+        const documentoPath = `Conductor/${userId}/Vehiculo/${vehicleId}/documentos/${limpiarNombre(
+          file.name
+        )}`;
+
+        // Subir archivo al storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("documentos")
+          .upload(documentoPath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          setSubmitting(false);
+          console.error(
+            "Error al subir el documento del vehículo:",
+            uploadError
+          );
+          throw uploadError;
+        }
+
+        // Registrar el documento en la tabla correspondiente
+        const { data: documentoData, error: documentoError } = await supabase
+          .from("urllmgdocumentovehiculo")
+          .insert({
+            idvehiculo: vehicleId,
+            urllmgdocumento: documentoPath,
+            nombredocumento: file.name,
+          });
+
+        if (documentoError) {
+          setSubmitting(false);
+          console.error(
+            "Error al registrar el documento del vehículo:",
+            documentoError
+          );
+          throw documentoError;
+        }
+      }
+
+      setSubmitting(false);
+    } catch (error) {
+      console.error("Error general en submitVehicleFiles:", error);
+      setSubmitting(false);
+      throw error;
+    }
+  };
+
   const createVehicle = async (formData, vehicleType, vehicleData) => {
     setSubmitting(true);
     const result = await supabase
@@ -266,6 +415,8 @@ export const LoginContextProvider = ({ children }) => {
         listUniversities,
         createUser,
         createPassenger,
+        submitPassengerFiles,
+        submitVehicleFiles,
         createVehicle,
         createDriver,
         checkUniqueAtributes,
