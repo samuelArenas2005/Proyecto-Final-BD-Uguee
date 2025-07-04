@@ -149,7 +149,7 @@ const ConductorPage = () => {
     const rutas = historicalTrips.map(async (ruta) => {
       const { data: historicalTripsruta, error2 } = await supabase
         .from('rutaconductorviaje')
-        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
+        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida,idruta)
         `)
         .eq('idruta', ruta.idruta)
       if (error2 || !historicalTripsruta) {
@@ -170,12 +170,14 @@ const ConductorPage = () => {
     else {
       setPreviousRoutes(
         rutasArrayPlana.map((ruta, index) => ({
+          id: ruta.ruta.idruta,
           title: `Ruta ${index + 1}`,
           originlat: ruta.ruta.salidalatitud,
           originlong: ruta.ruta.salidalongitud,
           destinationlat: ruta.ruta.paradalatitud,
           destinationlong: ruta.ruta.paradalongitud,
           departureTime: ruta.ruta.horadesalida
+
         }))
       )
       console.log("Numero de rutas previas", previousRoutes.length)
@@ -331,8 +333,6 @@ const ConductorPage = () => {
 
   const getInfoRutaAnterior = async (rutaData) => {
 
-    console.log(rutaData)
-
     const coordsI = { lat: rutaData.originlat, lng: rutaData.originlong };
     setStartCoords(coordsI)
     const direccion = await getAddressFromCoords(
@@ -340,15 +340,15 @@ const ConductorPage = () => {
       rutaData.originlong);
     setStartPoint(direccion);
 
-    const coordsF={lat: rutaData.destinationlat, lng: rutaData.destinationlong};
+    const coordsF = { lat: rutaData.destinationlat, lng: rutaData.destinationlong };
     setDestCoords(coordsF)
     console.log(coordsF)
 
     const direcciondestino = await getAddressFromCoords(
       rutaData.destinationlat,
       rutaData.destinationlong);
-    setDestination(direcciondestino); 
-    
+    setDestination(direcciondestino);
+
 
 
     setAsientos(3)
@@ -358,11 +358,33 @@ const ConductorPage = () => {
 
   }
 
+  const borrarRutaEspecifica = async (rutaData, indexR) => {
+
+    console.log (indexR)
+    console.log("Hola soy borrarRuta de la ruta:", rutaData.id)
+    const eliminarRuta = async (idruta) => {
+      const { error } = await supabase
+        .from('ruta')
+        .delete()
+        .eq('idruta', rutaData.id);
+
+
+      if (error) {
+        console.error(`Error al eliminar ruta con id ${idruta}:`, error.message);
+      } else {
+        console.log(`Ruta con id ${idruta} eliminada exitosamente.`);
+      }
+    };
+    eliminarRuta(rutaData.idruta)
+    setPreviousRoutes(prev => prev.filter((_, index) => index !== indexR));
+    console.log("soy yoooo",previousRoutes)
+  }
+
 
   //aqui termina mi prueba pa
   const handleEstablecerRuta = async () => {
 
-    if (!startCoords || !destCoords || !dateTime || asientos <= 0 ) {
+    if (!startCoords || !destCoords || !dateTime || asientos <= 0) {
       alert('Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente.');
       return;
     }
@@ -437,9 +459,7 @@ const ConductorPage = () => {
     }
   };
 
-  const rutasAnterioresData = [
 
-  ];
 
   if (isCheckingForActiveRoute) {
     return <LoadingScreen />;
@@ -508,8 +528,8 @@ const ConductorPage = () => {
               previousRoutes.map((rutaData, index) => (
                 <RutaAnteriorCard
                   routeData={rutaData}
-
                   onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
+                  onBorrarRuta={()=>borrarRutaEspecifica(rutaData,index)}
                 />
               ))
             ) : (

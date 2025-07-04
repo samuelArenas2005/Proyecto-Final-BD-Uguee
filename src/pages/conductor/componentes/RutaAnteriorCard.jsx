@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import styles from './RutaAnteriorCard.module.css';
 import { MapPinCheck, Clock, Route as RouteIcon , MapPinHouse,Trash2} from 'lucide-react';
 
-const RutaAnteriorCard = ({ routeData, onEstablecerRuta }) => {
+const RutaAnteriorCard = ({ routeData, onEstablecerRuta,onBorrarRuta }) => {
   const [origen, setOrigen] = useState(null);
   const [destino,setDestino] = useState(null);
 
@@ -52,7 +52,7 @@ return (
         <RouteIcon size={30} className={styles.routeIconGlobal} />
         <h3 className={styles.title}>{routeData.title}</h3>
         <h3 className={styles.translucent}>{"CongitoJrProtei"}</h3>
-        <button className={styles.translucidActionButton} onClick={onEstablecerRuta}>
+        <button className={styles.translucidActionButton} onClick={onBorrarRuta}>
           <Trash2 size={18} className={styles.icon} />
         </button>
       </div>
