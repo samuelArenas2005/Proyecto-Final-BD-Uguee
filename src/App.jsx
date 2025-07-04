@@ -19,7 +19,7 @@ import SettingsUniversity from "./layout/headerUni/settingsUniversity";
 import Minigame from "./pages/games/gameMenu";
 import MinigameTaxi2d from "./pages/games/taxigame2d";
 import MinigameTaxi3d from "./pages/games/taxigame3d";
-import Monitor from "./pages/monitor/monitor";
+import Monitor from "./pages/monitor/Monitor";
 import ProtectedRoute from "./private/privateRoutes";
 import Prueba from "./pages/prueba/prueba";
 import NotFoundPage from "./pages/notFound";

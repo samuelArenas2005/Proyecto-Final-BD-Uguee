@@ -1,5 +1,28 @@
 /* src/components/pasajero/pasajero.module.css */
 
+/* Estados de carga y verificación */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.loadingContent {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.loadingContent p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #666;
+}
+
 /* Estilos generales */
 .pageContainer {
   min-height: 100vh;

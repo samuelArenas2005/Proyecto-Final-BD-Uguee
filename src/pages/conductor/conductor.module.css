@@ -1,4 +1,28 @@
 /* src/components/RutasPage/RutasPage.module.css */
+
+/* Estilos para loading */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f7fc;
+}
+
+.loadingContent {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.loadingContent p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 .pageContainer {
   min-height: 100vh;
   /* background-color: #f4f7fc; Eliminado para que la ola funcione bien con el body */
