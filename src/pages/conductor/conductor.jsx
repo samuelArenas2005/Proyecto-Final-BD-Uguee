@@ -51,6 +51,10 @@ const ConductorPage = () => {
   const [minDateTime, setMinDateTime] = useState('');
   const [maxDateTime, setMaxDateTime] = useState('');
 
+  //Parte daniel
+  const [idActual, setIdActivo] = useState(-1);
+  const [bloqueado,setBloqueado]=useState(false);
+
   useEffect(() => {
     const getFormattedDateTimeColombia = (date) => {
       const options = {
@@ -135,7 +139,7 @@ const ConductorPage = () => {
 
     console.log("Hola soy el user:", userId)
     console.log("hola daniel ,", historicalTripsAll)
-    const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo")
+    const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo"||trip.ruta.estado == "cancelado")
 
     console.log("hola soy cosas, ", historicalTrips)
 
@@ -349,9 +353,13 @@ const ConductorPage = () => {
       rutaData.destinationlong);
     setDestination(direcciondestino);
 
+    setAsientos(1)
+    console.log("IdActivoAnterior:", idActual)
 
+    setIdActivo(rutaData.id)
+    setBloqueado(true)
 
-    setAsientos(3)
+    console.log("IdActivo:", idActual)
 
 
 
@@ -360,6 +368,9 @@ const ConductorPage = () => {
 
   const borrarRutaEspecifica = async (rutaData, indexR) => {
 
+    console.log("IdActivo:", idActual)
+
+    
     console.log (indexR)
     console.log("Hola soy borrarRuta de la ruta:", rutaData.id)
     const eliminarRuta = async (idruta) => {
@@ -378,6 +389,8 @@ const ConductorPage = () => {
     eliminarRuta(rutaData.idruta)
     setPreviousRoutes(prev => prev.filter((_, index) => index !== indexR));
     console.log("soy yoooo",previousRoutes)
+    
+    
   }
 
 
@@ -418,11 +431,35 @@ const ConductorPage = () => {
         tipoderuta: 'Municipal',
         estado: 'activo',
       };
-      const { data: rutaInsertada, error: rutaError } = await supabase
-        .from('ruta')
-        .insert(nuevaRuta)
-        .select('idruta')
-        .single();
+      let rutaInsertada;
+      let rutaError;
+      if (idActual != -1) {
+
+        const { data: rutaInsertadaActual, error: rutaErrorActual } = await supabase
+          .from('ruta')
+          .update({
+            fecha: fechaLocal,
+            horadesalida: fechaHora.toTimeString().split(' ')[0],
+            estado: 'activo'
+          })
+          .eq('idruta', idActual)
+          .select()
+          .single();
+          rutaInsertada=rutaInsertadaActual;
+          rutaError=rutaErrorActual
+      }
+      else {
+
+        const { data: rutaInsertadaActual, error: rutaErrorActual} = await supabase
+          .from('ruta')
+          .insert(nuevaRuta)
+          .select('idruta')
+          .single();
+          rutaInsertada=rutaInsertadaActual
+          rutaError=rutaErrorActual
+
+      }
+
       if (rutaError || !rutaInsertada) throw new Error(`Error al crear la ruta: ${rutaError?.message}`);
       const duracionEnHoras = duration / 3600;
       const nuevoViaje = {
@@ -478,13 +515,13 @@ const ConductorPage = () => {
                 <div className={styles.inputWrapper}>
                   <MapPin className={styles.inputIcon} size={20} />
                   <Autocomplete onLoad={onLoadStart} onPlaceChanged={onPlaceChangedStart} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
-                    <input type="text" placeholder="Punto de partida" value={startPoint} onChange={(e) => setStartPoint(e.target.value)} className={styles.inputField} />
+                    <input disabled={bloqueado} type="text" placeholder="Punto de partida" value={startPoint} onChange={(e) => setStartPoint(e.target.value)} className={styles.inputField} />
                   </Autocomplete>
                 </div>
                 <div className={styles.inputWrapper}>
                   <MapPin className={styles.inputIcon} size={20} />
                   <Autocomplete onLoad={onLoadDest} onPlaceChanged={onPlaceChangedDest} fields={['formatted_address', 'geometry']} restrictions={{ country: 'co' }}>
-                    <input type="text" placeholder="Destino" value={destination} onChange={(e) => setDestination(e.target.value)} className={styles.inputField} />
+                    <input disabled={bloqueado} type="text" placeholder="Destino" value={destination} onChange={(e) => setDestination(e.target.value)} className={styles.inputField} />
                   </Autocomplete>
                 </div>
                 <div className={styles.inputWrapper}>
@@ -529,7 +566,7 @@ const ConductorPage = () => {
                 <RutaAnteriorCard
                   routeData={rutaData}
                   onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
-                  onBorrarRuta={()=>borrarRutaEspecifica(rutaData,index)}
+                  onBorrarRuta={() => borrarRutaEspecifica(rutaData, index)}
                 />
               ))
             ) : (
