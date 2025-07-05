@@ -405,6 +405,7 @@ const TravelPage = () => {
 
 
     const RADIUS_METERS = 1000;
+    console.log(rutas)
     const filtradas = rutas.filter((ruta) => {
       const salidaRuta = {
         lat: parseFloat(ruta.salidalatitud),
@@ -421,9 +422,9 @@ const TravelPage = () => {
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
       const dentroDeNMin = Math.abs(diffMs) <= umbralN;
       const asientosDisponibles = ruta.asientosdisponibles
-      const viajeEnCurso = ruta.rutaconductorviaje[ruta.rutaconductorviaje.length - 1].viaje.estadodelviaje
+      /*const viajeEnCurso = ruta.rutaconductorviaje[ruta.rutaconductorviaje.length - 1].viaje.estadodelviaje*/
       return distSalida <= RADIUS_METERS && distDestino <= RADIUS_METERS && dentroDeNMin && fechaLocal == ruta.fecha
-        && asientosDisponibles >= 1 && viajeEnCurso == 'pendiente';
+        && asientosDisponibles >= 1 /*&& viajeEnCurso == 'pendiente'*/;
     });
 
     if (filtradas.length === 0) {
