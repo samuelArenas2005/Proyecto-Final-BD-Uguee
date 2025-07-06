@@ -23,7 +23,8 @@ import {
   GoogleMap,
   LoadScript,
   Autocomplete,
-  DirectionsRenderer
+  DirectionsRenderer,
+  useJsApiLoader
 
 } from '@react-google-maps/api';
 
@@ -98,6 +99,13 @@ const TravelPage = () => {
   const [dateTime, setDateTime] = useState('');
   const [minDateTime, setMinDateTime] = useState('');
   const [maxDateTime, setMaxDateTime] = useState('');
+
+    const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script', 
+    googleMapsApiKey: apigoogle,
+    libraries: libraries,
+  });
+
 
   useEffect(() => {
     const getFormattedDateTimeColombia = (date) => {
@@ -213,7 +221,7 @@ const TravelPage = () => {
         .limit(1)
         .single();
 
-      console.log("hola", lastPassengerTrip);
+      console.log("hola casdasdfa", lastPassengerTrip);
       setIdViajeActual(lastPassengerTrip.idviaje)
 
       if (
@@ -226,12 +234,16 @@ const TravelPage = () => {
         return;
       }
 
+       const { data: activeRoute, error: errorActiveRoute } = await supabase
+        .from('rutaconductorviaje')
+        .select('idruta')
+        .eq('idviaje', lastPassengerTrip.idviaje)
+        .single();
 
       const { data: activeRouteData, error: routeError } = await supabase
         .from('ruta')
         .select(FULL_ROUTE_QUERY)
-        .eq('estado', 'activo')
-        .eq('rutaconductorviaje.idviaje', lastPassengerTrip.idviaje)
+        .eq('idruta',activeRoute.idruta)
         .single();
 
       if (routeError) {
@@ -351,6 +363,7 @@ const TravelPage = () => {
   };
 
   useEffect(() => {
+    if (!isLoaded) return;
     if (startCoords && destCoords) {
       const directionsService = new window.google.maps.DirectionsService();
       directionsService.route(
@@ -410,6 +423,7 @@ const TravelPage = () => {
 
 
     const RADIUS_METERS = 1000;
+    console.log(rutas)
     const filtradas = rutas.filter((ruta) => {
       const salidaRuta = {
         lat: parseFloat(ruta.salidalatitud),
@@ -426,11 +440,12 @@ const TravelPage = () => {
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
       const dentroDeNMin = Math.abs(diffMs) <= umbralN;
       const asientosDisponibles = ruta.asientosdisponibles
-      const viajeEnCurso = ruta.rutaconductorviaje[ruta.rutaconductorviaje.length - 1].viaje.estadodelviaje
+      const viajeEnCurso = ruta.rutaconductorviaje.at(-1).viaje.estadodelviaje
       return distSalida <= RADIUS_METERS && distDestino <= RADIUS_METERS && dentroDeNMin && fechaLocal == ruta.fecha
         && asientosDisponibles >= 1 && viajeEnCurso == 'pendiente';
     });
-
+    
+    console.log("hola samu soy filtradas", filtradas)
     if (filtradas.length === 0) {
       setSearchMessage('No se encontraron rutas que coincidan con los criterios.');
     }
@@ -451,6 +466,8 @@ const TravelPage = () => {
       .from('rutaconductorviaje')
       .select('idviaje')
       .eq('idruta', tripId)
+      .order('idviaje', { ascending: false }) 
+      .limit(1)                              
       .single();
 
     if (error) {
@@ -488,15 +505,18 @@ const TravelPage = () => {
   const [isDesactive, setIsDesactive] = useState(false);
 
   useEffect(() => {
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     let intervalId;
-
     const fetchStatus = async () => {
       console.log("me llamo muchas veces")
+      console.log("hola soy idviajeActual ", idViajeActual)
       const { data, error } = await supabase
         .from('pasajeroviaje')
         .select('idviaje')
         .eq('idviaje', idViajeActual)
         .single();
+
+        await sleep(2000); 
 
       if(data === null || error){
         setIsDesactive(true)
@@ -539,7 +559,7 @@ const TravelPage = () => {
       setShowInfo(true)
       console.log('Viaje cancelado y registro eliminado exitosamente.');
     }
-
+    setShowConfirmModal(false)
     setAcceptedRoute(null);
     setMatchingRoutes([]);
     setSearchMessage('Tu viaje ha sido cancelado. Puedes buscar uno nuevo.');
@@ -574,9 +594,15 @@ const TravelPage = () => {
   const jsonString = JSON.stringify(acceptedRoute);
   const objetoString = btoa(jsonString);
 
+  if (loadError) {
+    return <div>Error loading maps</div>;
+  }
+
+  if (!isLoaded) {
+    return <div>Loading Maps...</div>; // Or a spinner component
+  }
 
   return (
-    <LoadScript googleMapsApiKey={apigoogle} libraries={libraries}>
       <div className={styles.pageContainer}>
         <div className={styles.topSectionWave}>
           <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
@@ -993,7 +1019,7 @@ const TravelPage = () => {
         )
         }
       </div>
-    </LoadScript>
+
   );
 };
 
