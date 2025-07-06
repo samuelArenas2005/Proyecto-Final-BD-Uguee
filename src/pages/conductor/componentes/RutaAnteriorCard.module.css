@@ -19,6 +19,15 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.headerElement{
+  display: flex;
+  align-items: center;
   gap: 12px;
   border-bottom: 1px solid #f0f0f0;
   padding-bottom: 12px;
@@ -105,18 +114,18 @@
 
 .translucidActionButton {
   background-color: rgba(0, 0, 0, 0.0);
-
   color: white;
   border: none;
-  padding: 10px 15px;
-
   border-color: #ffffff;
-
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top: 5px;
+  margin-left: 10px;
+}
+
+.translucidActionButton:hover {
+  scale: 1.2;
 }
 
 .actionButton:hover {

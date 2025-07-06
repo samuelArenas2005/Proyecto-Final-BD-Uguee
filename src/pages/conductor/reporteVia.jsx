@@ -6,7 +6,7 @@ import {
   GoogleMap,
   LoadScript,
   MarkerF,
-  InfoWindowF
+  InfoWindowF,useJsApiLoader
 } from '@react-google-maps/api';
 
 /**
@@ -55,13 +55,22 @@ const DetailedTravelPage = () => {
   const mapCenter = { lat: 4.624335, lng: -74.063644 }; 
   const trafficMarkerPosition = [3.3950, -76.5050];
 
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: apigoogle,
+    libraries: libraries,
+  });
+
+   if (!isLoaded) {
+    return <div>Cargando el mapa</div>;
+  }
+
   return (
-    <LoadScript googleMapsApiKey={apigoogle} libraries={libraries}>
     <div className={styles.pageOverlay}>
          <img src={waveImage} alt="Ola decorativa" className={styles.waveBg} />
       <div className={styles.modalContainer}>
         
-        <Link to="/conductor/viaje" className={styles.closeButton}>
+        <Link to="/conductor" className={styles.closeButton}>
           <XIcon size={30} /> {/* Tamaño ligeramente ajustado si es necesario */}
         </Link>
 
@@ -123,7 +132,6 @@ const DetailedTravelPage = () => {
         </div>
       </div>
     </div>
-    </LoadScript>
   );
 };
 

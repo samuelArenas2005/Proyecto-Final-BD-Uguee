@@ -50,7 +50,7 @@ const TravelInfoPage = () => {
   const [passengerError, setPassengerError] = useState(null);
 
 
-  const[showConfirmModal,setShowConfirmModal] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apigoogle,
@@ -109,14 +109,17 @@ const TravelInfoPage = () => {
 
     const fetchPassengers = async () => {
       try {
-        setPassengersLoading(true); 
-        setPassengerError(null); 
+        setPassengersLoading(true);
+        setPassengerError(null);
 
         const { data: viajeData, error: viajeError } = await supabase
           .from('rutaconductorviaje')
           .select('idviaje')
           .eq('idruta', idruta)
+          .order('idviaje', { ascending: false }) 
+          .limit(1)                              
           .single();
+
 
         // Si no se encuentra viajeData o hay un error al obtenerlo
         if (viajeError || !viajeData || !viajeData.idviaje) {
@@ -128,7 +131,7 @@ const TravelInfoPage = () => {
           } else if (!viajeData || !viajeData.idviaje) {
             setPassengerError("No se encontró un viaje activo asociado a esta ruta.");
           }
-          return; // IMPORTANTE: Detener la ejecución aquí para evitar usar 'undefined'
+          return;
         }
 
         const idviaje = viajeData.idviaje; // Aquí idviaje ya está definido y es un número
@@ -177,28 +180,46 @@ const TravelInfoPage = () => {
 
   // --- Manejadores de eventos y Renderizado (sin cambios) ---
 
-  const handleStartTrip = () => {
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 5000);
+  const handleStartTrip = async () => {
+
+    const { error: errorChangeTrip } = await supabase
+      .from('ruta')
+      .update({ estado: 'inactivo' })
+      .eq('idruta', idruta)
+      .select()
+      .single()
+
+    if (errorChangeTrip) {
+      console.log(errorChangeTrip)
+    } else {
+      setShowNotification(true);
+      setTimeout(() => {
+        setShowNotification(false)
+        navigate('/conductor');
+      }
+        , 1000);
+
+    }
   };
 
   const handleCancelTrip = async () => {
-      try {
-        const { error: supabaseError } = await supabase
-          .from('ruta')
-          .update({ estado: 'cancelado' })
-          .eq('idruta', idruta);
+    try {
+      const { error: supabaseError } = await supabase
+        .from('ruta')
+        .delete()
+        .eq('idruta', idruta)
+        .select()
+        .single()
 
-        if (supabaseError) throw supabaseError;
+      if (supabaseError) throw supabaseError;
 
-        alert("Viaje cancelado exitosamente.");
-        setShowConfirmModal(false)
-        navigate('/conductor');
-      } catch (error) {
-        console.log(idruta)
-        console.error("Error al cancelar el viaje:", error.message);
-        alert("No se pudo cancelar el viaje. Inténtalo de nuevo.");
-      }
+      setShowConfirmModal(false)
+      navigate('/conductor');
+    } catch (error) {
+      console.log(idruta)
+      console.error("Error al cancelar el viaje:", error.message);
+      alert("No se pudo cancelar el viaje. Inténtalo de nuevo.");
+    }
   };
 
   if (loadError) return <div className={styles.centeredLoader}><AlertCircle size={48} color="red" /> <p>Error al cargar API de Google Maps: {loadError.message}</p></div>;
@@ -239,10 +260,10 @@ const TravelInfoPage = () => {
             <div className={styles.qrSection}>
               <h3 className={styles.qrTitle}>Escanear QR</h3>
               <div className={styles.qrImageContainer}>
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RutaID:${idruta}`}
-                    alt={`Código QR para la ruta ${idruta}`}
-                  />
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RutaID:${idruta}`}
+                  alt={`Código QR para la ruta ${idruta}`}
+                />
               </div>
               <p className={styles.qrText}>
                 Para obtener información de la ruta y reportes en la vía.
@@ -254,17 +275,17 @@ const TravelInfoPage = () => {
 
             <div className={styles.mapWrapper}>
               <GoogleMap
-                  mapContainerClassName={styles.mapContainer}
-                  center={mapCenter}
-                  zoom={13}
-                  options={{ styles: mapCustomStyles, disableDefaultUI: true, zoomControl: true }}
+                mapContainerClassName={styles.mapContainer}
+                center={mapCenter}
+                zoom={13}
+                options={{ styles: mapCustomStyles, disableDefaultUI: true, zoomControl: true }}
               >
-                  {directionsResponse && (
-                      <DirectionsRenderer options={{ directions: directionsResponse, polylineOptions: { strokeColor: '#5A2E98', strokeWeight: 5 } }} />
-                  )}
-                  <Link to="/conductor/reporte" className={styles.viewReportsButtonMap}>
-                      <AlertCircle size={18} /> Ver reportes en la vía
-                  </Link>
+                {directionsResponse && (
+                  <DirectionsRenderer options={{ directions: directionsResponse, polylineOptions: { strokeColor: '#5A2E98', strokeWeight: 5 } }} />
+                )}
+                <Link to="/conductor/reporte" className={styles.viewReportsButtonMap}>
+                  <AlertCircle size={18} /> Ver reportes en la vía
+                </Link>
               </GoogleMap>
             </div>
           </div>
@@ -312,34 +333,34 @@ const TravelInfoPage = () => {
       )}
 
       {showConfirmModal && (
-          <div className={styles.modalOverlayOpen}>
-            <div className={styles.confirmModalContent} onClick={e => e.stopPropagation()}>
+        <div className={styles.modalOverlayOpen}>
+          <div className={styles.confirmModalContent} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setShowConfirmModal(false)}
+              className={styles.modalCloseButton}
+            >
+              <X size={28} />
+            </button>
+            <h3>
+              ¿Estás seguro de cancelar esta ruta?
+            </h3>
+            <div className={styles.confirmModalActions}>
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className={styles.modalCloseButton}
+                className={styles.confirmModalButton}
               >
-                <X size={28} />
+                Volver
               </button>
-              <h3>
-                ¿Estás seguro de cancelar esta ruta?
-              </h3>
-              <div className={styles.confirmModalActions}>
-                <button
-                  onClick={() => setShowConfirmModal(false)}
-                  className={styles.confirmModalButton}
-                >
-                  Volver
-                </button>
-                <button
-                  onClick={handleCancelTrip}
-                  className={styles.confirmModalButtonCancelar}
-                >
-                  Cancelar ruta
-                </button>
-              </div>
+              <button
+                onClick={handleCancelTrip}
+                className={styles.confirmModalButtonCancelar}
+              >
+                Cancelar ruta
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
 
     </div>
