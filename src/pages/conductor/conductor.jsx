@@ -352,18 +352,11 @@ const ConductorPage = () => {
       rutaData.destinationlat,
       rutaData.destinationlong);
     setDestination(direcciondestino);
-
     setAsientos(1)
     console.log("IdActivoAnterior:", idActual)
-
     setIdActivo(rutaData.id)
-    setBloqueado(true)
-
+    setBloqueado(true)  
     console.log("IdActivo:", idActual)
-
-
-
-
   }
 
   const borrarRutaEspecifica = async (rutaData, indexR) => {
