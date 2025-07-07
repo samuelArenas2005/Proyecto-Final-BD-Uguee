@@ -67,6 +67,8 @@ const ConductorPage = () => {
   //Parte daniel
   const [idActual, setIdActivo] = useState(-1);
   const [bloqueado, setBloqueado] = useState(false);
+
+  const[nombreUsuario, setNombre]=useState("");
   
 
   useEffect(() => {
@@ -85,6 +87,7 @@ const ConductorPage = () => {
 
       return formatted.replace(' ', 'T');
     };
+ 
 
     const now = new Date();
     const minVal = getFormattedDateTimeColombia(now);
@@ -146,6 +149,7 @@ const ConductorPage = () => {
   const [previousRoutes, setPreviousRoutes] = useState([]);
 
   const fetchPreviousRoutes = async (userId) => {
+
     const { data: historicalTripsAll, error } = await supabase
       .from('rutaconductorviaje')
       .select(`idruta,ruta(estado),idconductor
@@ -213,6 +217,15 @@ const ConductorPage = () => {
         const { data: { user } } = await supabase.auth.getUser();
 
         console.log(user)
+            const { data: userInfo, error0 } = await supabase
+      .from('usuario')
+      .select(`nombrecompleto,edad
+        `)
+      .eq('nidentificacion', user.id)
+      .single()
+
+
+      setNombre(userInfo.nombrecompleto)
 
         if (user) {
           const { data: activeRouteData, error } = await supabase
@@ -403,6 +416,8 @@ const ConductorPage = () => {
 
 
   //aqui termina mi prueba pa
+
+
   const handleEstablecerRuta = async () => {
 
     if (!startCoords || !destCoords || !dateTime || asientos <= 0) {
@@ -527,7 +542,7 @@ const ConductorPage = () => {
         <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
         <div className={styles.contentWrapper}>
           <div className={styles.routeSetupSection}>
-            <h2 className={styles.greeting}>¡Hola Miguel Andrade! Establece tu ruta de hoy</h2>
+            <h2 className={styles.greeting}>¡Hola {nombreUsuario}! Establece tu ruta de hoy</h2>
             <div className={styles.inputGroup}>
               <div className={styles.inputWrapper}>
                 <MapPin className={styles.inputIcon} size={20} />

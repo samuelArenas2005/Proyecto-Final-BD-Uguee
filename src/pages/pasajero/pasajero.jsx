@@ -99,6 +99,8 @@ const TravelPage = () => {
   const [dateTime, setDateTime] = useState('');
   const [minDateTime, setMinDateTime] = useState('');
   const [maxDateTime, setMaxDateTime] = useState('');
+  const[nombreUsuario, setNombre]=useState("");
+  
 
     const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script', 
@@ -150,6 +152,11 @@ const TravelPage = () => {
 //vuelve papu
 
   const fetchPreviousRoutes = async (userId) => {
+
+    console.log("Estoy en el fetch")
+    console.log("Sexooooooooooo")
+
+
     const { data: historicalTripsAll, error } = await supabase
       .from('pasajeroviaje')
       .select(`idviaje,viaje(estadodelviaje)
@@ -170,7 +177,7 @@ const TravelPage = () => {
     const rutas = historicalTrips.map(async (viaje) => {
       const { data: historicalTripsruta, error2 } = await supabase
         .from('rutaconductorviaje')
-        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
+        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida,idruta)
       `)
         .eq('idviaje', viaje.idviaje)
       if (error2 || !historicalTripsruta) {
@@ -191,6 +198,7 @@ const TravelPage = () => {
     else {
       setPreviousRoutes(
         rutasArrayPlana.map((ruta, index) => ({
+          id:ruta.ruta.idruta,
           title: `Ruta ${index + 1}`,
           originlat: ruta.ruta.salidalatitud,
           originlong: ruta.ruta.salidalongitud,
@@ -210,8 +218,16 @@ const TravelPage = () => {
         console.log('No hay usuario logueado.');
         return;
       }
-
+      const { data: userInfo, error0 } = await supabase
+        .from('usuario')
+          .select(`nombrecompleto,edad
+            `)
+          .eq('nidentificacion', user.id)
+          .single()
+        
+      setNombre(userInfo.nombrecompleto)
       console.log(user)
+
 
       const { data: lastPassengerTrip, error: passengerError } = await supabase
         .from('pasajeroviaje')
@@ -502,6 +518,32 @@ const TravelPage = () => {
     setIsTripDetailDialogOpen(false);
   };
 
+  //Función para las cards de retomar viaje
+
+  const getInfoRutaAnterior = async (rutaData) => {
+
+    console.log(rutaData)
+    console.log("Mi id es:",rutaData.id)
+      
+    const coordsI = { lat: rutaData.originlat, lng: rutaData.originlong };
+    setStartCoords(coordsI)
+    const direccion = await getAddressFromCoords(
+      rutaData.originlat,
+      rutaData.originlong);
+    setStartPoint(direccion);
+
+    const coordsF = { lat: rutaData.destinationlat, lng: rutaData.destinationlong };
+    setDestCoords(coordsF)
+    console.log(coordsF)
+
+    const direcciondestino = await getAddressFromCoords(
+      rutaData.destinationlat,
+      rutaData.destinationlong);
+    setDestination(direcciondestino);
+  
+  }
+
+
   const [isDesactive, setIsDesactive] = useState(false);
 
   useEffect(() => {
@@ -610,7 +652,7 @@ const TravelPage = () => {
             <div className={styles.routeSetupSection}>
               {!acceptedRoute ? (
                 <>
-                  <h2 className={styles.greeting}>¡Busca tu viaje ideal!</h2>
+                  <h2 className={styles.greeting}>¡Hola! {nombreUsuario} ¡Busca tu viaje ideal!</h2>
                   <div className={styles.inputGroup}>
                     <div className={styles.inputWrapper}>
                       <MapPin className={styles.inputIcon} size={20} />
@@ -955,7 +997,7 @@ const TravelPage = () => {
                 previousRoutes.map((rutaData,index) => (
                   <RutaAnteriorCard
                     routeData={rutaData}
-                    onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes, index); }}
+                    onEstablecerRuta={() => getInfoRutaAnterior(rutaData) }
                   />
                 ))
               ) : (
