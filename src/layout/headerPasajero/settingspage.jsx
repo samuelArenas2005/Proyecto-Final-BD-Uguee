@@ -1,9 +1,9 @@
 // src/pages/SettingsPage/SettingsPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../supabaseClient.js';
-import { 
-  UserCog, User, Mail, University, Phone, Home, Building, Hash, 
-  BookUser, Pencil, X, LoaderCircle, Save 
+import {
+  UserCog, User, Mail, University, Phone, Home, Building, Hash,
+  BookUser, Pencil, X, LoaderCircle, Save
 } from 'lucide-react';
 import styles from './SettingsPage.module.css';
 import { useParams } from 'react-router-dom';
@@ -28,19 +28,20 @@ const SettingsPage = () => {
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    const fetchUser = async () => { 
+    const fetchUser = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        setUserId(user ? user.id : null); 
+        setUserId(user ? user.id : null);
       } catch (error) {
         console.error("Error al obtener el usuario de Supabase:", error);
       }
     };
 
-    fetchUser(); 
+    fetchUser();
   }, []);
- 
+
   const [userData, setUserData] = useState(null);
+  const [urlAvatar, setUrlAvatar] = useState(null)
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -50,7 +51,7 @@ const SettingsPage = () => {
   const fetchUserData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await supabase
         .from('usuario')
@@ -65,6 +66,10 @@ const SettingsPage = () => {
       if (error) throw error;
 
       if (data) {
+        const avatarUrl = supabase.storage
+          .from("publico")
+          .getPublicUrl(data?.urlAvatar);
+        setUrlAvatar(avatarUrl)
         setUserData(data);
         setFormData(data); // Inicializa el formulario con los datos existentes
       }
@@ -107,9 +112,9 @@ const SettingsPage = () => {
         .eq('nidentificacion', userId)
         .select()
         .single();
-      
+
       if (error) throw error;
-      
+
       setUserData(data); // Actualiza la vista con los nuevos datos guardados
       setIsEditing(false);
       alert("¡Perfil actualizado con éxito!");
@@ -138,14 +143,14 @@ const SettingsPage = () => {
         <UserCog size={32} />
         <h1>Configuración de la Cuenta</h1>
       </header>
-      
+
       <main className={styles.mainGrid}>
         {/* Columna Izquierda: Tarjeta de Perfil */}
         <aside className={styles.profileCard}>
-          <img src={userData.urlAvatar || 'https://via.placeholder.com/150'} alt="Avatar" className={styles.avatar} />
+          <img src={urlAvatar.data.publicUrl} alt="Avatar" className={styles.avatar} />
           <h2>{userData.nombrecompleto}</h2>
           <p className={styles.userStatus}>{userData.estatuto}</p>
-          
+
           <div className={styles.profileInfoItem}>
             <BookUser size={18} />
             <span>{userData.codigoestudiantil}</span>
@@ -155,7 +160,7 @@ const SettingsPage = () => {
             <span>{userData.institucion?.nombre || 'No especificada'}</span>
           </div>
         </aside>
-        
+
         {/* Columna Derecha: Formulario de Configuración */}
         <form onSubmit={handleSaveChanges} className={styles.settingsForm}>
           <div className={styles.formHeader}>

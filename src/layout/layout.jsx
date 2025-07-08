@@ -16,6 +16,16 @@ const Layout = ({ children }) => {
 
       const { data: { user } } = await supabase.auth.getUser();
 
+      const { data: dataMonitor } = await supabase
+        .from('monitor')
+        .select('idmonitor')
+        .eq('idmonitor', user.id)
+
+      if (dataMonitor.length !== 0) {
+        setUserActual('monitor')
+        return
+      }
+
       const { data: dataConductor } = await supabase
         .from('conductor')
         .select('idusuario,numerodelicencia')
@@ -47,17 +57,7 @@ const Layout = ({ children }) => {
         setUserActual('administrador')
         return
       }
-
-
-      const { data: dataMonitor } = await supabase
-        .from('monitor')
-        .select('idmonitor')
-        .eq('idmonitor', user.id)
-
-      if (dataMonitor.length !== 0) {
-        setUserActual('monitor')
-        return
-      }
+      
 
       setUserActual('universidad')
 

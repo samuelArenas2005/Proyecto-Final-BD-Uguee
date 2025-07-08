@@ -10,8 +10,8 @@ import { useNavigate } from 'react-router-dom';
 
 
 const Header = ({
-  conductorConfig, // Ejemplo: { text: "Ver Mis Viajes", action: () => navigate('/conductor/viajes') }
-  IconoComponent,   // Ejemplo: () => navigate('/perfil-conductor')
+  conductorConfig, 
+  IconoComponent,   
   userType
 }) => {
   const [urlAvatar, setUrlAvatar] = useState(null)
@@ -32,8 +32,11 @@ const Header = ({
       setUserActual(user);
       if (urlData.length !== 0) {
         if (urlData[0].urlAvatar != 'NULL') {
-          console.log(urlData[0].urlAvatar);
-          setUrlAvatar(urlData);
+          const avatarUrl = supabase.storage
+              .from("publico")
+              .getPublicUrl(urlData[0].urlAvatar);
+          console.log("hola soy avatar", avatarUrl);
+          setUrlAvatar(avatarUrl);
         }
         return
       }
@@ -104,7 +107,7 @@ const Header = ({
           onClick={toggleMenu}
         >
           {urlAvatar !== null ? (
-            <img src={urlAvatar[0].urlAvatar} alt={urlAvatar[0].nombrecompleto} className={styles.avatar} />
+            <img src={urlAvatar.data.publicUrl} alt={"none"} className={styles.avatar} />
           ) : (
             <User size={24} className={styles.iconProfile} />
           )}

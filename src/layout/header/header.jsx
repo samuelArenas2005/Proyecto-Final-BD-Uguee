@@ -29,6 +29,16 @@ const header = ({
     setIsOpen(!isOpen);
   };
 
+  const getUrlAvatar = (url) => {
+    const avatarUrl = supabase.storage
+                .from("publico")
+                .getPublicUrl(url);
+
+    return avatarUrl
+  }
+    
+
+
   useEffect(() => {
     async function checkSessionActive() {
       const { data: { user }, error: erroUser } = await supabase.auth.getUser();
@@ -46,8 +56,7 @@ const header = ({
 
       if (urlData.length !== 0) {
         if (urlData[0].urlAvatar !== 'NULL') {
-          console.log("no soy usuario");
-          setUrlAvatar(urlData);
+          setUrlAvatar(getUrlAvatar(urlData[0].urlAvatar));
         }
         return
       }
@@ -61,11 +70,7 @@ const header = ({
 
       if (urlDataUni.length !== 0) {
         if (urlDataUni[0].urllmglogo !== 'NULL') {
-          const urlDataModificate = [{
-            urlAvatar: urlDataUni[0].urllmglogo,
-            nombrecompleto: urlDataUni[0].nombre
-          }]
-          setUrlAvatar(urlDataModificate);
+           setUrlAvatar(getUrlAvatar(urlDataUni[0].urllmglogo));
         }
         return
       }
@@ -74,7 +79,6 @@ const header = ({
 
     }
     checkSessionActive();
-    console.log(urlAvatar)
   }, [])
 
   const handleActionGoStart = () => {
@@ -137,6 +141,10 @@ const header = ({
     action: () => { alert('cargando..') }
   }
 
+  console.log("hola soy urlAvatar",urlAvatar)
+
+  console.log("Hola soy finalUser",FinalUserType)
+
   return (
     <header className={`header ${scrolled ? "scrolled" : ""}`}>
       <div className="container-wrapper">
@@ -164,8 +172,8 @@ const header = ({
               onClick={toggleMenu}
             >
               {urlAvatar ? (
-                <img src={urlAvatar[0].urlAvatar}
-                  alt={urlAvatar[0].nombrecompleto} className={styles.avatar} />
+                <img src={urlAvatar.data.publicUrl}
+                  alt={"none"} className={styles.avatar} />
               ) : (
                 <User size={24} className={styles.iconProfile} />
               )}
