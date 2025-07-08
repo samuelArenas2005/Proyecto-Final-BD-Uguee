@@ -63,6 +63,10 @@ const ConductorPage = () => {
   const [minDateTime, setMinDateTime] = useState("");
   const [maxDateTime, setMaxDateTime] = useState("");
 
+  //Parte daniel
+  const [idActual, setIdActivo] = useState(-1);
+  const [bloqueado,setBloqueado]=useState(false);
+
   useEffect(() => {
     const getFormattedDateTimeColombia = (date) => {
       const options = {
@@ -146,11 +150,9 @@ const ConductorPage = () => {
       )
       .eq("idconductor", userId);
 
-    console.log("Hola soy el user:", userId);
-    console.log("hola daniel ,", historicalTripsAll);
-    const historicalTrips = historicalTripsAll.filter(
-      (trip) => trip.ruta.estado == "inactivo"
-    );
+    console.log("Hola soy el user:", userId)
+    console.log("hola daniel ,", historicalTripsAll)
+    const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo"||trip.ruta.estado == "cancelado")
 
     console.log("hola soy cosas, ", historicalTrips);
 
@@ -161,12 +163,10 @@ const ConductorPage = () => {
 
     const rutas = historicalTrips.map(async (ruta) => {
       const { data: historicalTripsruta, error2 } = await supabase
-        .from("rutaconductorviaje")
-        .select(
-          `ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
-        `
-        )
-        .eq("idruta", ruta.idruta);
+        .from('rutaconductorviaje')
+        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida,idruta)
+        `)
+        .eq('idruta', ruta.idruta)
       if (error2 || !historicalTripsruta) {
         return [];
       }
@@ -186,12 +186,14 @@ const ConductorPage = () => {
     } else {
       setPreviousRoutes(
         rutasArrayPlana.map((ruta, index) => ({
+          id: ruta.ruta.idruta,
           title: `Ruta ${index + 1}`,
           originlat: ruta.ruta.salidalatitud,
           originlong: ruta.ruta.salidalongitud,
           destinationlat: ruta.ruta.paradalatitud,
           destinationlong: ruta.ruta.paradalongitud,
-          departureTime: ruta.ruta.horadesalida,
+          departureTime: ruta.ruta.horadesalida
+
         }))
       );
       console.log("Numero de rutas previas", previousRoutes.length);
@@ -446,7 +448,6 @@ const ConductorPage = () => {
   //Función creada por DAniel pa probar
 
   const getInfoRutaAnterior = async (rutaData) => {
-    console.log(rutaData);
 
     const coordsI = { lat: rutaData.originlat, lng: rutaData.originlong };
     setStartCoords(coordsI);
@@ -456,28 +457,54 @@ const ConductorPage = () => {
     );
     setStartPoint(direccion);
 
-    const coordsF = {
-      lat: rutaData.destinationlat,
-      lng: rutaData.destinationlong,
-    };
-    setDestCoords(coordsF);
-    console.log(coordsF);
+    const coordsF = { lat: rutaData.destinationlat, lng: rutaData.destinationlong };
+    setDestCoords(coordsF)
+    console.log(coordsF)
 
     const direcciondestino = await getAddressFromCoords(
       rutaData.destinationlat,
-      rutaData.destinationlong
-    );
+      rutaData.destinationlong);
     setDestination(direcciondestino);
+    setAsientos(1)
+    console.log("IdActivoAnterior:", idActual)
+    setIdActivo(rutaData.id)
+    setBloqueado(true)  
+    console.log("IdActivo:", idActual)
+  }
 
-    setAsientos(3);
-  };
+  const borrarRutaEspecifica = async (rutaData, indexR) => {
+
+    console.log("IdActivo:", idActual)
+
+    
+    console.log (indexR)
+    console.log("Hola soy borrarRuta de la ruta:", rutaData.id)
+    const eliminarRuta = async (idruta) => {
+      const { error } = await supabase
+        .from('ruta')
+        .delete()
+        .eq('idruta', rutaData.id);
+
+
+      if (error) {
+        console.error(`Error al eliminar ruta con id ${idruta}:`, error.message);
+      } else {
+        console.log(`Ruta con id ${idruta} eliminada exitosamente.`);
+      }
+    };
+    eliminarRuta(rutaData.idruta)
+    setPreviousRoutes(prev => prev.filter((_, index) => index !== indexR));
+    console.log("soy yoooo",previousRoutes)
+    
+    
+  }
+
 
   //aqui termina mi prueba pa
   const handleEstablecerRuta = async () => {
+
     if (!startCoords || !destCoords || !dateTime || asientos <= 0) {
-      alert(
-        "Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente."
-      );
+      alert('Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente.');
       return;
     }
     setLoading(true);
@@ -516,13 +543,36 @@ const ConductorPage = () => {
         tipoderuta: "Municipal",
         estado: "activo",
       };
-      const { data: rutaInsertada, error: rutaError } = await supabase
-        .from("ruta")
-        .insert(nuevaRuta)
-        .select("idruta")
-        .single();
-      if (rutaError || !rutaInsertada)
-        throw new Error(`Error al crear la ruta: ${rutaError?.message}`);
+      let rutaInsertada;
+      let rutaError;
+      if (idActual != -1) {
+
+        const { data: rutaInsertadaActual, error: rutaErrorActual } = await supabase
+          .from('ruta')
+          .update({
+            fecha: fechaLocal,
+            horadesalida: fechaHora.toTimeString().split(' ')[0],
+            estado: 'activo'
+          })
+          .eq('idruta', idActual)
+          .select()
+          .single();
+          rutaInsertada=rutaInsertadaActual;
+          rutaError=rutaErrorActual
+      }
+      else {
+
+        const { data: rutaInsertadaActual, error: rutaErrorActual} = await supabase
+          .from('ruta')
+          .insert(nuevaRuta)
+          .select('idruta')
+          .single();
+          rutaInsertada=rutaInsertadaActual
+          rutaError=rutaErrorActual
+
+      }
+
+      if (rutaError || !rutaInsertada) throw new Error(`Error al crear la ruta: ${rutaError?.message}`);
       const duracionEnHoras = duration / 3600;
       const nuevoViaje = {
         tiempodesalida: fechaHora.toISOString(),
@@ -564,7 +614,7 @@ const ConductorPage = () => {
     }
   };
 
-  const rutasAnterioresData = [];
+
 
   if (isCheckingForActiveRoute) {
     return <LoadingScreen />;
@@ -617,7 +667,7 @@ const ConductorPage = () => {
                         restrictions={{ country: "co" }}
                       >
                         <input
-                          type="text"
+                          disabled={bloqueado} type="text"
                           placeholder="Punto de partida"
                           value={startPoint}
                           onChange={(e) => setStartPoint(e.target.value)}
@@ -634,7 +684,7 @@ const ConductorPage = () => {
                         restrictions={{ country: "co" }}
                       >
                         <input
-                          type="text"
+                          disabled={bloqueado} type="text"
                           placeholder="Destino"
                           value={destination}
                           onChange={(e) => setDestination(e.target.value)}
@@ -710,23 +760,23 @@ const ConductorPage = () => {
               </div>
             </div>
 
-            <div className={styles.previousRoutesSection}>
-              <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
-              <div className={styles.cardsGrid}>
-                {previousRoutes.length > 0 ? (
-                  previousRoutes.map((rutaData, index) => (
-                    <RutaAnteriorCard
-                      routeData={rutaData}
-                      onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
-                    />
-                  ))
-                ) : (
-                  <div className={styles.infoMessage}>
-                    No tienes viajes anteriores
-                  </div>
-                )}
-              </div>
-            </div>
+        <div className={styles.previousRoutesSection}>
+          <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
+          <div className={styles.cardsGrid}>
+            {previousRoutes.length > 0 ? (
+
+              previousRoutes.map((rutaData, index) => (
+                <RutaAnteriorCard
+                  routeData={rutaData}
+                  onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
+                  onBorrarRuta={() => borrarRutaEspecifica(rutaData, index)}
+                />
+              ))
+            ) : (
+              <div className={styles.infoMessage}>No tienes viajes anteriores</div>
+            )}
+          </div>
+        </div>
 
             <SuccessModal
               isOpen={showSuccessModal}
