@@ -4,7 +4,7 @@ import styles from './succes.module.css';
 import { CheckCircle2, X } from 'lucide-react';
 import { Link } from "react-router-dom";
 
-const SuccessModal = ({ isOpen, onClose }) => {
+const SuccessModal = ({ isOpen, onClose,rutaInsertadaId }) => {
   if (!isOpen) {
     return null;
   }
@@ -23,7 +23,7 @@ const SuccessModal = ({ isOpen, onClose }) => {
           Su viaje se estableció con éxito, <br />
           dentro de poco podra ver aquellos estudiantes interesados en tomar su ruta.
         </p>
-        <Link to="/conductor/viaje" className={styles.okButton}>  
+        <Link to={`/conductor/viaje/${rutaInsertadaId}`} className={styles.okButton}>  
               <span>Entendido</span>
         </Link>
       </div>

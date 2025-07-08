@@ -31,6 +31,7 @@ import {
   LoadScript,
   Autocomplete,
   DirectionsRenderer,
+  useJsApiLoader,
 } from "@react-google-maps/api";
 
 const apigoogle = import.meta.env.VITE_APIS_GOOGLE;
@@ -215,6 +216,13 @@ const TravelPage = () => {
 
     checkUniversityAndUserStatus();
   }, []);
+  const [nombreUsuario, setNombre] = useState("");
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: apigoogle,
+    libraries: libraries,
+  });
 
   useEffect(() => {
     const getFormattedDateTimeColombia = (date) => {
@@ -258,6 +266,9 @@ const TravelPage = () => {
   //vuelve papu
 
   const fetchPreviousRoutes = async (userId) => {
+    console.log("Estoy en el fetch");
+    console.log("Sexooooooooooo");
+
     const { data: historicalTripsAll, error } = await supabase
       .from("pasajeroviaje")
       .select(
@@ -280,7 +291,7 @@ const TravelPage = () => {
       const { data: historicalTripsruta, error2 } = await supabase
         .from("rutaconductorviaje")
         .select(
-          `ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
+          `ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida,idruta)
       `
         )
         .eq("idviaje", viaje.idviaje);
@@ -301,6 +312,7 @@ const TravelPage = () => {
     } else {
       setPreviousRoutes(
         rutasArrayPlana.map((ruta, index) => ({
+          id: ruta.ruta.idruta,
           title: `Ruta ${index + 1}`,
           originlat: ruta.ruta.salidalatitud,
           originlong: ruta.ruta.salidalongitud,
@@ -321,7 +333,16 @@ const TravelPage = () => {
         console.log("No hay usuario logueado.");
         return;
       }
+      const { data: userInfo, error0 } = await supabase
+        .from("usuario")
+        .select(
+          `nombrecompleto,edad
+            `
+        )
+        .eq("nidentificacion", user.id)
+        .single();
 
+      setNombre(userInfo.nombrecompleto);
       console.log(user);
 
       const { data: lastPassengerTrip, error: passengerError } = await supabase
@@ -332,7 +353,7 @@ const TravelPage = () => {
         .limit(1)
         .single();
 
-      console.log("hola", lastPassengerTrip);
+      console.log("hola casdasdfa", lastPassengerTrip);
       setIdViajeActual(lastPassengerTrip.idviaje);
 
       if (
@@ -347,11 +368,16 @@ const TravelPage = () => {
         return;
       }
 
+      const { data: activeRoute, error: errorActiveRoute } = await supabase
+        .from("rutaconductorviaje")
+        .select("idruta")
+        .eq("idviaje", lastPassengerTrip.idviaje)
+        .single();
+
       const { data: activeRouteData, error: routeError } = await supabase
         .from("ruta")
         .select(FULL_ROUTE_QUERY)
-        .eq("estado", "activo")
-        .eq("rutaconductorviaje.idviaje", lastPassengerTrip.idviaje)
+        .eq("idruta", activeRoute.idruta)
         .single();
 
       if (routeError) {
@@ -474,6 +500,7 @@ const TravelPage = () => {
   };
 
   useEffect(() => {
+    if (!isLoaded) return;
     if (startCoords && destCoords) {
       const directionsService = new window.google.maps.DirectionsService();
       directionsService.route(
@@ -530,6 +557,7 @@ const TravelPage = () => {
     const fechaLocal = `${yyyy}-${mm}-${dd}`;
 
     const RADIUS_METERS = 1000;
+    console.log(rutas);
     const filtradas = rutas.filter((ruta) => {
       const salidaRuta = {
         lat: parseFloat(ruta.salidalatitud),
@@ -546,9 +574,7 @@ const TravelPage = () => {
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
       const dentroDeNMin = Math.abs(diffMs) <= umbralN;
       const asientosDisponibles = ruta.asientosdisponibles;
-      const viajeEnCurso =
-        ruta.rutaconductorviaje[ruta.rutaconductorviaje.length - 1].viaje
-          .estadodelviaje;
+      const viajeEnCurso = ruta.rutaconductorviaje.at(-1).viaje.estadodelviaje;
       return (
         distSalida <= RADIUS_METERS &&
         distDestino <= RADIUS_METERS &&
@@ -559,6 +585,7 @@ const TravelPage = () => {
       );
     });
 
+    console.log("hola samu soy filtradas", filtradas);
     if (filtradas.length === 0) {
       setSearchMessage(
         "No se encontraron rutas que coincidan con los criterios."
@@ -580,6 +607,8 @@ const TravelPage = () => {
       .from("rutaconductorviaje")
       .select("idviaje")
       .eq("idruta", tripId)
+      .order("idviaje", { ascending: false })
+      .limit(1)
       .single();
 
     if (error) {
@@ -616,18 +645,49 @@ const TravelPage = () => {
     setIsTripDetailDialogOpen(false);
   };
 
+  //Función para las cards de retomar viaje
+
+  const getInfoRutaAnterior = async (rutaData) => {
+    console.log(rutaData);
+    console.log("Mi id es:", rutaData.id);
+
+    const coordsI = { lat: rutaData.originlat, lng: rutaData.originlong };
+    setStartCoords(coordsI);
+    const direccion = await getAddressFromCoords(
+      rutaData.originlat,
+      rutaData.originlong
+    );
+    setStartPoint(direccion);
+
+    const coordsF = {
+      lat: rutaData.destinationlat,
+      lng: rutaData.destinationlong,
+    };
+    setDestCoords(coordsF);
+    console.log(coordsF);
+
+    const direcciondestino = await getAddressFromCoords(
+      rutaData.destinationlat,
+      rutaData.destinationlong
+    );
+    setDestination(direcciondestino);
+  };
+
   const [isDesactive, setIsDesactive] = useState(false);
 
   useEffect(() => {
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     let intervalId;
-
     const fetchStatus = async () => {
       console.log("me llamo muchas veces");
+      console.log("hola soy idviajeActual ", idViajeActual);
       const { data, error } = await supabase
         .from("pasajeroviaje")
         .select("idviaje")
         .eq("idviaje", idViajeActual)
         .single();
+
+      await sleep(2000);
 
       if (data === null || error) {
         setIsDesactive(true);
@@ -673,7 +733,7 @@ const TravelPage = () => {
       setShowInfo(true);
       console.log("Viaje cancelado y registro eliminado exitosamente.");
     }
-
+    setShowConfirmModal(false);
     setAcceptedRoute(null);
     setMatchingRoutes([]);
     setSearchMessage("Tu viaje ha sido cancelado. Puedes buscar uno nuevo.");
@@ -705,6 +765,14 @@ const TravelPage = () => {
   const jsonString = JSON.stringify(acceptedRoute);
   const objetoString = btoa(jsonString);
 
+  if (loadError) {
+    return <div>Error loading maps</div>;
+  }
+
+  if (!isLoaded) {
+    return <div>Loading Maps...</div>; // Or a spinner component
+  }
+
   return (
     <>
       {/* Show loading state while checking statuses */}
@@ -732,524 +800,521 @@ const TravelPage = () => {
 
       {/* Show main content if both university and user are active */}
       {isUniversityActive === true && isUserActive === true && (
-        <LoadScript googleMapsApiKey={apigoogle} libraries={libraries}>
-          <div className={styles.pageContainer}>
-            <div className={styles.topSectionWave}>
-              <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
-              <div className={styles.contentWrapper}>
-                <div className={styles.routeSetupSection}>
-                  {!acceptedRoute ? (
-                    <>
-                      <h2 className={styles.greeting}>
-                        ¡Busca tu viaje ideal!
-                      </h2>
-                      <div className={styles.inputGroup}>
-                        <div className={styles.inputWrapper}>
-                          <MapPin className={styles.inputIcon} size={20} />
-                          <Autocomplete
-                            onLoad={onLoadStart}
-                            onPlaceChanged={onPlaceChangedStart}
-                            fields={["formatted_address", "geometry"]}
-                            restrictions={{ country: "co" }}
-                          >
-                            <input
-                              type="text"
-                              placeholder="Punto de partida"
-                              value={startPoint}
-                              onChange={(e) => setStartPoint(e.target.value)}
-                              className={styles.inputField}
-                            />
-                          </Autocomplete>
-                        </div>
-                        <div className={styles.inputWrapper}>
-                          <MapPin className={styles.inputIcon} size={20} />
-                          <Autocomplete
-                            onLoad={onLoadDest}
-                            onPlaceChanged={onPlaceChangedDest}
-                            fields={["formatted_address", "geometry"]}
-                            restrictions={{ country: "co" }}
-                          >
-                            <input
-                              type="text"
-                              placeholder="Destino"
-                              value={destination}
-                              onChange={(e) => setDestination(e.target.value)}
-                              className={styles.inputField}
-                            />
-                          </Autocomplete>
-                        </div>
-                        <div className={styles.inputWrapper}>
-                          <Clock className={styles.inputIcon} size={20} />
+        <div className={styles.pageContainer}>
+          <div className={styles.topSectionWave}>
+            <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
+            <div className={styles.contentWrapper}>
+              <div className={styles.routeSetupSection}>
+                {!acceptedRoute ? (
+                  <>
+                    <h2 className={styles.greeting}>
+                      ¡Hola! {nombreUsuario} ¡Busca tu viaje ideal!
+                    </h2>
+                    <div className={styles.inputGroup}>
+                      <div className={styles.inputWrapper}>
+                        <MapPin className={styles.inputIcon} size={20} />
+                        <Autocomplete
+                          onLoad={onLoadStart}
+                          onPlaceChanged={onPlaceChangedStart}
+                          fields={["formatted_address", "geometry"]}
+                          restrictions={{ country: "co" }}
+                        >
                           <input
-                            type="datetime-local"
-                            min={minDateTime}
-                            onBlur={handleBlur}
-                            max={maxDateTime}
-                            value={dateTime}
-                            onChange={(e) => setDateTime(e.target.value)}
+                            type="text"
+                            placeholder="Punto de partida"
+                            value={startPoint}
+                            onChange={(e) => setStartPoint(e.target.value)}
                             className={styles.inputField}
                           />
-                        </div>
+                        </Autocomplete>
                       </div>
-                      <div className={styles.buttonGroup}>
-                        <button
-                          className={styles.submitButton}
-                          onClick={handleSearchTrip}
-                          disabled={loadingRoutes}
+                      <div className={styles.inputWrapper}>
+                        <MapPin className={styles.inputIcon} size={20} />
+                        <Autocomplete
+                          onLoad={onLoadDest}
+                          onPlaceChanged={onPlaceChangedDest}
+                          fields={["formatted_address", "geometry"]}
+                          restrictions={{ country: "co" }}
                         >
-                          {loadingRoutes ? (
-                            "Buscando..."
-                          ) : (
-                            <>
-                              <Search size={18} /> Buscar
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className={styles.acceptedTripCard}>
-                      <h2 className={styles.title}>¡Viaje confirmado!</h2>
-
-                      {/* --- SECCIÓN DEL CONDUCTOR --- */}
-                      <div className={styles.section}>
-                        <div className={styles.driverInfo}>
-                          <img
-                            src={
-                              acceptedRoute.rutaconductorviaje[0].conductor
-                                .usuario.urlAvatar
-                            }
-                            alt={
-                              acceptedRoute.rutaconductorviaje[0].conductor
-                                .usuario.nombrecompleto
-                            }
-                            className={styles.avatar}
+                          <input
+                            type="text"
+                            placeholder="Destino"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            className={styles.inputField}
                           />
-                          <div className={styles.driverText}>
-                            <p className={styles.label}>Conductor</p>
-                            <p className={styles.value}>
-                              {
-                                acceptedRoute.rutaconductorviaje[0].conductor
-                                  .usuario.nombrecompleto
-                              }
-                            </p>
-                          </div>
-                        </div>
-                        <div className={styles.contactInfo}>
-                          <Phone size={18} className={styles.icon} />
+                        </Autocomplete>
+                      </div>
+                      <div className={styles.inputWrapper}>
+                        <Clock className={styles.inputIcon} size={20} />
+                        <input
+                          type="datetime-local"
+                          min={minDateTime}
+                          onBlur={handleBlur}
+                          max={maxDateTime}
+                          value={dateTime}
+                          onChange={(e) => setDateTime(e.target.value)}
+                          className={styles.inputField}
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.buttonGroup}>
+                      <button
+                        className={styles.submitButton}
+                        onClick={handleSearchTrip}
+                        disabled={loadingRoutes}
+                      >
+                        {loadingRoutes ? (
+                          "Buscando..."
+                        ) : (
+                          <>
+                            <Search size={18} /> Buscar
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.acceptedTripCard}>
+                    <h2 className={styles.title}>¡Viaje confirmado!</h2>
+
+                    {/* --- SECCIÓN DEL CONDUCTOR --- */}
+                    <div className={styles.section}>
+                      <div className={styles.driverInfo}>
+                        <img
+                          src={
+                            acceptedRoute.rutaconductorviaje[0].conductor
+                              .usuario.urlAvatar
+                          }
+                          alt={
+                            acceptedRoute.rutaconductorviaje[0].conductor
+                              .usuario.nombrecompleto
+                          }
+                          className={styles.avatar}
+                        />
+                        <div className={styles.driverText}>
+                          <p className={styles.label}>Conductor</p>
                           <p className={styles.value}>
                             {
                               acceptedRoute.rutaconductorviaje[0].conductor
-                                .usuario.telefono
+                                .usuario.nombrecompleto
                             }
                           </p>
                         </div>
                       </div>
-
-                      {/* --- SECCIÓN DE RUTA --- */}
-                      <div className={styles.section}>
-                        <div className={styles.routePoint}>
-                          <MapPin size={20} className={styles.icon} />
-                          <div className={styles.routeText}>
-                            <p className={styles.label}>Origen</p>
-                            <p className={styles.value}>{origen}</p>
-                          </div>
-                        </div>
-                        <div className={styles.routePoint}>
-                          <MapPin
-                            size={20}
-                            className={styles.icon}
-                            color="#8A2BE2"
-                          />
-                          <div className={styles.routeText}>
-                            <p className={styles.label}>Destino</p>
-                            <p className={styles.value}>{destino}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* --- SECCIÓN DE VEHÍCULO Y HORA --- */}
-                      <div className={styles.section}>
-                        <p className={styles.sectionTitle2}>
-                          Detalles del Vehículo
+                      <div className={styles.contactInfo}>
+                        <Phone size={18} className={styles.icon} />
+                        <p className={styles.value}>
+                          {
+                            acceptedRoute.rutaconductorviaje[0].conductor
+                              .usuario.telefono
+                          }
                         </p>
-                        <div className={styles.vehicleGrid}>
-                          <div className={styles.detailItem}>
-                            <Car size={20} className={styles.icon} />
-                            <div>
-                              <p className={styles.label}>Marca / Modelo</p>
-                              <p className={styles.value}>
-                                {acceptedRoute?.vehiculo?.marca}{" "}
-                                {acceptedRoute?.vehiculo?.modelo}
-                              </p>
-                            </div>
-                          </div>
-                          <div className={styles.detailItem}>
-                            <Palette size={20} className={styles.icon} />
-                            <div>
-                              <p className={styles.label}>Color</p>
-                              <p className={styles.value}>
-                                {acceptedRoute?.vehiculo?.color}
-                              </p>
-                            </div>
-                          </div>
-                          <div className={styles.detailItem}>
-                            <Tag size={20} className={styles.icon} />
-                            <div>
-                              <p className={styles.label}>Placa</p>
-                              <p className={styles.value}>
-                                {acceptedRoute?.vehiculo?.vehiculoligero.nserie}
-                              </p>
-                            </div>
-                          </div>
-                          <div className={styles.detailItem}>
-                            <Shapes size={20} className={styles.icon} />
-                            <div>
-                              <p className={styles.label}>Tipo</p>
-                              <p className={styles.value}>
-                                {acceptedRoute?.vehiculo?.vehiculoligero.tipo}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* --- HORA DE SALIDA --- */}
-                      <div className={styles.departureTimeSection}>
-                        <Clock size={20} className={styles.icon} />
-                        <div>
-                          <p className={styles.label}>
-                            Hora de salida programada
-                          </p>
-                          <p className={styles.valueLarge}>
-                            {acceptedRoute?.horadesalida}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* --- BOTONES DE ACCIÓN --- */}
-                      <div className={styles.actionButtons}>
-                        <button
-                          className={styles.cancelButton}
-                          onClick={() => setShowConfirmModal(true)}
-                        >
-                          Cancelar viaje
-                        </button>
-                        <button
-                          className={styles.qrButton}
-                          onClick={handleOpenQrModal}
-                        >
-                          <QrCode size={18} /> Ver QR
-                        </button>
                       </div>
                     </div>
+
+                    {/* --- SECCIÓN DE RUTA --- */}
+                    <div className={styles.section}>
+                      <div className={styles.routePoint}>
+                        <MapPin size={20} className={styles.icon} />
+                        <div className={styles.routeText}>
+                          <p className={styles.label}>Origen</p>
+                          <p className={styles.value}>{origen}</p>
+                        </div>
+                      </div>
+                      <div className={styles.routePoint}>
+                        <MapPin
+                          size={20}
+                          className={styles.icon}
+                          color="#8A2BE2"
+                        />
+                        <div className={styles.routeText}>
+                          <p className={styles.label}>Destino</p>
+                          <p className={styles.value}>{destino}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* --- SECCIÓN DE VEHÍCULO Y HORA --- */}
+                    <div className={styles.section}>
+                      <p className={styles.sectionTitle2}>
+                        Detalles del Vehículo
+                      </p>
+                      <div className={styles.vehicleGrid}>
+                        <div className={styles.detailItem}>
+                          <Car size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Marca / Modelo</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.marca}{" "}
+                              {acceptedRoute?.vehiculo?.modelo}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <Palette size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Color</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.color}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <Tag size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Placa</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.vehiculoligero.nserie}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <Shapes size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Tipo</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.vehiculoligero.tipo}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* --- HORA DE SALIDA --- */}
+                    <div className={styles.departureTimeSection}>
+                      <Clock size={20} className={styles.icon} />
+                      <div>
+                        <p className={styles.label}>
+                          Hora de salida programada
+                        </p>
+                        <p className={styles.valueLarge}>
+                          {acceptedRoute?.horadesalida}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* --- BOTONES DE ACCIÓN --- */}
+                    <div className={styles.actionButtons}>
+                      <button
+                        className={styles.cancelButton}
+                        onClick={() => setShowConfirmModal(true)}
+                      >
+                        Cancelar viaje
+                      </button>
+                      <button
+                        className={styles.qrButton}
+                        onClick={handleOpenQrModal}
+                      >
+                        <QrCode size={18} /> Ver QR
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className={styles.mapSection}>
+                <GoogleMap
+                  center={mapCenter}
+                  zoom={mapZoom}
+                  mapContainerClassName={styles.mapContainer}
+                  options={{
+                    styles: mapCustomStyles,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                  }}
+                >
+                  {directionsResponse && (
+                    <DirectionsRenderer
+                      options={{
+                        directions: directionsResponse,
+                        suppressMarkers: false,
+                        polylineOptions: {
+                          strokeColor: "#AA00FF",
+                          strokeWeight: 5,
+                        },
+                      }}
+                    />
                   )}
-                </div>
-                <div className={styles.mapSection}>
-                  <GoogleMap
-                    center={mapCenter}
-                    zoom={mapZoom}
-                    mapContainerClassName={styles.mapContainer}
-                    options={{
-                      styles: mapCustomStyles,
-                      disableDefaultUI: true,
-                      zoomControl: true,
-                    }}
+                </GoogleMap>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.previousRoutesSection}>
+            <h2 className={styles.sectionTitle}>
+              {acceptedRoute
+                ? ""
+                : matchingRoutes.length > 0
+                ? "Rutas Disponibles"
+                : "Busca tu ruta"}
+            </h2>
+
+            <div className={styles.cardsGrid}>
+              {acceptedRoute ? null : (
+                <>
+                  {loadingRoutes && (
+                    <div className={styles.loadingMessage}>
+                      Buscando rutas disponibles...
+                    </div>
+                  )}
+
+                  {!loadingRoutes && searchMessage && (
+                    <div className={styles.infoMessage}>{searchMessage}</div>
+                  )}
+
+                  {matchingRoutes.map((ruta) => {
+                    const rutaconductor = ruta.rutaconductorviaje?.[0];
+                    const usuario = rutaconductor?.conductor?.usuario || {};
+                    const conductorNombre =
+                      usuario.nombrecompleto ||
+                      usuario.codigoestudiantil ||
+                      "Sin nombre";
+                    const fetchDireccion = async () => {
+                      const direccion = await getAddressFromCoords(
+                        ruta.salidalatitud,
+                        ruta.salidalongitud
+                      );
+                      setOrigen(direccion);
+
+                      const direcciondestino = await getAddressFromCoords(
+                        ruta.paradalatitud,
+                        ruta.paradalongitud
+                      );
+                      setDestino(direcciondestino);
+                    };
+
+                    fetchDireccion();
+
+                    return (
+                      <div key={ruta.idruta} className={styles.routeCard}>
+                        <div className={styles.driverInfo}>
+                          <UserCircle2
+                            size={36}
+                            className={styles.driverAvatar}
+                          />
+                          <div className={styles.driverText}>
+                            <span className={styles.driverName}>
+                              {conductorNombre}
+                            </span>
+                            <span className={styles.driverLocation}>
+                              <MapPin
+                                size={16}
+                                className={styles.locationIconSmall}
+                              />
+                              <span className={styles.ubicationSpan}>
+                                Punto de partida:{" "}
+                              </span>
+                              {origen
+                                ? origen.slice(
+                                    0,
+                                    origen.length <= 30
+                                      ? origen.length
+                                      : origen.length - 10
+                                  ) + "..."
+                                : "Cargando..."}
+                            </span>
+                            <span className={styles.driverLocation}>
+                              <MapPin
+                                size={16}
+                                className={styles.locationIconSmall}
+                              />
+                              <span className={styles.ubicationSpan}>
+                                Destino:{" "}
+                              </span>
+                              {destino
+                                ? destino.slice(
+                                    0,
+                                    destino.length <= 30
+                                      ? destino.length
+                                      : destino.length - 10
+                                  ) + "..."
+                                : "Cargando..."}
+                            </span>
+                          </div>
+                        </div>
+                        <div className={styles.routeDetails}>
+                          <div className={styles.detailItem}>
+                            <Clock color={"#aa00ff"} size={16} />
+                            <span>Hora de salida: {ruta.horadesalida}</span>
+                          </div>
+                          <div className={styles.detailItem}>
+                            <Armchair color={"#aa00ff"} size={16} />
+                            <span>
+                              Asientos Disponibles: {ruta.asientosdisponibles}
+                            </span>
+                          </div>
+                          <div className={styles.detailItem}>
+                            <Route color={"#aa00ff"} size={16} />
+                            <span>
+                              Distancia de la ruta: {ruta.distancia.toFixed(1)}{" "}
+                              km
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          className={styles.detailsButton}
+                          onClick={() => openTripDetailDialog(ruta)}
+                        >
+                          <MoreVertical size={20} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          </div>
+
+          {selectedRoute && (
+            <TripDetailDialog
+              open={isTripDetailDialogOpen}
+              onOpenChange={setIsTripDetailDialogOpen}
+              tripId={selectedRoute.idruta}
+              driverData={{
+                nombre:
+                  selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                    ?.nombrecompleto ||
+                  selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                    ?.codigoestudiantil ||
+                  "Sin nombre",
+                avatarUrl:
+                  selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                    ?.urlAvatar,
+              }}
+              routeData={{
+                origen: origen,
+                destino: destino,
+                horadesalida: selectedRoute.horadesalida,
+                fecha: selectedRoute.fecha,
+                tipoderuta: selectedRoute.tipoderuta,
+                distancia: selectedRoute.distancia,
+                asientosdisponibles: selectedRoute.asientosdisponibles,
+              }}
+              vehicleData={{
+                color: selectedRoute.vehiculo?.color,
+                marca: selectedRoute.vehiculo?.marca,
+                modelo: selectedRoute.vehiculo?.modelo,
+                placa:
+                  selectedRoute.vehiculo?.vehiculopesado?.placa ??
+                  selectedRoute.vehiculo?.vehiculoligero?.nserie ??
+                  "—",
+                tipovehiculo:
+                  selectedRoute.vehiculo?.vehiculopesado?.tipovehiculo ??
+                  selectedRoute.vehiculo?.vehiculoligero?.tipo ??
+                  "—",
+                numeroasientos: selectedRoute.vehiculo?.numeroasientos,
+              }}
+              onAcceptTrip={handleAcceptRoute}
+            />
+          )}
+
+          {showQrModal && acceptedRoute && (
+            <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
+              <div
+                className={styles.modalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className={styles.modalHeader}>
+                  <h3 className={styles.modalTitle}>Código QR del Viaje</h3>
+                  <button
+                    onClick={handleCloseQrModal}
+                    className={styles.closeModalButton}
                   >
-                    {directionsResponse && (
-                      <DirectionsRenderer
-                        options={{
-                          directions: directionsResponse,
-                          suppressMarkers: false,
-                          polylineOptions: {
-                            strokeColor: "#AA00FF",
-                            strokeWeight: 5,
-                          },
-                        }}
-                      />
-                    )}
-                  </GoogleMap>
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className={styles.modalBody}>
+                  <QRCode
+                    value={objetoString} // Aquí pasas la cadena serializada
+                    size={250}
+                    color="black"
+                    level="Q"
+                    className={styles.qrImageModal}
+                  />
+                  <p className={styles.qrHelpText}>
+                    Escanea este QR en la App movil para ver la información de
+                    tu viaje.
+                  </p>
                 </div>
               </div>
             </div>
-
+          )}
+          {showInfo ? (
             <div className={styles.previousRoutesSection}>
-              <h2 className={styles.sectionTitle}>
-                {acceptedRoute
-                  ? ""
-                  : matchingRoutes.length > 0
-                  ? "Rutas Disponibles"
-                  : "Busca tu ruta"}
-              </h2>
-
+              <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
               <div className={styles.cardsGrid}>
-                {acceptedRoute ? null : (
-                  <>
-                    {loadingRoutes && (
-                      <div className={styles.loadingMessage}>
-                        Buscando rutas disponibles...
-                      </div>
-                    )}
-
-                    {!loadingRoutes && searchMessage && (
-                      <div className={styles.infoMessage}>{searchMessage}</div>
-                    )}
-
-                    {matchingRoutes.map((ruta) => {
-                      const rutaconductor = ruta.rutaconductorviaje?.[0];
-                      const usuario = rutaconductor?.conductor?.usuario || {};
-                      const conductorNombre =
-                        usuario.nombrecompleto ||
-                        usuario.codigoestudiantil ||
-                        "Sin nombre";
-                      const fetchDireccion = async () => {
-                        const direccion = await getAddressFromCoords(
-                          ruta.salidalatitud,
-                          ruta.salidalongitud
-                        );
-                        setOrigen(direccion);
-
-                        const direcciondestino = await getAddressFromCoords(
-                          ruta.paradalatitud,
-                          ruta.paradalongitud
-                        );
-                        setDestino(direcciondestino);
-                      };
-
-                      fetchDireccion();
-
-                      return (
-                        <div key={ruta.idruta} className={styles.routeCard}>
-                          <div className={styles.driverInfo}>
-                            <UserCircle2
-                              size={36}
-                              className={styles.driverAvatar}
-                            />
-                            <div className={styles.driverText}>
-                              <span className={styles.driverName}>
-                                {conductorNombre}
-                              </span>
-                              <span className={styles.driverLocation}>
-                                <MapPin
-                                  size={16}
-                                  className={styles.locationIconSmall}
-                                />
-                                <span className={styles.ubicationSpan}>
-                                  Punto de partida:{" "}
-                                </span>
-                                {origen
-                                  ? origen.slice(
-                                      0,
-                                      origen.length <= 30
-                                        ? origen.length
-                                        : origen.length - 10
-                                    ) + "..."
-                                  : "Cargando..."}
-                              </span>
-                              <span className={styles.driverLocation}>
-                                <MapPin
-                                  size={16}
-                                  className={styles.locationIconSmall}
-                                />
-                                <span className={styles.ubicationSpan}>
-                                  Destino:{" "}
-                                </span>
-                                {destino
-                                  ? destino.slice(
-                                      0,
-                                      destino.length <= 30
-                                        ? destino.length
-                                        : destino.length - 10
-                                    ) + "..."
-                                  : "Cargando..."}
-                              </span>
-                            </div>
-                          </div>
-                          <div className={styles.routeDetails}>
-                            <div className={styles.detailItem}>
-                              <Clock color={"#aa00ff"} size={16} />
-                              <span>Hora de salida: {ruta.horadesalida}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <Armchair color={"#aa00ff"} size={16} />
-                              <span>
-                                Asientos Disponibles: {ruta.asientosdisponibles}
-                              </span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <Route color={"#aa00ff"} size={16} />
-                              <span>
-                                Distancia de la ruta:{" "}
-                                {ruta.distancia.toFixed(1)} km
-                              </span>
-                            </div>
-                          </div>
-                          <button
-                            className={styles.detailsButton}
-                            onClick={() => openTripDetailDialog(ruta)}
-                          >
-                            <MoreVertical size={20} />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </>
+                {previousRoutes.length > 0 ? (
+                  previousRoutes.map((rutaData, index) => (
+                    <RutaAnteriorCard
+                      key={index}
+                      routeData={rutaData}
+                      onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
+                    />
+                  ))
+                ) : (
+                  <div className={styles.infoMessage}>
+                    No tienes viajes anteriores
+                  </div>
                 )}
               </div>
             </div>
-
-            {selectedRoute && (
-              <TripDetailDialog
-                open={isTripDetailDialogOpen}
-                onOpenChange={setIsTripDetailDialogOpen}
-                tripId={selectedRoute.idruta}
-                driverData={{
-                  nombre:
-                    selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
-                      ?.nombrecompleto ||
-                    selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
-                      ?.codigoestudiantil ||
-                    "Sin nombre",
-                  avatarUrl:
-                    selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
-                      ?.urlAvatar,
-                }}
-                routeData={{
-                  origen: origen,
-                  destino: destino,
-                  horadesalida: selectedRoute.horadesalida,
-                  fecha: selectedRoute.fecha,
-                  tipoderuta: selectedRoute.tipoderuta,
-                  distancia: selectedRoute.distancia,
-                  asientosdisponibles: selectedRoute.asientosdisponibles,
-                }}
-                vehicleData={{
-                  color: selectedRoute.vehiculo?.color,
-                  marca: selectedRoute.vehiculo?.marca,
-                  modelo: selectedRoute.vehiculo?.modelo,
-                  placa:
-                    selectedRoute.vehiculo?.vehiculopesado?.placa ??
-                    selectedRoute.vehiculo?.vehiculoligero?.nserie ??
-                    "—",
-                  tipovehiculo:
-                    selectedRoute.vehiculo?.vehiculopesado?.tipovehiculo ??
-                    selectedRoute.vehiculo?.vehiculoligero?.tipo ??
-                    "—",
-                  numeroasientos: selectedRoute.vehiculo?.numeroasientos,
-                }}
-                onAcceptTrip={handleAcceptRoute}
-              />
-            )}
-
-            {showQrModal && acceptedRoute && (
-              <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
-                <div
-                  className={styles.modalContent}
-                  onClick={(e) => e.stopPropagation()}
+          ) : (
+            <div></div>
+          )}
+          {showConfirmModal && (
+            <div className={styles.modalOverlayOpen}>
+              <div
+                className={styles.confirmModalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className={styles.modalCloseButton}
                 >
-                  <div className={styles.modalHeader}>
-                    <h3 className={styles.modalTitle}>Código QR del Viaje</h3>
-                    <button
-                      onClick={handleCloseQrModal}
-                      className={styles.closeModalButton}
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-                  <div className={styles.modalBody}>
-                    <QRCode
-                      value={objetoString} // Aquí pasas la cadena serializada
-                      size={250}
-                      color="black"
-                      level="Q"
-                      className={styles.qrImageModal}
-                    />
-                    <p className={styles.qrHelpText}>
-                      Escanea este QR en la App movil para ver la información de
-                      tu viaje.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            {showInfo ? (
-              <div className={styles.previousRoutesSection}>
-                <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
-                <div className={styles.cardsGrid}>
-                  {previousRoutes.length > 0 ? (
-                    previousRoutes.map((rutaData, index) => (
-                      <RutaAnteriorCard
-                        routeData={rutaData}
-                        onEstablecerRuta={() => {
-                          console.log("soy yo guacho", previousRoutes, index);
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <div className={styles.infoMessage}>
-                      No tienes viajes anteriores
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div></div>
-            )}
-            {showConfirmModal && (
-              <div className={styles.modalOverlayOpen}>
-                <div
-                  className={styles.confirmModalContent}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                  <X size={28} />
+                </button>
+                <h3>¿Estás seguro de cancelar el viaje?</h3>
+                <div className={styles.confirmModalActions}>
                   <button
                     onClick={() => setShowConfirmModal(false)}
-                    className={styles.modalCloseButton}
+                    className={styles.confirmModalButton}
                   >
-                    <X size={28} />
+                    Volver
                   </button>
-                  <h3>¿Estás seguro de cancelar el viaje?</h3>
-                  <div className={styles.confirmModalActions}>
-                    <button
-                      onClick={() => setShowConfirmModal(false)}
-                      className={styles.confirmModalButton}
-                    >
-                      Volver
-                    </button>
-                    <button
-                      onClick={handleCancelTripInfo}
-                      className={styles.confirmModalButtonCancelar}
-                    >
-                      Cancelar viaje
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleCancelTripInfo}
+                    className={styles.confirmModalButtonCancelar}
+                  >
+                    Cancelar viaje
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {isDesactive && (
-              <div className={styles.modalOverlayOpen}>
-                <div
-                  className={styles.confirmModalContent}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <TicketX size={40} color={"#aa00ff"} />
-                  <h3>&nbsp;El conductor a cancelado la ruta.</h3>
-                  <div className={styles.confirmModalActions}>
-                    <button
-                      onClick={() => {
-                        setIsDesactive(false);
-                        window.location.reload();
-                      }}
-                      className={styles.confirmModalButton}
-                    >
-                      Volver
-                    </button>
-                  </div>
+          {isDesactive && (
+            <div className={styles.modalOverlayOpen}>
+              <div
+                className={styles.confirmModalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <TicketX size={40} color={"#aa00ff"} />
+                <h3>&nbsp;El conductor a cancelado la ruta.</h3>
+                <div className={styles.confirmModalActions}>
+                  <button
+                    onClick={() => {
+                      setIsDesactive(false);
+                      window.location.reload();
+                    }}
+                    className={styles.confirmModalButton}
+                  >
+                    Volver
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
-        </LoadScript>
+            </div>
+          )}
+        </div>
       )}
     </>
   );

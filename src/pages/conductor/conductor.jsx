@@ -6,6 +6,7 @@ import {
   LoadScript,
   Autocomplete,
   DirectionsRenderer,
+  useJsApiLoader,
 } from "@react-google-maps/api";
 import { supabase } from "../../supabaseClient.js";
 
@@ -35,11 +36,17 @@ const DEFAULT_CENTER = { lat: 3.3745, lng: -76.5308 };
 const LoadingScreen = () => (
   <div className={styles.loaderContainer}>
     <div className={styles.spinner}></div>
-    <p className={styles.text}>Buscando Rutas Activas...</p>
+    <p className={styles.text}>Buscando rutas activas...</p>
   </div>
 );
 
 const ConductorPage = () => {
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: apigoogle,
+    libraries: libraries,
+  });
+
   const navigate = useNavigate();
   // --- NUEVO ESTADO PARA VERIFICACIÓN INICIAL ---
   const [isCheckingForActiveRoute, setIsCheckingForActiveRoute] =
@@ -63,9 +70,13 @@ const ConductorPage = () => {
   const [minDateTime, setMinDateTime] = useState("");
   const [maxDateTime, setMaxDateTime] = useState("");
 
+  const [rutaInsertadaId, setRutaInsertadaId] = useState();
+
   //Parte daniel
   const [idActual, setIdActivo] = useState(-1);
-  const [bloqueado,setBloqueado]=useState(false);
+  const [bloqueado, setBloqueado] = useState(false);
+
+  const [nombreUsuario, setNombre] = useState("");
 
   useEffect(() => {
     const getFormattedDateTimeColombia = (date) => {
@@ -150,9 +161,11 @@ const ConductorPage = () => {
       )
       .eq("idconductor", userId);
 
-    console.log("Hola soy el user:", userId)
-    console.log("hola daniel ,", historicalTripsAll)
-    const historicalTrips = historicalTripsAll.filter(trip => trip.ruta.estado == "inactivo"||trip.ruta.estado == "cancelado")
+    console.log("Hola soy el user:", userId);
+    console.log("hola daniel ,", historicalTripsAll);
+    const historicalTrips = historicalTripsAll.filter(
+      (trip) => trip.ruta.estado == "inactivo"
+    );
 
     console.log("hola soy cosas, ", historicalTrips);
 
@@ -163,10 +176,12 @@ const ConductorPage = () => {
 
     const rutas = historicalTrips.map(async (ruta) => {
       const { data: historicalTripsruta, error2 } = await supabase
-        .from('rutaconductorviaje')
-        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida,idruta)
-        `)
-        .eq('idruta', ruta.idruta)
+        .from("rutaconductorviaje")
+        .select(
+          `ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida,idruta)
+        `
+        )
+        .eq("idruta", ruta.idruta);
       if (error2 || !historicalTripsruta) {
         return [];
       }
@@ -192,8 +207,7 @@ const ConductorPage = () => {
           originlong: ruta.ruta.salidalongitud,
           destinationlat: ruta.ruta.paradalatitud,
           destinationlong: ruta.ruta.paradalongitud,
-          departureTime: ruta.ruta.horadesalida
-
+          departureTime: ruta.ruta.horadesalida,
         }))
       );
       console.log("Numero de rutas previas", previousRoutes.length);
@@ -312,6 +326,16 @@ const ConductorPage = () => {
         } = await supabase.auth.getUser();
 
         console.log(user);
+        const { data: userInfo, error0 } = await supabase
+          .from("usuario")
+          .select(
+            `nombrecompleto,edad
+        `
+          )
+          .eq("nidentificacion", user.id)
+          .single();
+
+        setNombre(userInfo.nombrecompleto);
 
         if (user) {
           const { data: activeRouteData, error } = await supabase
@@ -422,6 +446,7 @@ const ConductorPage = () => {
   };
 
   useEffect(() => {
+    if (!isLoaded) return;
     if (startCoords && destCoords) {
       const directionsService = new window.google.maps.DirectionsService();
       directionsService.route(
@@ -448,7 +473,6 @@ const ConductorPage = () => {
   //Función creada por DAniel pa probar
 
   const getInfoRutaAnterior = async (rutaData) => {
-
     const coordsI = { lat: rutaData.originlat, lng: rutaData.originlong };
     setStartCoords(coordsI);
     const direccion = await getAddressFromCoords(
@@ -457,54 +481,57 @@ const ConductorPage = () => {
     );
     setStartPoint(direccion);
 
-    const coordsF = { lat: rutaData.destinationlat, lng: rutaData.destinationlong };
-    setDestCoords(coordsF)
-    console.log(coordsF)
+    const coordsF = {
+      lat: rutaData.destinationlat,
+      lng: rutaData.destinationlong,
+    };
+    setDestCoords(coordsF);
+    console.log(coordsF);
 
     const direcciondestino = await getAddressFromCoords(
       rutaData.destinationlat,
-      rutaData.destinationlong);
+      rutaData.destinationlong
+    );
     setDestination(direcciondestino);
-    setAsientos(1)
-    console.log("IdActivoAnterior:", idActual)
-    setIdActivo(rutaData.id)
-    setBloqueado(true)  
-    console.log("IdActivo:", idActual)
-  }
+    setAsientos(1);
+    console.log("IdActivoAnterior:", idActual);
+    setIdActivo(rutaData.id);
+    setBloqueado(true);
+    console.log("IdActivo:", idActual);
+  };
 
   const borrarRutaEspecifica = async (rutaData, indexR) => {
+    console.log("IdActivo:", idActual);
 
-    console.log("IdActivo:", idActual)
-
-    
-    console.log (indexR)
-    console.log("Hola soy borrarRuta de la ruta:", rutaData.id)
+    console.log(indexR);
+    console.log("Hola soy borrarRuta de la ruta:", rutaData.id);
     const eliminarRuta = async (idruta) => {
       const { error } = await supabase
-        .from('ruta')
+        .from("ruta")
         .delete()
-        .eq('idruta', rutaData.id);
-
+        .eq("idruta", rutaData.id);
 
       if (error) {
-        console.error(`Error al eliminar ruta con id ${idruta}:`, error.message);
+        console.error(
+          `Error al eliminar ruta con id ${idruta}:`,
+          error.message
+        );
       } else {
         console.log(`Ruta con id ${idruta} eliminada exitosamente.`);
       }
     };
-    eliminarRuta(rutaData.idruta)
-    setPreviousRoutes(prev => prev.filter((_, index) => index !== indexR));
-    console.log("soy yoooo",previousRoutes)
-    
-    
-  }
-
+    eliminarRuta(rutaData.idruta);
+    setPreviousRoutes((prev) => prev.filter((_, index) => index !== indexR));
+    console.log("soy yoooo", previousRoutes);
+  };
 
   //aqui termina mi prueba pa
-  const handleEstablecerRuta = async () => {
 
+  const handleEstablecerRuta = async () => {
     if (!startCoords || !destCoords || !dateTime || asientos <= 0) {
-      alert('Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente.');
+      alert(
+        "Por favor, completa todos los campos y asegúrate de que la ruta y su duración se hayan calculado correctamente."
+      );
       return;
     }
     setLoading(true);
@@ -546,33 +573,32 @@ const ConductorPage = () => {
       let rutaInsertada;
       let rutaError;
       if (idActual != -1) {
-
-        const { data: rutaInsertadaActual, error: rutaErrorActual } = await supabase
-          .from('ruta')
-          .update({
-            fecha: fechaLocal,
-            horadesalida: fechaHora.toTimeString().split(' ')[0],
-            estado: 'activo'
-          })
-          .eq('idruta', idActual)
-          .select()
-          .single();
-          rutaInsertada=rutaInsertadaActual;
-          rutaError=rutaErrorActual
-      }
-      else {
-
-        const { data: rutaInsertadaActual, error: rutaErrorActual} = await supabase
-          .from('ruta')
-          .insert(nuevaRuta)
-          .select('idruta')
-          .single();
-          rutaInsertada=rutaInsertadaActual
-          rutaError=rutaErrorActual
-
+        const { data: rutaInsertadaActual, error: rutaErrorActual } =
+          await supabase
+            .from("ruta")
+            .update({
+              fecha: fechaLocal,
+              horadesalida: fechaHora.toTimeString().split(" ")[0],
+              estado: "activo",
+            })
+            .eq("idruta", idActual)
+            .select()
+            .single();
+        rutaInsertada = rutaInsertadaActual;
+        rutaError = rutaErrorActual;
+      } else {
+        const { data: rutaInsertadaActual, error: rutaErrorActual } =
+          await supabase
+            .from("ruta")
+            .insert(nuevaRuta)
+            .select("idruta")
+            .single();
+        rutaInsertada = rutaInsertadaActual;
+        rutaError = rutaErrorActual;
       }
 
-      if (rutaError || !rutaInsertada) throw new Error(`Error al crear la ruta: ${rutaError?.message}`);
+      if (rutaError || !rutaInsertada)
+        throw new Error(`Error al crear la ruta: ${rutaError?.message}`);
       const duracionEnHoras = duration / 3600;
       const nuevoViaje = {
         tiempodesalida: fechaHora.toISOString(),
@@ -601,11 +627,12 @@ const ConductorPage = () => {
         throw new Error(
           `Error al asociar la ruta al conductor: ${relacionError?.message}`
         );
+      setRutaInsertadaId(rutaInsertada.idruta);
       setShowSuccessModal(true);
       setTimeout(() => {
         setShowSuccessModal(false);
         navigate(`/conductor/viaje/${rutaInsertada.idruta}`);
-      }, 2000);
+      }, 3000);
     } catch (error) {
       console.error("Error al establecer la ruta y el viaje:", error.message);
       alert(`Ocurrió un error: ${error.message}`);
@@ -614,10 +641,16 @@ const ConductorPage = () => {
     }
   };
 
-
-
   if (isCheckingForActiveRoute) {
     return <LoadingScreen />;
+  }
+
+  if (loadError) {
+    return <div>Error loading maps</div>;
+  }
+
+  if (!isLoaded) {
+    return <div>Cargando el mapa</div>;
   }
 
   return (
@@ -647,143 +680,146 @@ const ConductorPage = () => {
 
       {/* Show main content if both university and conductor are active */}
       {isUniversityActive === true && isUserActive === true && (
-        <LoadScript googleMapsApiKey={apigoogle} libraries={libraries}>
-          <div className={styles.pageContainer}>
-            {/* ... (resto del JSX sin cambios) ... */}
-            <div className={styles.topSectionWave}>
-              <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
-              <div className={styles.contentWrapper}>
-                <div className={styles.routeSetupSection}>
-                  <h2 className={styles.greeting}>
-                    ¡Hola Miguel Andrade! Establece tu ruta de hoy
-                  </h2>
-                  <div className={styles.inputGroup}>
-                    <div className={styles.inputWrapper}>
-                      <MapPin className={styles.inputIcon} size={20} />
-                      <Autocomplete
-                        onLoad={onLoadStart}
-                        onPlaceChanged={onPlaceChangedStart}
-                        fields={["formatted_address", "geometry"]}
-                        restrictions={{ country: "co" }}
-                      >
-                        <input
-                          disabled={bloqueado} type="text"
-                          placeholder="Punto de partida"
-                          value={startPoint}
-                          onChange={(e) => setStartPoint(e.target.value)}
-                          className={styles.inputField}
-                        />
-                      </Autocomplete>
-                    </div>
-                    <div className={styles.inputWrapper}>
-                      <MapPin className={styles.inputIcon} size={20} />
-                      <Autocomplete
-                        onLoad={onLoadDest}
-                        onPlaceChanged={onPlaceChangedDest}
-                        fields={["formatted_address", "geometry"]}
-                        restrictions={{ country: "co" }}
-                      >
-                        <input
-                          disabled={bloqueado} type="text"
-                          placeholder="Destino"
-                          value={destination}
-                          onChange={(e) => setDestination(e.target.value)}
-                          className={styles.inputField}
-                        />
-                      </Autocomplete>
-                    </div>
-                    <div className={styles.inputWrapper}>
-                      <Clock className={styles.inputIcon} size={20} />
-                      <input
-                        type="datetime-local"
-                        min={minDateTime}
-                        onBlur={handleBlur}
-                        max={maxDateTime}
-                        value={dateTime}
-                        onChange={(e) => setDateTime(e.target.value)}
-                        className={styles.inputField}
-                      />
-                    </div>
-                    <div className={styles.inputWrapper}>
-                      <Users className={styles.inputIcon} size={20} />
-                      <input
-                        type="number"
-                        value={asientos}
-                        onChange={handleAsientosChange}
-                        className={styles.inputField}
-                        min="1"
-                        max={maxAsientosVehiculo}
-                        disabled={isVehicleInfoLoading}
-                        title={
-                          isVehicleInfoLoading
-                            ? "Cargando capacidad del vehículo..."
-                            : `Máximo ${maxAsientosVehiculo} asientos disponibles`
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className={styles.buttonGroup}>
-                    <button
-                      className={styles.submitButton}
-                      onClick={handleEstablecerRuta}
-                      disabled={loading || isVehicleInfoLoading}
+        <div className={styles.pageContainer}>
+          {/* ... (resto del JSX sin cambios) ... */}
+          <div className={styles.topSectionWave}>
+            <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
+            <div className={styles.contentWrapper}>
+              <div className={styles.routeSetupSection}>
+                <h2 className={styles.greeting}>
+                  ¡Hola {nombreUsuario}! Establece tu ruta de hoy
+                </h2>
+                <div className={styles.inputGroup}>
+                  <div className={styles.inputWrapper}>
+                    <MapPin className={styles.inputIcon} size={20} />
+                    <Autocomplete
+                      onLoad={onLoadStart}
+                      onPlaceChanged={onPlaceChangedStart}
+                      fields={["formatted_address", "geometry"]}
+                      restrictions={{ country: "co" }}
                     >
-                      {loading ? "Estableciendo..." : "Establecer ruta"}
-                    </button>
+                      <input
+                        disabled={bloqueado}
+                        type="text"
+                        placeholder="Punto de partida"
+                        value={startPoint}
+                        onChange={(e) => setStartPoint(e.target.value)}
+                        className={styles.inputField}
+                      />
+                    </Autocomplete>
+                  </div>
+                  <div className={styles.inputWrapper}>
+                    <MapPin className={styles.inputIcon} size={20} />
+                    <Autocomplete
+                      onLoad={onLoadDest}
+                      onPlaceChanged={onPlaceChangedDest}
+                      fields={["formatted_address", "geometry"]}
+                      restrictions={{ country: "co" }}
+                    >
+                      <input
+                        disabled={bloqueado}
+                        type="text"
+                        placeholder="Destino"
+                        value={destination}
+                        onChange={(e) => setDestination(e.target.value)}
+                        className={styles.inputField}
+                      />
+                    </Autocomplete>
+                  </div>
+                  <div className={styles.inputWrapper}>
+                    <Clock className={styles.inputIcon} size={20} />
+                    <input
+                      type="datetime-local"
+                      min={minDateTime}
+                      onBlur={handleBlur}
+                      max={maxDateTime}
+                      value={dateTime}
+                      onChange={(e) => setDateTime(e.target.value)}
+                      className={styles.inputField}
+                    />
+                  </div>
+                  <div className={styles.inputWrapper}>
+                    <Users className={styles.inputIcon} size={20} />
+                    <input
+                      type="number"
+                      value={asientos}
+                      onChange={handleAsientosChange}
+                      className={styles.inputField}
+                      min="1"
+                      max={maxAsientosVehiculo}
+                      disabled={isVehicleInfoLoading}
+                      title={
+                        isVehicleInfoLoading
+                          ? "Cargando capacidad del vehículo..."
+                          : `Máximo ${maxAsientosVehiculo} asientos disponibles`
+                      }
+                    />
                   </div>
                 </div>
-                <div className={styles.mapSection}>
-                  <GoogleMap
-                    mapContainerClassName={styles.mapContainer}
-                    center={mapCenter}
-                    zoom={mapZoom}
-                    options={{
-                      styles: mapCustomStyles,
-                      disableDefaultUI: true,
-                      zoomControl: true,
-                    }}
+                <div className={styles.buttonGroup}>
+                  <button
+                    className={styles.submitButton}
+                    onClick={handleEstablecerRuta}
+                    disabled={loading || isVehicleInfoLoading}
                   >
-                    {directionsResponse && (
-                      <DirectionsRenderer
-                        options={{
-                          directions: directionsResponse,
-                          suppressMarkers: false,
-                          polylineOptions: {
-                            strokeColor: "#AA00FF",
-                            strokeWeight: 5,
-                          },
-                        }}
-                      />
-                    )}
-                  </GoogleMap>
+                    {loading ? "Estableciendo..." : "Establecer ruta"}
+                  </button>
                 </div>
               </div>
+              <div className={styles.mapSection}>
+                <GoogleMap
+                  mapContainerClassName={styles.mapContainer}
+                  center={mapCenter}
+                  zoom={mapZoom}
+                  options={{
+                    styles: mapCustomStyles,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                  }}
+                >
+                  {directionsResponse && (
+                    <DirectionsRenderer
+                      options={{
+                        directions: directionsResponse,
+                        suppressMarkers: false,
+                        polylineOptions: {
+                          strokeColor: "#AA00FF",
+                          strokeWeight: 5,
+                        },
+                      }}
+                    />
+                  )}
+                </GoogleMap>
+              </div>
             </div>
-
-        <div className={styles.previousRoutesSection}>
-          <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
-          <div className={styles.cardsGrid}>
-            {previousRoutes.length > 0 ? (
-
-              previousRoutes.map((rutaData, index) => (
-                <RutaAnteriorCard
-                  routeData={rutaData}
-                  onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
-                  onBorrarRuta={() => borrarRutaEspecifica(rutaData, index)}
-                />
-              ))
-            ) : (
-              <div className={styles.infoMessage}>No tienes viajes anteriores</div>
-            )}
           </div>
+
+          <div className={styles.previousRoutesSection}>
+            <h2 className={styles.sectionTitle}>Rutas anteriores</h2>
+            <div className={styles.cardsGrid}>
+              {previousRoutes.length > 0 ? (
+                previousRoutes.map((rutaData, index) => (
+                  <RutaAnteriorCard
+                    key={index}
+                    routeData={rutaData}
+                    onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
+                    onBorrarRuta={() => borrarRutaEspecifica(rutaData, index)}
+                  />
+                ))
+              ) : (
+                <div className={styles.infoMessage}>
+                  No tienes viajes anteriores
+                </div>
+              )}
+            </div>
+          </div>
+
+          <SuccessModal
+            isOpen={showSuccessModal}
+            onClose={() => setShowSuccessModal(false)}
+            rutaInsertadaId={rutaInsertadaId}
+          />
         </div>
-
-            <SuccessModal
-              isOpen={showSuccessModal}
-              onClose={() => setShowSuccessModal(false)}
-            />
-          </div>
-        </LoadScript>
       )}
     </>
   );
