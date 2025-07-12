@@ -1,48 +1,71 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Footer from "./footer/footer";
 import Navbar from "./headerPasajero/headerPasajero";
 import { useLocation, useNavigate } from 'react-router-dom';
 import "./layout.css";
 import { User, Car } from "lucide-react";
+import { supabase } from '../supabaseClient.js';
 
 const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+  const [userActual, setUserActual] = useState()
 
-  let headerProps = {}; // Objeto para las props del header
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: dataConductor } = await supabase
+        .from('conductor')
+        .select('idusuario')
+        .eq('idusuario', user.id);
+        console.log(dataConductor)
+      if (dataConductor.length == 0) {
+        const { data: dataPasajero } = await supabase
+        .from('pasajero')
+        .select('idusuario')
+        .eq('idusuario', user.id);
+        if(dataPasajero){
+          setUserActual('pasajero')
+        }
+      } else {
+        setUserActual('conductor')
+        return
+      }
+    }
+    getUser();
+  }, [])
+
+
+  let headerProps = {};
 
   if (location.pathname.startsWith('/conductor')) {
     headerProps = {
       conductorConfig: { text: "ir al Panel de Pasajero", action: () => navigate('/pasajero') },
-      activityConfig: { text: "Mis viajes", to: "/conductor/dashboard" },
-      profileAction: () => navigate('/conductor/perfil'),
-      iconoComponent : User,
+      IconoComponent: User,
       userType: 'conductor'
     };
-  } else if (location.pathname.startsWith('/admin')) {
+  } else if (location.pathname.startsWith('/pasajero')) {
     headerProps = {
-      conductorConfig: { text: "Gestionar Conductores", action: () => navigate('/admin/conductores') },
-      activityConfig: { text: "Reportes", to: "/admin/reportes" },
-      profileAction: () => navigate('/admin/configuracion'),
-      userType: 'admin'
-    };
-  } else {
-    headerProps = {
-      activityConfig: { text: "Actividad", to: "/pasajero/actividad" },
-      profileAction: () => navigate('/perfil'),
-      iconoComponent : Car,
+      conductorConfig: { text: "Registrarse como conductor", action: () => navigate('/conductor') },
+      IconoComponent: Car,
       userType: 'pasajero'
     };
+  } else if (location.pathname.startsWith('/configuracion') || location.pathname.startsWith('/minijuego')) {
+    headerProps = {
+      conductorConfig: { text: "Ir al panel principal", action: () => navigate( userActual === 'pasajero' ? '/pasajero' : '/conductor' ) },
+      IconoComponent: userActual === 'pasajero' ? User : Car,
+      userType: 'configuracion'
+    };
   }
+
 
   return (
     <div>
       <Navbar {...headerProps} />
       <main>
-        {children} {/* El contenido de la página actual */}
+        {children}
       </main>
-       <Footer />
+      <Footer />
     </div>
   );
 };

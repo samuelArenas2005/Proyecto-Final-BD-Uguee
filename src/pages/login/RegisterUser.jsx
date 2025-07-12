@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useLogin } from "../../context/LoginContext";
+import FormField from "./components/FormField";
+import ComboField from "./components/ComboField";
+import FileField from "./components/FileField";
+import MultiFileField from "./components/MultiFileField";
 
 function RegisterPassenger({ handleChange }) {
   // --- Objetos iniciales ---
@@ -57,6 +61,17 @@ function RegisterPassenger({ handleChange }) {
     fechavensoat: "",
   };
 
+  const initialPassengerFiles = {
+    avatar: null, // Para el avatar del usuario
+    carneInstitucional: null, // Para el carné estudiantil
+    registroAcademico: null, // Para el registro académico
+    documentoIdentidad: null, // Para el documento de identidad
+  };
+
+  const initialVehiculoFiles = {
+    documents: [], // Array para los documentos del vehículo
+  };
+
   // --- useState ---
   const [userData, setUserData] = useState(initialUserData);
   const [usuarioData, setUsuarioData] = useState(initialUsuarioData);
@@ -66,8 +81,10 @@ function RegisterPassenger({ handleChange }) {
   const [vehiculoData, setVehiculoData] = useState(initialVehiculoData);
   const [ligeroData, setLigeroData] = useState(initialLigeroData);
   const [pesadoData, setPesadoData] = useState(initialPesadoData);
+  const [passengerFiles, setPassengerFiles] = useState(initialPassengerFiles);
+  const [vehiculoFiles, setVehiculoFiles] = useState(initialVehiculoFiles);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
 
-  const [isPassenger, setIsPassenger] = useState(false);
   const [isDriver, setIsDriver] = useState(false);
 
   const [tipoVehiculo, setTipoVehiculo] = useState(""); // "ligero" o "pesado"
@@ -80,6 +97,8 @@ function RegisterPassenger({ handleChange }) {
     checkUniqueAtributes,
     createUser,
     createPassenger,
+    submitPassengerFiles,
+    submitVehicleFiles,
     createVehicle,
     createDriver,
     submitting,
@@ -104,13 +123,33 @@ function RegisterPassenger({ handleChange }) {
     fetchUniversities();
   }, []);
 
+  // --- File handling functions ---
+  const handlePassengerFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const name = e.target.name;
+      const file = e.target.files[0];
+      setPassengerFiles((prevFiles) => ({ ...prevFiles, [name]: file }));
+    }
+  };
+
+  const handleAvatarPreview = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setAvatarPreviewUrl(reader.result);
+    };
+  };
+
+  const handleVehiculoFileChange = (newFiles) => {
+    setVehiculoFiles((prevFiles) => ({ ...prevFiles, documents: newFiles }));
+  };
+
   // --- Manejo de cambios en los campos del formulario ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isPassenger && !isDriver) {
-      alert("Debes seleccionar al menos una opción: pasajero o conductor.");
-      return;
-    }
+
     // Preparar datos del usuario
     console.log("Datos del usuario:", usuarioData);
     try {
@@ -123,16 +162,19 @@ function RegisterPassenger({ handleChange }) {
       const result = await createUser(userData, usuarioData);
       console.log("Datos del usuario creado:", result);
 
-      if (isPassenger) {
-        const user = result.data[0];
-        const pasajeroPayload = {
-          ...pasajeroData,
-          idusuario: user.nidentificacion,
-        };
-        console.log("Datos del pasajero:", pasajeroPayload);
-        const resultPassenger = await createPassenger(pasajeroPayload);
-        console.log("Datos del pasajero creado:", resultPassenger);
-      }
+      const user = result.data[0];
+      const pasajeroPayload = {
+        ...pasajeroData,
+        idusuario: user.nidentificacion,
+      };
+      console.log("Datos del pasajero:", pasajeroPayload);
+      const resultPassenger = await createPassenger(pasajeroPayload);
+      console.log("Datos del pasajero creado:", resultPassenger);
+      const resultFiles = await submitPassengerFiles(
+        passengerFiles,
+        user.nidentificacion
+      );
+      console.log("Archivos del pasajero enviados:", resultFiles);
 
       if (isDriver) {
         if (tipoVehiculo == "ligero") {
@@ -156,7 +198,7 @@ function RegisterPassenger({ handleChange }) {
             tipoVehiculo,
             pesadoData
           );
-          console.log("Datos del vehículo creado:", result);
+          console.log("Datos del vehículo creado:", resultVehicle);
           const conductorPayload = {
             ...conductorData,
             idvehiculo: resultVehicle.idvehiculo,
@@ -164,6 +206,16 @@ function RegisterPassenger({ handleChange }) {
           };
           const resultDriver = await createDriver(conductorPayload);
           console.log("Datos del conductor creado:", resultDriver);
+
+          // Subir documentos del vehículo si existen
+          if (vehiculoFiles.documents.length > 0) {
+            const resultVehicleFiles = await submitVehicleFiles(
+              vehiculoFiles,
+              resultVehicle.idvehiculo,
+              result.data[0].nidentificacion
+            );
+            console.log("Archivos del vehículo enviados:", resultVehicleFiles);
+          }
         }
       }
       setInfoMsg("Usuario creado con éxito");
@@ -174,7 +226,9 @@ function RegisterPassenger({ handleChange }) {
       setVehiculoData(initialVehiculoData);
       setLigeroData(initialLigeroData);
       setPesadoData(initialPesadoData);
-      setIsPassenger(false);
+      setPassengerFiles(initialPassengerFiles);
+      setVehiculoFiles(initialVehiculoFiles);
+      setAvatarPreviewUrl("");
       setIsDriver(false);
       setTipoVehiculo("");
     } catch (error) {
@@ -192,7 +246,7 @@ function RegisterPassenger({ handleChange }) {
     <form className="rd-form" onSubmit={handleSubmit}>
       {/* Sección datos de usuario */}
       <div className="rd-section">
-        <h3 className="rd-section-title">Datos de usuario</h3>
+        <h3 className="rd-section-title">Datos de pasajero</h3>
         {infoMsg && (
           <div
             className={
@@ -205,64 +259,51 @@ function RegisterPassenger({ handleChange }) {
           </div>
         )}
         {/* Email y Password */}
-        <div className="rd-field">
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            value={userData.email}
-            required
-            placeholder="ejemplo@correo.com"
-            onChange={(e) => handleChange(e, setUserData)}
-          />
-        </div>
-        <div className="rd-field">
-          <label>Contraseña</label>
-          <input
-            type="password"
-            name="password"
-            minLength={6}
-            value={userData.password}
-            required
-            placeholder="Mínimo 6 caracteres"
-            onChange={(e) => handleChange(e, setUserData)}
-          />
-        </div>
+        <FormField
+          label="Email"
+          type="email"
+          name="email"
+          value={userData.email}
+          required
+          placeholder="ejemplo@correo.com"
+          onChange={(e) => handleChange(e, setUserData)}
+        />
+        <FormField
+          label="Contraseña"
+          type="password"
+          name="password"
+          minLength={6}
+          value={userData.password}
+          required
+          placeholder="Mínimo 6 caracteres"
+          onChange={(e) => handleChange(e, setUserData)}
+        />
 
         {/* Campos usuario */}
-        <div className="rd-field">
-          <label>Nombre completo</label>
-          <input
-            name="nombrecompleto"
-            value={usuarioData.nombrecompleto}
-            required
-            placeholder="Juan Pérez"
-            pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)+$"
-            title="Debe ingresar al menos dos palabras, solo letras y espacios."
-            onChange={(e) => handleChange(e, setUsuarioData)}
-          />
-        </div>
-        <div className="rd-field">
-          <label>Universidad</label>
-          <select
-            name="idinstitucion"
-            value={usuarioData.idinstitucion}
-            required
-            onChange={(e) => handleChange(e, setUsuarioData)}
-          >
-            <option value="" disabled>
-              Selecciona una universidad
-            </option>
-            {universities.map((uni) => (
-              <option key={uni.idinstitucion} value={uni.idinstitucion}>
-                {uni.nombre} {uni.sede ? `- ${uni.sede}` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="rd-field">
-          <label>Edad</label>
-          <input
+        <FormField
+          label="Nombre completo"
+          name="nombrecompleto"
+          value={usuarioData.nombrecompleto}
+          required
+          placeholder="Juan Pérez"
+          pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)+$"
+          title="Debe ingresar al menos dos palabras, solo letras y espacios."
+          onChange={(e) => handleChange(e, setUsuarioData)}
+        />
+        <ComboField
+          label="Universidad"
+          name="idinstitucion"
+          value={usuarioData.idinstitucion}
+          required
+          onChange={(e) => handleChange(e, setUsuarioData)}
+          options={universities.map((uni) => ({
+            value: uni.idinstitucion,
+            label: `${uni.nombre}${uni.sede ? ` - ${uni.sede}` : ""}`,
+          }))}
+        />
+        <div className="rd-two-col">
+          <FormField
+            label="Edad"
             type="number"
             name="edad"
             value={usuarioData.edad}
@@ -273,10 +314,8 @@ function RegisterPassenger({ handleChange }) {
             onChange={(e) => handleChange(e, setUsuarioData)}
             style={{ appearance: "textfield" }}
           />
-        </div>
-        <div className="rd-field">
-          <label>Teléfono</label>
-          <input
+          <FormField
+            label="Teléfono"
             type="text"
             name="telefono"
             value={usuarioData.telefono}
@@ -288,19 +327,17 @@ function RegisterPassenger({ handleChange }) {
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
-        <div className="rd-field">
-          <label>Calle</label>
-          <input
+        <div className="rd-two-col">
+          <FormField
+            label="Calle"
             name="calle"
             value={usuarioData.calle}
             required
             placeholder="45"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
-        </div>
-        <div className="rd-field">
-          <label>Número de casa</label>
-          <input
+          <FormField
+            label="Número de casa"
             name="numerocasa"
             value={usuarioData.numerocasa}
             required
@@ -308,9 +345,9 @@ function RegisterPassenger({ handleChange }) {
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
-        <div className="rd-field">
-          <label>Ciudad</label>
-          <input
+        <div className="rd-two-col">
+          <FormField
+            label="Ciudad"
             name="ciudad"
             value={usuarioData.ciudad}
             required
@@ -319,36 +356,67 @@ function RegisterPassenger({ handleChange }) {
             title="La ciudad solo debe contener letras y espacios, sin números."
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
-        </div>
-        <div className="rd-field">
-          <label>Código estudiantil</label>
-          <input
+          <FormField
+            label="Código estudiantil"
             type="number"
             name="codigoestudiantil"
             value={usuarioData.codigoestudiantil}
-            required
             placeholder="202011111"
             onChange={(e) => handleChange(e, setUsuarioData)}
           />
         </div>
-        <div className="rd-field">
-          <label>Estatuto</label>
-          <select
-            name="estatuto"
-            value={usuarioData.estatuto}
-            required
-            onChange={(e) => handleChange(e, setUsuarioData)}
-          >
-            <option value="" disabled>
-              Selecciona estatuto
-            </option>
-            <option value="estudiante">Estudiante</option>
-            <option value="profesor">Profesor</option>
-            <option value="funcionario">Funcionario</option>
-            <option value="egresado">Egresado</option>
-            <option value="otro">Otro</option>
-          </select>
-        </div>
+        <ComboField
+          label="Estatuto"
+          name="estatuto"
+          value={usuarioData.estatuto}
+          required
+          onChange={(e) => handleChange(e, setUsuarioData)}
+          options={[
+            { value: "estudiante", label: "Estudiante" },
+            { value: "profesor", label: "Profesor" },
+            { value: "funcionario", label: "Funcionario" },
+            { value: "egresado", label: "Egresado" },
+            { value: "otro", label: "Otro" },
+          ]}
+        />
+        <FileField
+          label="Avatar del usuario (PNG o JPG)"
+          type="file"
+          name="avatar"
+          file={passengerFiles.avatar}
+          accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+          onFileChange={(e) => {
+            handlePassengerFileChange(e);
+            handleAvatarPreview(e);
+          }}
+          previewUrl={avatarPreviewUrl}
+        />
+        <FileField
+          label="Carné Institucional (PDF)"
+          type="file"
+          name="carneInstitucional"
+          file={passengerFiles.carneInstitucional}
+          accept=".pdf,application/pdf"
+          onFileChange={handlePassengerFileChange}
+        />
+        <FileField
+          label="Registro Académico (PDF)"
+          type="file"
+          name="registroAcademico"
+          file={passengerFiles.registroAcademico}
+          required={false}
+          accept=".pdf,application/pdf"
+          onFileChange={handlePassengerFileChange}
+        />
+        <FileField
+          label="Documento de Identidad (PDF)"
+          type="file"
+          name="documentoIdentidad"
+          required={false}
+          file={passengerFiles.documentoIdentidad}
+          accept=".pdf,application/pdf"
+          onFileChange={handlePassengerFileChange}
+        />
       </div>
 
       {/* Sección conductor */}
@@ -356,51 +424,43 @@ function RegisterPassenger({ handleChange }) {
         <div className="rd-section rd-section-conductor">
           <h3 className="rd-section-title">Datos de conductor</h3>
           {/* Campos conductor */}
-          <div className="rd-field">
-            <label>Número de licencia</label>
-            <input
-              type="text"
-              name="numerodelicencia"
-              value={conductorData.numerodelicencia}
-              required
-              placeholder="1234567890"
-              pattern="^\d{3,}$"
-              title="El número de licencia debe tener al menos 3 números, solo números positivos."
-              onChange={(e) => handleChange(e, setConductorData)}
-              inputMode="numeric"
-            />
-          </div>
+          <FormField
+            label="Número de licencia"
+            type="text"
+            name="numerodelicencia"
+            value={conductorData.numerodelicencia}
+            required
+            placeholder="1234567890"
+            pattern="^\d{3,}$"
+            title="El número de licencia debe tener al menos 3 números, solo números positivos."
+            onChange={(e) => handleChange(e, setConductorData)}
+            inputMode="numeric"
+          />
 
           {/* Información de vehículo */}
-          <div className="rd-field">
-            <label>¿Como es tu vehiculo?</label>
-            <select
-              value={tipoVehiculo}
-              required
-              onChange={(e) => setTipoVehiculo(e.target.value)}
-            >
-              <option value="" disabled>
-                Selecciona tipo de vehículo
-              </option>
-              <option value="ligero">Ligero (Solo dentro del campus)</option>
-              <option value="pesado">Pesado</option>
-            </select>
-          </div>
+          <ComboField
+            label="¿Como es tu vehiculo?"
+            value={tipoVehiculo}
+            required
+            onChange={(e) => setTipoVehiculo(e.target.value)}
+            options={[
+              { value: "ligero", label: "Ligero (Solo dentro del campus)" },
+              { value: "pesado", label: "Pesado" },
+            ]}
+          />
 
           {/* Campos generales de vehículo */}
-          <div className="rd-field">
-            <label>Color</label>
-            <input
+          <div className="rd-two-col">
+            <FormField
+              label="Color"
               name="color"
               value={vehiculoData.color}
               required
               placeholder="Rojo"
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
-          </div>
-          <div className="rd-field">
-            <label>Número de asientos (sin contar el conductor)</label>
-            <input
+            <FormField
+              label="Número de asientos (sin contar el conductor)"
               type="number"
               name="numeroasientos"
               value={vehiculoData.numeroasientos}
@@ -411,19 +471,17 @@ function RegisterPassenger({ handleChange }) {
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
           </div>
-          <div className="rd-field">
-            <label>Modelo</label>
-            <input
+          <div className="rd-two-col">
+            <FormField
+              label="Modelo"
               name="modelo"
               value={vehiculoData.modelo}
               required
               placeholder="Toyota Fortuner"
               onChange={(e) => handleChange(e, setVehiculoData)}
             />
-          </div>
-          <div className="rd-field">
-            <label>Marca</label>
-            <input
+            <FormField
+              label="Marca"
               name="marca"
               value={vehiculoData.marca}
               required
@@ -434,91 +492,76 @@ function RegisterPassenger({ handleChange }) {
 
           {/* Campos específicos según tipo de vehículo */}
           {tipoVehiculo === "ligero" && (
-            <>
-              <div className="rd-field">
-                <label>Número de serie</label>
-                <input
-                  name="nserie"
-                  value={ligeroData.nserie}
-                  required
-                  placeholder="ABC123456789"
-                  onChange={(e) => handleChange(e, setLigeroData)}
-                />
-              </div>
-              <div className="rd-field">
-                <label>Tipo</label>
-                <input
-                  name="tipo"
-                  value={ligeroData.tipo}
-                  required
-                  placeholder="Motocicleta, bicicleta, etc."
-                  onChange={(e) => handleChange(e, setLigeroData)}
-                />
-              </div>
-            </>
+            <div className="rd-two-col">
+              <FormField
+                label="Número de serie"
+                name="nserie"
+                value={ligeroData.nserie}
+                required
+                placeholder="ABC123456789"
+                onChange={(e) => handleChange(e, setLigeroData)}
+              />
+              <FormField
+                label="Tipo"
+                name="tipo"
+                value={ligeroData.tipo}
+                required
+                placeholder="Motocicleta, bicicleta, etc."
+                onChange={(e) => handleChange(e, setLigeroData)}
+              />
+            </div>
           )}
           {tipoVehiculo === "pesado" && (
             <>
-              <div className="rd-field">
-                <label>Placa</label>
-                <input
-                  name="placa"
-                  value={pesadoData.placa}
-                  required
-                  placeholder="ABC123"
-                  pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]{3}\d{3}$"
-                  title="La placa debe tener 3 letras seguidas de 3 números, por ejemplo: ABC123"
-                  onChange={(e) => handleChange(e, setPesadoData)}
-                />
-              </div>
-              {/* Los selects no llevan placeholder, pero puedes dejar la opción por defecto */}
-              <div className="rd-field">
-                <label>Categoría de viaje</label>
-                <select
+              <FormField
+                label="Placa"
+                name="placa"
+                value={pesadoData.placa}
+                required
+                placeholder="ABC123"
+                pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]{3}\d{3}$"
+                title="La placa debe tener 3 letras seguidas de 3 números, por ejemplo: ABC123"
+                onChange={(e) => handleChange(e, setPesadoData)}
+              />
+              <div className="rd-two-col">
+                <ComboField
+                  label="Categoría de viaje"
                   name="categoriaviaje"
                   value={pesadoData.categoriaviaje}
                   required
                   onChange={(e) => handleChange(e, setPesadoData)}
-                >
-                  <option value="" disabled>
-                    Selecciona una categoría
-                  </option>
-                  <option value="intermunicipal">Intermunicipal</option>
-                  <option value="municipal">Municipal</option>
-                  <option value="dentro del campus">Dentro del campus</option>
-                </select>
-              </div>
-              <div className="rd-field">
-                <label>Tipo de vehículo</label>
-                <select
+                  options={[
+                    { value: "intermunicipal", label: "Intermunicipal" },
+                    { value: "municipal", label: "Municipal" },
+                    { value: "dentro del campus", label: "Dentro del campus" },
+                  ]}
+                />
+                <ComboField
+                  label="Tipo de vehículo"
                   name="tipovehiculo"
                   value={pesadoData.tipovehiculo}
                   required
                   onChange={(e) => handleChange(e, setPesadoData)}
-                >
-                  <option value="" disabled>
-                    Selecciona tipo de vehículo
-                  </option>
-                  <option value="automovil">Automóvil</option>
-                  <option value="buseta">Buseta</option>
-                  <option value="bus">Bus</option>
-                  <option value="camion">Camión</option>
-                  <option value="motocicleta">Motocicleta</option>
-                </select>
+                  options={[
+                    { value: "automovil", label: "Automóvil" },
+                    { value: "buseta", label: "Buseta" },
+                    { value: "bus", label: "Bus" },
+                    { value: "camion", label: "Camión" },
+                    { value: "motocicleta", label: "Motocicleta" },
+                  ]}
+                />
               </div>
-              <div className="rd-field">
-                <label>Fecha vencimiento técnico</label>
-                <input
+              <div className="rd-two-col">
+                <FormField
+                  label="Fecha vencimiento técnico"
                   type="date"
                   name="fechaventecno"
                   value={pesadoData.fechaventecno}
                   required
                   onChange={(e) => handleChange(e, setPesadoData)}
                 />
-              </div>
-              <div className="rd-field">
-                <label>Fecha vencimiento SOAT</label>
-                <input
+                <FormField
+                  label="Fecha vencimiento SOAT"
                   type="date"
                   name="fechavensoat"
                   value={pesadoData.fechavensoat}
@@ -526,6 +569,13 @@ function RegisterPassenger({ handleChange }) {
                   onChange={(e) => handleChange(e, setPesadoData)}
                 />
               </div>
+              <MultiFileField
+                label="Documentos del Vehículo (PDF) * - SOAT, Tarjeta de Propiedad, Revisión Tecnomecánica, Licencia de Tránsito, etc."
+                name="documents"
+                files={vehiculoFiles.documents}
+                onFilesChange={handleVehiculoFileChange}
+                accept=".pdf,application/pdf"
+              />
             </>
           )}
         </div>
@@ -533,14 +583,6 @@ function RegisterPassenger({ handleChange }) {
 
       {/* Selección de roles */}
       <div className="rd-field">
-        <label>
-          <input
-            type="checkbox"
-            checked={isPassenger}
-            onChange={() => setIsPassenger((v) => !v)}
-          />
-          Quiero ser pasajero
-        </label>
         <label>
           <input
             type="checkbox"

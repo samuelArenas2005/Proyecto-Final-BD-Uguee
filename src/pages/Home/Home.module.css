@@ -268,40 +268,32 @@
   color: #555;
 }
 
-.asistente{
-  display:flex;
+.asistente {
+  position: fixed; 
+  bottom: 20px;    
+  right: 20px;   
+  z-index: 1000;   
+  display: flex;
   justify-content: center;
   align-items: center;
-  width:70px;
-  height: 70px;
+}
+
+.chatBot {
   border-radius: 50%;
-  background-color: #fff8f8;
-  box-shadow: 0 0px 5px #5c00d4;
-  position: fixed;
-  z-index: 1000;
-  top: 710px;
-  left:1400px;
-  cursor: pointer;
-  transition: all .2;
-}
-
-.asistente:hover{
-  transform: scale(1.03);
-  box-shadow: 0 0px 5px #aa00d4;
-}
-
-.chatBot{
-  all: unset;
-  display: inline-block;
-  width: auto;
-  height: auto;
-  background: none;
+  width: 60px;   
+  height: 60px;  
+  background-color: #ffffff; 
   border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
   cursor: pointer;
+  box-shadow: 0 0px 5px #5c00d4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease-in-out; 
+}
+
+.chatBot:hover {
+  transform: scale(1.05); 
 }
 
 

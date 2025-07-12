@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from "react";
 import {
   MapPin,
   Search,
@@ -8,29 +8,46 @@ import {
   Clock,
   Star,
   QrCode,
-  X
-} from 'lucide-react';
-import FilterDialog from './complementos/filterDialog';
-import TripDetailDialog from './complementos/tripDetailDialog';
-import styles from './pasajero.module.css';
-import wave from '/wave.svg';
-import RutaAnteriorCard from './historialPasajeros/RutaAnteriorCard';
+  Route,
+  Armchair,
+  X,
+  Car,
+  Phone,
+  Palette,
+  Tag,
+  Shapes,
+  TicketX,
+} from "lucide-react";
+import TripDetailDialog from "./complementos/tripDetailDialog";
+import styles from "./pasajero.module.css";
+import wave from "/wave.svg";
+import RutaAnteriorCard from "./historialPasajeros/RutaAnteriorCard";
+import QRCode from "react-qr-code";
+import { supabase } from "../../supabaseClient.js";
+import NotActive from "./components/NotActive";
 
 import {
   GoogleMap,
   LoadScript,
   Autocomplete,
-  DirectionsRenderer
-} from '@react-google-maps/api';
-
-import { supabase } from '../../supabaseClient.js';
+  DirectionsRenderer,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 
 const apigoogle = import.meta.env.VITE_APIS_GOOGLE;
 const mapCustomStyles = [
-  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  {
+    featureType: "poi",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "transit",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
 ];
-const libraries = ['places'];
+const libraries = ["places"];
 const DEFAULT_CENTER = { lat: 4.624335, lng: -74.063644 };
 
 const FULL_ROUTE_QUERY = `
@@ -49,22 +66,28 @@ const FULL_ROUTE_QUERY = `
     idviaje,
     conductor (
       usuario (*)
-    )
+    ),
+    viaje(estadodelviaje)
   ),
   vehiculo (
     color,
     marca,
     modelo,
+    numeroasientos,
     vehiculopesado (
       placa,
-      tipovehiculo
+      tipovehiculo,
+      categoriaviaje
+    ),vehiculoligero(
+      nserie,
+      tipo
     )
   )
 `;
 
 const TravelPage = () => {
-  const [startPoint, setStartPoint] = useState('');
-  const [destination, setDestination] = useState('');
+  const [startPoint, setStartPoint] = useState("");
+  const [destination, setDestination] = useState("");
   const [startCoords, setStartCoords] = useState(null);
   const [destCoords, setDestCoords] = useState(null);
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
@@ -72,119 +95,352 @@ const TravelPage = () => {
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [matchingRoutes, setMatchingRoutes] = useState([]);
   const [loadingRoutes, setLoadingRoutes] = useState(false);
-  const [searchMessage, setSearchMessage] = useState('');
+  const [searchMessage, setSearchMessage] = useState("");
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [isTripDetailDialogOpen, setIsTripDetailDialogOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [acceptedRoute, setAcceptedRoute] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);
   const [previousRoutes, setPreviousRoutes] = useState([]);
-  const [showInfo,setShowInfo] = useState(true)
+  const [showInfo, setShowInfo] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Estados para verificaciones
+  const [isUniversityActive, setIsUniversityActive] = useState(null); // null = loading, true = active, false = not active
+  const [isUserActive, setIsUserActive] = useState(null); // null = loading, true = active, false = not active
+  const [universityId, setUniversityId] = useState(null);
+  const [universityStatus, setUniversityStatus] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userStatus, setUserStatus] = useState(null);
+
+  const [origen, setOrigen] = useState(null);
+  const [destino, setDestino] = useState(null);
+
+  const [dateTime, setDateTime] = useState("");
+  const [minDateTime, setMinDateTime] = useState("");
+  const [maxDateTime, setMaxDateTime] = useState("");
+
+  // Verificar estado de universidad y usuario
+  useEffect(() => {
+    const checkUniversityAndUserStatus = async () => {
+      try {
+        // Get current authenticated user
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+
+        if (authError) {
+          console.error("Error getting user:", authError);
+          setIsUniversityActive(false);
+          setIsUserActive(false);
+          return;
+        }
+
+        if (!user) {
+          console.error("No user found");
+          setIsUniversityActive(false);
+          setIsUserActive(false);
+          return;
+        }
+
+        setUserId(user.id);
+
+        // Get user data and check university
+        const { data: userData, error: userError } = await supabase
+          .from("usuario")
+          .select("idinstitucion")
+          .eq("nidentificacion", user.id)
+          .single();
+
+        if (userError) {
+          console.error("Error fetching user data:", userError);
+          setIsUniversityActive(false);
+          setIsUserActive(false);
+          return;
+        }
+
+        if (!userData?.idinstitucion) {
+          console.error("User has no institution assigned");
+          setIsUniversityActive(false);
+          setIsUserActive(false);
+          return;
+        }
+
+        setUniversityId(userData.idinstitucion);
+
+        // Check university status
+        const { data: universityData, error: universityError } = await supabase
+          .from("institucion")
+          .select("estado")
+          .eq("idinstitucion", userData.idinstitucion)
+          .single();
+
+        if (universityError) {
+          console.error("Error fetching university data:", universityError);
+          setIsUniversityActive(false);
+          setIsUserActive(false);
+          return;
+        }
+
+        setUniversityStatus(universityData.estado);
+        setIsUniversityActive(universityData.estado === "activo");
+
+        // If university is not active, don't check user status
+        if (universityData.estado !== "activo") {
+          setIsUserActive(false);
+          return;
+        }
+
+        // Check user status (passenger)
+        const { data: passengerData, error: passengerError } = await supabase
+          .from("pasajero")
+          .select("estadopasajero")
+          .eq("idusuario", user.id)
+          .single();
+
+        if (passengerError) {
+          console.error("Error fetching passenger data:", passengerError);
+          setIsUserActive(false);
+          return;
+        }
+
+        setUserStatus(passengerData.estadopasajero);
+        setIsUserActive(passengerData.estadopasajero === "activo");
+      } catch (error) {
+        console.error("Error checking university and user status:", error);
+        setIsUniversityActive(false);
+        setIsUserActive(false);
+      }
+    };
+
+    checkUniversityAndUserStatus();
+  }, []);
+  const [nombreUsuario, setNombre] = useState("");
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: apigoogle,
+    libraries: libraries,
+  });
+
+  useEffect(() => {
+    const getFormattedDateTimeColombia = (date) => {
+      const options = {
+        timeZone: "America/Bogota",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+      const formatted = new Date(date).toLocaleString("sv-SE", options);
+
+      return formatted.replace(" ", "T");
+    };
+
+    const now = new Date();
+    const minVal = getFormattedDateTimeColombia(now);
+    setMinDateTime(minVal);
+    setDateTime(minVal);
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const maxVal = getFormattedDateTimeColombia(tomorrow);
+    setMaxDateTime(maxVal);
+  }, []);
+
+  const handleBlur = (e) => {
+    const value = e.target.value;
+    console.log(dateTime.slice(11, 16));
+    if (value < minDateTime) {
+      console.log("Valor muy bajo. Corrigiendo al mínimo.");
+      setDateTime(minDateTime);
+    }
+  };
 
   const autoStartRef = useRef(null);
   const autoDestRef = useRef(null);
 
+  //vuelve papu
+
   const fetchPreviousRoutes = async (userId) => {
+    console.log("Estoy en el fetch");
+    console.log("Sexooooooooooo");
+
     const { data: historicalTripsAll, error } = await supabase
-      .from('pasajeroviaje')
-      .select(`idviaje,viaje(estadodelviaje)
+      .from("pasajeroviaje")
+      .select(
+        `idviaje,viaje(estadodelviaje)
 
-      `)
-      .eq('idpasajero', userId)
-      
+      `
+      )
+      .eq("idpasajero", userId);
 
-      const historicalTrips = historicalTripsAll.filter(trip => trip.viaje.estadodelviaje == "terminado")
+    const historicalTrips = historicalTripsAll.filter(
+      (trip) => trip.viaje.estadodelviaje == "terminado"
+    );
 
-     if (
-        error ||!historicalTrips
-      ) {
-        console.log('El no tiene viajes anteriores.');
-        return ;
-      }
+    if (error || !historicalTrips) {
+      console.log("El no tiene viajes anteriores.");
+      return;
+    }
 
     const rutas = historicalTrips.map(async (viaje) => {
       const { data: historicalTripsruta, error2 } = await supabase
-        .from('rutaconductorviaje')
-        .select(`ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida)
-      `)
-        .eq('idviaje', viaje.idviaje)
+        .from("rutaconductorviaje")
+        .select(
+          `ruta(salidalatitud,salidalongitud,paradalatitud,paradalongitud,horadesalida,idruta)
+      `
+        )
+        .eq("idviaje", viaje.idviaje);
       if (error2 || !historicalTripsruta) {
-        return []
+        return [];
       }
       return historicalTripsruta;
-    })
+    });
 
     const rutasArray = await Promise.all(rutas);
-    const rutasArrayPlana = rutasArray.flat()
+    const rutasArrayPlana = rutasArray.flat();
 
-    console.log(rutasArrayPlana)
+    console.log(rutasArrayPlana);
 
     if (error || !historicalTrips) {
-      console.error('Error fetching previous routes:', error);
+      console.error("Error fetching previous routes:", error);
       return;
-    }
-    else {
+    } else {
       setPreviousRoutes(
         rutasArrayPlana.map((ruta, index) => ({
+          id: ruta.ruta.idruta,
           title: `Ruta ${index + 1}`,
           originlat: ruta.ruta.salidalatitud,
-          originlong : ruta.ruta.salidalongitud,
+          originlong: ruta.ruta.salidalongitud,
           destinationlat: ruta.ruta.paradalatitud,
           destinationlong: ruta.ruta.paradalongitud,
-          departureTime: ruta.ruta.horadesalida
+          departureTime: ruta.ruta.horadesalida,
         }))
-      )
+      );
     }
-
   };
 
   useEffect(() => {
     const checkForActiveTrip = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        console.log('No hay usuario logueado.');
+        console.log("No hay usuario logueado.");
         return;
       }
+      const { data: userInfo, error0 } = await supabase
+        .from("usuario")
+        .select(
+          `nombrecompleto,edad
+            `
+        )
+        .eq("nidentificacion", user.id)
+        .single();
+
+      setNombre(userInfo.nombrecompleto);
+      console.log(user);
 
       const { data: lastPassengerTrip, error: passengerError } = await supabase
-        .from('pasajeroviaje')
-        .select('idviaje, viaje(estadodelviaje)')
-        .eq('idpasajero', user.id)
-        .order('idviaje', { ascending: false })
+        .from("pasajeroviaje")
+        .select("idviaje, viaje(estadodelviaje)")
+        .eq("idpasajero", user.id)
+        .order("idviaje", { ascending: false })
         .limit(1)
         .single();
 
-      console.log("hola", lastPassengerTrip);
+      console.log("hola casdasdfa", lastPassengerTrip);
+      setIdViajeActual(lastPassengerTrip.idviaje);
 
       if (
         passengerError ||
         !lastPassengerTrip ||
-        !['pendiente', 'proceso'].includes(lastPassengerTrip.viaje?.estadodelviaje)
+        !["pendiente", "proceso"].includes(
+          lastPassengerTrip.viaje?.estadodelviaje
+        )
       ) {
-        console.log('El usuario no está en ningún viaje activo.');
-        fetchPreviousRoutes(user.id)
+        console.log("El usuario no está en ningún viaje activo.");
+        fetchPreviousRoutes(user.id);
         return;
       }
 
+      const { data: activeRoute, error: errorActiveRoute } = await supabase
+        .from("rutaconductorviaje")
+        .select("idruta")
+        .eq("idviaje", lastPassengerTrip.idviaje)
+        .single();
 
       const { data: activeRouteData, error: routeError } = await supabase
-        .from('ruta')
+        .from("ruta")
         .select(FULL_ROUTE_QUERY)
-        .eq('estado', 'activo')
-        .eq('rutaconductorviaje.idviaje', lastPassengerTrip.idviaje)
+        .eq("idruta", activeRoute.idruta)
         .single();
 
       if (routeError) {
-        console.error('Error al verificar la ruta activa:', routeError);
+        console.error("Error al verificar la ruta activa:", routeError);
         return;
       }
 
       if (activeRouteData) {
-        console.log('Se encontró un viaje activo. Mostrando panel...');
-        setShowInfo(false)
-        setAcceptedRoute(activeRouteData);
-      }
+        const fetchDireccion = async () => {
+          const direccion = await getAddressFromCoords(
+            activeRouteData.salidalatitud,
+            activeRouteData.salidalongitud
+          );
+          setOrigen(direccion);
 
+          const direcciondestino = await getAddressFromCoords(
+            activeRouteData.paradalatitud,
+            activeRouteData.paradalongitud
+          );
+          setDestino(direcciondestino);
+        };
+
+        fetchDireccion();
+        setStartCoords({
+          lat: activeRouteData.salidalatitud,
+          lng: activeRouteData.salidalongitud,
+        });
+
+        setMapZoom(16);
+        setDestCoords({
+          lat: activeRouteData.paradalatitud,
+          lng: activeRouteData.paradalongitud,
+        });
+        console.log(
+          "hola soy prueba coordenadas",
+          activeRouteData.paradalatitud
+        );
+        console.log("hola soy coordenadas", startCoords, destCoords);
+
+        if (startCoords && destCoords) {
+          console.log("entre a las coordenadas chabon");
+          const directionsService = new window.google.maps.DirectionsService();
+          directionsService.route(
+            {
+              origin: startCoords,
+              destination: destCoords,
+              travelMode: window.google.maps.TravelMode.DRIVING,
+            },
+            (result, status) => {
+              if (status === "OK" && result) {
+                setDirectionsResponse(result);
+              } else {
+                console.error("Error obteniendo ruta:", status);
+                setDirectionsResponse(null);
+              }
+            }
+          );
+        }
+
+        setAcceptedRoute(activeRouteData);
+        console.log("Se encontró un viaje activo. Mostrando panel...");
+        setShowInfo(false);
+      }
     };
 
     checkForActiveTrip();
@@ -244,6 +500,7 @@ const TravelPage = () => {
   };
 
   useEffect(() => {
+    if (!isLoaded) return;
     if (startCoords && destCoords) {
       const directionsService = new window.google.maps.DirectionsService();
       directionsService.route(
@@ -253,10 +510,10 @@ const TravelPage = () => {
           travelMode: window.google.maps.TravelMode.DRIVING,
         },
         (result, status) => {
-          if (status === 'OK' && result) {
+          if (status === "OK" && result) {
             setDirectionsResponse(result);
           } else {
-            console.error('Error obteniendo ruta:', status);
+            console.error("Error obteniendo ruta:", status);
             setDirectionsResponse(null);
           }
         }
@@ -266,30 +523,41 @@ const TravelPage = () => {
 
   const handleSearchTrip = async () => {
     setMatchingRoutes([]);
-    setSearchMessage('');
+    setSearchMessage("");
     setLoadingRoutes(true);
     setSelectedRoute(null);
     setIsTripDetailDialogOpen(false);
 
     if (!startCoords || !destCoords) {
-      setSearchMessage('Primero ingresa punto de partida y destino válidos.');
+      setSearchMessage("Primero ingresa punto de partida y destino válidos.");
       setLoadingRoutes(false);
       return;
     }
 
     const { data: rutas, error } = await supabase
-      .from('ruta')
+      .from("ruta")
       .select(FULL_ROUTE_QUERY)
-      .eq('estado', 'activo');
+      .eq("estado", "activo");
+
+    console.log(rutas);
 
     if (error) {
-      console.error('Error al consultar Supabase:', error);
-      setSearchMessage('Ocurrió un error al buscar rutas. Intenta más tarde.');
+      console.error("Error al consultar Supabase:", error);
+      setSearchMessage("Ocurrió un error al buscar rutas. Intenta más tarde.");
       setLoadingRoutes(false);
       return;
     }
 
-    const RADIUS_METERS = 500;
+    const fechaHora = new Date(dateTime);
+
+    const yyyy = fechaHora.getFullYear();
+    const mm = String(fechaHora.getMonth() + 1).padStart(2, "0");
+    const dd = String(fechaHora.getDate()).padStart(2, "0");
+
+    const fechaLocal = `${yyyy}-${mm}-${dd}`;
+
+    const RADIUS_METERS = 1000;
+    console.log(rutas);
     const filtradas = rutas.filter((ruta) => {
       const salidaRuta = {
         lat: parseFloat(ruta.salidalatitud),
@@ -299,13 +567,29 @@ const TravelPage = () => {
         lat: parseFloat(ruta.paradalatitud),
         lng: parseFloat(ruta.paradalongitud),
       };
+      const fechaSalidaRuta = new Date(`${ruta.fecha}T${ruta.horadesalida}`);
+      const diffMs = fechaHora.getTime() - fechaSalidaRuta.getTime();
+      const umbralN = 45 * 60 * 1000;
       const distSalida = getDistanceMeters(startCoords, salidaRuta);
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
-      return distSalida <= RADIUS_METERS && distDestino <= RADIUS_METERS;
+      const dentroDeNMin = Math.abs(diffMs) <= umbralN;
+      const asientosDisponibles = ruta.asientosdisponibles;
+      const viajeEnCurso = ruta.rutaconductorviaje.at(-1).viaje.estadodelviaje;
+      return (
+        distSalida <= RADIUS_METERS &&
+        distDestino <= RADIUS_METERS &&
+        dentroDeNMin &&
+        fechaLocal == ruta.fecha &&
+        asientosDisponibles >= 1 &&
+        viajeEnCurso == "pendiente"
+      );
     });
 
+    console.log("hola samu soy filtradas", filtradas);
     if (filtradas.length === 0) {
-      setSearchMessage('No se encontraron rutas que coincidan con los criterios.');
+      setSearchMessage(
+        "No se encontraron rutas que coincidan con los criterios."
+      );
     }
     setMatchingRoutes(filtradas);
     setLoadingRoutes(false);
@@ -316,11 +600,15 @@ const TravelPage = () => {
     setIsTripDetailDialogOpen(true);
   };
 
+  const [idViajeActual, setIdViajeActual] = useState(null);
+
   const setPasajeroViaje = async (tripId) => {
     const { data: viaje, error } = await supabase
-      .from('rutaconductorviaje')
-      .select('idviaje')
-      .eq('idruta', tripId)
+      .from("rutaconductorviaje")
+      .select("idviaje")
+      .eq("idruta", tripId)
+      .order("idviaje", { ascending: false })
+      .limit(1)
       .single();
 
     if (error) {
@@ -328,7 +616,11 @@ const TravelPage = () => {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    setIdViajeActual(viaje.idviaje);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const nuevoPasajeroViaje = {
       idpasajero: user.id,
@@ -336,26 +628,80 @@ const TravelPage = () => {
     };
 
     const { error: insertError } = await supabase
-      .from('pasajeroviaje')
+      .from("pasajeroviaje")
       .insert(nuevoPasajeroViaje);
 
     if (insertError) {
-      console.log('no se pudo ingresar el pasajero al viaje ', insertError);
+      console.log("no se pudo ingresar el pasajero al viaje ", insertError);
     } else {
-      console.log('Pasajero añadido al viaje exitosamente.');
+      console.log("Pasajero añadido al viaje exitosamente.");
     }
   };
 
   const handleAcceptRoute = (tripId) => {
-    setShowInfo(false)
+    setShowInfo(false);
     setPasajeroViaje(tripId);
     setAcceptedRoute(selectedRoute);
     setIsTripDetailDialogOpen(false);
   };
 
-  const handleCancelTrip = async () => {
-    if (!acceptedRoute) return;
+  //Función para las cards de retomar viaje
 
+  const getInfoRutaAnterior = async (rutaData) => {
+    console.log(rutaData);
+    console.log("Mi id es:", rutaData.id);
+
+    const coordsI = { lat: rutaData.originlat, lng: rutaData.originlong };
+    setStartCoords(coordsI);
+    const direccion = await getAddressFromCoords(
+      rutaData.originlat,
+      rutaData.originlong
+    );
+    setStartPoint(direccion);
+
+    const coordsF = {
+      lat: rutaData.destinationlat,
+      lng: rutaData.destinationlong,
+    };
+    setDestCoords(coordsF);
+    console.log(coordsF);
+
+    const direcciondestino = await getAddressFromCoords(
+      rutaData.destinationlat,
+      rutaData.destinationlong
+    );
+    setDestination(direcciondestino);
+  };
+
+  const [isDesactive, setIsDesactive] = useState(false);
+
+  useEffect(() => {
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    let intervalId;
+    const fetchStatus = async () => {
+      console.log("me llamo muchas veces");
+      console.log("hola soy idviajeActual ", idViajeActual);
+      const { data, error } = await supabase
+        .from("pasajeroviaje")
+        .select("idviaje")
+        .eq("idviaje", idViajeActual)
+        .single();
+
+      await sleep(2000);
+
+      if (data === null || error) {
+        setIsDesactive(true);
+      }
+    };
+    if (acceptedRoute !== null && idViajeActual !== null) {
+      fetchStatus();
+      intervalId = setInterval(fetchStatus, 5000);
+    }
+    return () => clearInterval(intervalId);
+  }, [acceptedRoute, idViajeActual]);
+
+  const handleCancelTripInfo = async () => {
+    if (!acceptedRoute) return;
     const viajeInfo = acceptedRoute.rutaconductorviaje?.[0];
     if (!viajeInfo || !viajeInfo.idviaje) {
       console.error("No se pudo encontrar el idviaje para cancelar.");
@@ -364,7 +710,9 @@ const TravelPage = () => {
     }
     const idviaje = viajeInfo.idviaje;
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       console.error("No se encontró usuario para cancelar el viaje.");
       setAcceptedRoute(null);
@@ -372,378 +720,609 @@ const TravelPage = () => {
     }
 
     const { error: deleteError } = await supabase
-      .from('pasajeroviaje')
+      .from("pasajeroviaje")
       .delete()
       .match({ idpasajero: user.id, idviaje: idviaje });
 
     if (deleteError) {
-      console.error('Error al cancelar el viaje en la base de datos:', deleteError);
+      console.error(
+        "Error al cancelar el viaje en la base de datos:",
+        deleteError
+      );
     } else {
-      setShowInfo(true)
-      console.log('Viaje cancelado y registro eliminado exitosamente.');
+      setShowInfo(true);
+      console.log("Viaje cancelado y registro eliminado exitosamente.");
     }
-
+    setShowConfirmModal(false);
     setAcceptedRoute(null);
     setMatchingRoutes([]);
-    setSearchMessage('Tu viaje ha sido cancelado. Puedes buscar uno nuevo.');
+    setSearchMessage("Tu viaje ha sido cancelado. Puedes buscar uno nuevo.");
   };
 
+  async function getAddressFromCoords(lat, lng) {
+    const apiKey = import.meta.env.VITE_APIS_GOOGLE;
+    const endpoint = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
 
-  const formatCoordsShort = (lat, lng) => {
-    const round4 = (num) => Number(num).toFixed(4);
-    return `${round4(lat)}, ${round4(lng)}`;
-  };
+    try {
+      const response = await fetch(endpoint);
+      const data = await response.json();
 
-  let chosenDriverData = null;
-  if (acceptedRoute) {
-    const rutaconductor = acceptedRoute.rutaconductorviaje?.[0];
-    const usuario = rutaconductor?.conductor?.usuario || {};
-    const nombre =
-      usuario.nombrecompleto || usuario.codigoestudiantil || 'Sin nombre';
-    const coordsShort = formatCoordsShort(
-      acceptedRoute.salidalatitud,
-      acceptedRoute.salidalongitud
-    );
-
-    chosenDriverData = {
-      name: nombre,
-      location: coordsShort,
-      avatarUrl: '',
-      rating: 0,
-      car: {
-        plate: acceptedRoute.vehiculo?.vehiculopesado?.placa || '—',
-        model: `${acceptedRoute.vehiculo?.marca || ''} ${acceptedRoute.vehiculo?.modelo || ''
-          }`.trim(),
-        imageUrl: '/car.png',
-      },
-      eta: acceptedRoute.horadesalida || '—',
-      price: 'Gratis',
-    };
+      if (data.status === "OK" && data.results.length > 0) {
+        return data.results[0].formatted_address;
+      } else {
+        console.warn("No se encontró una dirección para estas coordenadas.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error al obtener dirección:", error);
+      return null;
+    }
   }
 
   const handleOpenQrModal = () => setShowQrModal(true);
   const handleCloseQrModal = () => setShowQrModal(false);
 
+  const jsonString = JSON.stringify(acceptedRoute);
+  const objetoString = btoa(jsonString);
+
+  if (loadError) {
+    return <div>Error loading maps</div>;
+  }
+
+  if (!isLoaded) {
+    return <div>Loading Maps...</div>; // Or a spinner component
+  }
+
   return (
-    <LoadScript googleMapsApiKey={apigoogle} libraries={libraries}>
-      <div className={styles.pageContainer}>
-        <div className={styles.topSectionWave}>
-          <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
-          <div className={styles.contentWrapper}>
-            <div className={styles.routeSetupSection}>
-              {!acceptedRoute ? (
-                <>
-                  <h2 className={styles.greeting}>¡Busca tu viaje ideal!</h2>
-                  <div className={styles.inputGroup}>
-                    <div className={styles.inputWrapper}>
-                      <MapPin className={styles.inputIcon} size={20} />
-                      <Autocomplete
-                        onLoad={onLoadStart}
-                        onPlaceChanged={onPlaceChangedStart}
-                        fields={['formatted_address', 'geometry']}
-                        restrictions={{ country: 'co' }}
-                      >
-                        <input
-                          type="text"
-                          placeholder="Punto de partida"
-                          value={startPoint}
-                          onChange={(e) => setStartPoint(e.target.value)}
-                          className={styles.inputField}
-                        />
-                      </Autocomplete>
-                    </div>
-                    <div className={styles.inputWrapper}>
-                      <MapPin className={styles.inputIcon} size={20} />
-                      <Autocomplete
-                        onLoad={onLoadDest}
-                        onPlaceChanged={onPlaceChangedDest}
-                        fields={['formatted_address', 'geometry']}
-                        restrictions={{ country: 'co' }}
-                      >
-                        <input
-                          type="text"
-                          placeholder="Destino"
-                          value={destination}
-                          onChange={(e) => setDestination(e.target.value)}
-                          className={styles.inputField}
-                        />
-                      </Autocomplete>
-                    </div>
-                  </div>
-                  <div className={styles.buttonGroup}>
-                    <button
-                      className={styles.submitButton}
-                      onClick={handleSearchTrip}
-                      disabled={loadingRoutes}
-                    >
-                      {loadingRoutes ? 'Buscando...' : (
-                        <>
-                          <Search size={18} /> Buscar
-                        </>
-                      )}
-                    </button>
-                    <button
-                      className={styles.filterButton}
-                      onClick={() => setIsFilterDialogOpen(true)}
-                      aria-label="Filtros"
-                    >
-                      <SlidersHorizontal size={20} />
-                    </button>
-                  </div>
-                </>
-              ) : chosenDriverData ? (
-                <div className={styles.acceptedTripCard}>
-                  <h2 className={styles.greeting}>¡Viaje confirmado!</h2>
-                  <div className={styles.driverInfoBig}>
-                    <div className={styles.driverAvatarContainer}>
-                      <UserCircle2 size={36} className={styles.driverAvatar} />
-                    </div>
-                    <div className={styles.driverDetails}>
-                      <h3 className={styles.driverName}>{chosenDriverData.name}</h3>
-                      <div className={styles.locationRow}>
-                        <MapPin size={16} className={styles.locationIcon} />
-                        <span className={styles.driverLocation}>{chosenDriverData.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.vehicleDetails}>
-                    <div className={styles.carImageColumn}>
-                      <img
-                        src={chosenDriverData.car.imageUrl}
-                        alt={chosenDriverData.car.model}
-                        className={styles.carImage}
-                      />
-                    </div>
-                    <div className={styles.vehicleInfo}>
-                      <div className={styles.carInfo}>
-                        <span className={styles.carPlate}>{chosenDriverData.car.plate}</span>
-                        <span className={styles.carModel}>{chosenDriverData.car.model}</span>
-                      </div>
-                      <div className={styles.etaSection}>
-                        <Clock size={18} className={styles.clockIcon} />
-                        <div>
-                          <p className={styles.etaTitle}>Hora de salida</p>
-                          <p className={styles.etaTime}>{chosenDriverData.eta}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.actionButtons}>
-                    <button
-                      className={styles.cancelButton}
-                      onClick={handleCancelTrip}
-                    >
-                      Cancelar viaje
-                    </button>
-                    <button
-                      className={styles.qrButton}
-                      onClick={handleOpenQrModal}
-                    >
-                      <QrCode size={18} /> Ver QR
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-            <div className={styles.mapSection}>
-              <GoogleMap
-                center={mapCenter}
-                zoom={mapZoom}
-                mapContainerClassName={styles.mapContainer}
-                options={{
-                  styles: mapCustomStyles,
-                  disableDefaultUI: true,
-                  zoomControl: true
-                }}
-              >
-                {directionsResponse && (
-                  <DirectionsRenderer
-                    options={{
-                      directions: directionsResponse,
-                      suppressMarkers: false,
-                      polylineOptions: {
-                        strokeColor: '#AA00FF',
-                        strokeWeight: 5,
-                      },
-                    }}
-                  />
-                )}
-              </GoogleMap>
-            </div>
+    <>
+      {/* Show loading state while checking statuses */}
+      {(isUniversityActive === null || isUserActive === null) && (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingContent}>
+            <p>Verificando estado de la universidad y usuario...</p>
           </div>
         </div>
+      )}
 
-        <div className={styles.previousRoutesSection}>
-          <h2 className={styles.sectionTitle}>
-            {acceptedRoute ? 'Tu viaje actual' : matchingRoutes.length > 0 ? 'Rutas Disponibles' : 'Busca tu ruta'}
-          </h2>
+      {/* Show NotActive component if university is not active */}
+      {isUniversityActive === false && (
+        <NotActive
+          universityId={universityId}
+          universityStatus={universityStatus}
+          userType="university"
+        />
+      )}
 
-          <div className={styles.cardsGrid}>
-            {acceptedRoute && chosenDriverData ? (
-              <div className={styles.activeTripCard}>
-                <div className={styles.driverInfo}>
-                  <UserCircle2 size={36} className={styles.driverAvatar} />
-                  <div className={styles.driverText}>
-                    <span className={styles.driverName}>{chosenDriverData.name}</span>
-                    <span className={styles.driverLocation}>
-                      <MapPin size={12} className={styles.locationIconSmall} />
-                      {chosenDriverData.location}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles.tripDetails}>
-                  <div className={styles.detailItem}>
-                    <Clock size={16} />
-                    <span>Salida: {chosenDriverData.eta}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>Vehículo: {chosenDriverData.car.model}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>Placa: {chosenDriverData.car.plate}</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                {loadingRoutes && (
-                  <div className={styles.loadingMessage}>Buscando rutas disponibles...</div>
-                )}
+      {/* Show NotActive component if user is not active but university is active */}
+      {isUniversityActive === true && isUserActive === false && (
+        <NotActive userId={userId} userStatus={userStatus} userType="user" />
+      )}
 
-                {!loadingRoutes && searchMessage && (
-                  <div className={styles.infoMessage}>{searchMessage}</div>
-                )}
-
-                {matchingRoutes.map((ruta) => {
-                  const rutaconductor = ruta.rutaconductorviaje?.[0];
-                  const usuario = rutaconductor?.conductor?.usuario || {};
-                  const conductorNombre =
-                    usuario.nombrecompleto ||
-                    usuario.codigoestudiantil ||
-                    'Sin nombre';
-                  const coordsShort = formatCoordsShort(
-                    ruta.salidalatitud,
-                    ruta.salidalongitud
-                  );
-
-                  return (
-                    <div key={ruta.idruta} className={styles.routeCard}>
-                      <div className={styles.driverInfo}>
-                        <UserCircle2 size={36} className={styles.driverAvatar} />
-                        <div className={styles.driverText}>
-                          <span className={styles.driverName}>{conductorNombre}</span>
-                          <span className={styles.driverLocation}>
-                            <MapPin size={12} className={styles.locationIconSmall} />
-                            {coordsShort}
-                          </span>
-                        </div>
+      {/* Show main content if both university and user are active */}
+      {isUniversityActive === true && isUserActive === true && (
+        <div className={styles.pageContainer}>
+          <div className={styles.topSectionWave}>
+            <img src={wave} alt="Fondo de ola" className={styles.waveBg} />
+            <div className={styles.contentWrapper}>
+              <div className={styles.routeSetupSection}>
+                {!acceptedRoute ? (
+                  <>
+                    <h2 className={styles.greeting}>
+                      ¡Hola! {nombreUsuario} ¡Busca tu viaje ideal!
+                    </h2>
+                    <div className={styles.inputGroup}>
+                      <div className={styles.inputWrapper}>
+                        <MapPin className={styles.inputIcon} size={20} />
+                        <Autocomplete
+                          onLoad={onLoadStart}
+                          onPlaceChanged={onPlaceChangedStart}
+                          fields={["formatted_address", "geometry"]}
+                          restrictions={{ country: "co" }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Punto de partida"
+                            value={startPoint}
+                            onChange={(e) => setStartPoint(e.target.value)}
+                            className={styles.inputField}
+                          />
+                        </Autocomplete>
                       </div>
-                      <div className={styles.routeDetails}>
-                        <div className={styles.detailItem}>
-                          <Clock size={16} />
-                          <span>{ruta.horadesalida}</span>
-                        </div>
-                        <div className={styles.detailItem}>
-                          <span>Asientos: {ruta.asientosdisponibles}</span>
-                        </div>
-                        <div className={styles.detailItem}>
-                          <span>Distancia: {ruta.distancia.toFixed(1)} km</span>
-                        </div>
+                      <div className={styles.inputWrapper}>
+                        <MapPin className={styles.inputIcon} size={20} />
+                        <Autocomplete
+                          onLoad={onLoadDest}
+                          onPlaceChanged={onPlaceChangedDest}
+                          fields={["formatted_address", "geometry"]}
+                          restrictions={{ country: "co" }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Destino"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            className={styles.inputField}
+                          />
+                        </Autocomplete>
                       </div>
+                      <div className={styles.inputWrapper}>
+                        <Clock className={styles.inputIcon} size={20} />
+                        <input
+                          type="datetime-local"
+                          min={minDateTime}
+                          onBlur={handleBlur}
+                          max={maxDateTime}
+                          value={dateTime}
+                          onChange={(e) => setDateTime(e.target.value)}
+                          className={styles.inputField}
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.buttonGroup}>
                       <button
-                        className={styles.detailsButton}
-                        onClick={() => openTripDetailDialog(ruta)}
+                        className={styles.submitButton}
+                        onClick={handleSearchTrip}
+                        disabled={loadingRoutes}
                       >
-                        <MoreVertical size={20} />
+                        {loadingRoutes ? (
+                          "Buscando..."
+                        ) : (
+                          <>
+                            <Search size={18} /> Buscar
+                          </>
+                        )}
                       </button>
                     </div>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        </div>
+                  </>
+                ) : (
+                  <div className={styles.acceptedTripCard}>
+                    <h2 className={styles.title}>¡Viaje confirmado!</h2>
 
-        <FilterDialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen} />
+                    {/* --- SECCIÓN DEL CONDUCTOR --- */}
+                    <div className={styles.section}>
+                      <div className={styles.driverInfo}>
+                        <img
+                          src={
+                            acceptedRoute.rutaconductorviaje[0].conductor
+                              .usuario.urlAvatar
+                          }
+                          alt={
+                            acceptedRoute.rutaconductorviaje[0].conductor
+                              .usuario.nombrecompleto
+                          }
+                          className={styles.avatar}
+                        />
+                        <div className={styles.driverText}>
+                          <p className={styles.label}>Conductor</p>
+                          <p className={styles.value}>
+                            {
+                              acceptedRoute.rutaconductorviaje[0].conductor
+                                .usuario.nombrecompleto
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <div className={styles.contactInfo}>
+                        <Phone size={18} className={styles.icon} />
+                        <p className={styles.value}>
+                          {
+                            acceptedRoute.rutaconductorviaje[0].conductor
+                              .usuario.telefono
+                          }
+                        </p>
+                      </div>
+                    </div>
 
-        {selectedRoute && (
-          <TripDetailDialog
-            open={isTripDetailDialogOpen}
-            onOpenChange={setIsTripDetailDialogOpen}
-            tripId={selectedRoute.idruta}
-            driverData={{
-              nombre:
-                selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
-                  ?.nombrecompleto ||
-                selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
-                  ?.codigoestudiantil ||
-                'Sin nombre',
-            }}
-            routeData={{
-              horadesalida: selectedRoute.horadesalida,
-              fecha: selectedRoute.fecha,
-              tipoderuta: selectedRoute.tipoderuta,
-              distancia: selectedRoute.distancia,
-              asientosdisponibles: selectedRoute.asientosdisponibles,
-            }}
-            vehicleData={{
-              color: selectedRoute.vehiculo?.color,
-              marca: selectedRoute.vehiculo?.marca,
-              modelo: selectedRoute.vehiculo?.modelo,
-              placa: selectedRoute.vehiculo?.vehiculopesado?.placa,
-              tipovehiculo: selectedRoute.vehiculo?.vehiculopesado?.tipovehiculo,
-            }}
-            onAcceptTrip={handleAcceptRoute}
-          />
-        )}
+                    {/* --- SECCIÓN DE RUTA --- */}
+                    <div className={styles.section}>
+                      <div className={styles.routePoint}>
+                        <MapPin size={20} className={styles.icon} />
+                        <div className={styles.routeText}>
+                          <p className={styles.label}>Origen</p>
+                          <p className={styles.value}>{origen}</p>
+                        </div>
+                      </div>
+                      <div className={styles.routePoint}>
+                        <MapPin
+                          size={20}
+                          className={styles.icon}
+                          color="#8A2BE2"
+                        />
+                        <div className={styles.routeText}>
+                          <p className={styles.label}>Destino</p>
+                          <p className={styles.value}>{destino}</p>
+                        </div>
+                      </div>
+                    </div>
 
-        {showQrModal && acceptedRoute && (
-          <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h3 className={styles.modalTitle}>Código QR del Viaje</h3>
-                <button onClick={handleCloseQrModal} className={styles.closeModalButton}>
-                  <X size={24} />
-                </button>
+                    {/* --- SECCIÓN DE VEHÍCULO Y HORA --- */}
+                    <div className={styles.section}>
+                      <p className={styles.sectionTitle2}>
+                        Detalles del Vehículo
+                      </p>
+                      <div className={styles.vehicleGrid}>
+                        <div className={styles.detailItem}>
+                          <Car size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Marca / Modelo</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.marca}{" "}
+                              {acceptedRoute?.vehiculo?.modelo}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <Palette size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Color</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.color}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <Tag size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Placa</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.vehiculoligero.nserie}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <Shapes size={20} className={styles.icon} />
+                          <div>
+                            <p className={styles.label}>Tipo</p>
+                            <p className={styles.value}>
+                              {acceptedRoute?.vehiculo?.vehiculoligero.tipo}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* --- HORA DE SALIDA --- */}
+                    <div className={styles.departureTimeSection}>
+                      <Clock size={20} className={styles.icon} />
+                      <div>
+                        <p className={styles.label}>
+                          Hora de salida programada
+                        </p>
+                        <p className={styles.valueLarge}>
+                          {acceptedRoute?.horadesalida}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* --- BOTONES DE ACCIÓN --- */}
+                    <div className={styles.actionButtons}>
+                      <button
+                        className={styles.cancelButton}
+                        onClick={() => setShowConfirmModal(true)}
+                      >
+                        Cancelar viaje
+                      </button>
+                      <button
+                        className={styles.qrButton}
+                        onClick={handleOpenQrModal}
+                      >
+                        <QrCode size={18} /> Ver QR
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className={styles.modalBody}>
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ViajeRuta:${encodeURIComponent(
-                    acceptedRoute.idruta
-                  )}`}
-                  alt="Código QR"
-                  className={styles.qrImageModal}
-                />
-                <p className={styles.qrHelpText}>
-                  Escanea este QR en la App del conductor para confirmar el viaje.
-                </p>
+              <div className={styles.mapSection}>
+                <GoogleMap
+                  center={mapCenter}
+                  zoom={mapZoom}
+                  mapContainerClassName={styles.mapContainer}
+                  options={{
+                    styles: mapCustomStyles,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                  }}
+                >
+                  {directionsResponse && (
+                    <DirectionsRenderer
+                      options={{
+                        directions: directionsResponse,
+                        suppressMarkers: false,
+                        polylineOptions: {
+                          strokeColor: "#AA00FF",
+                          strokeWeight: 5,
+                        },
+                      }}
+                    />
+                  )}
+                </GoogleMap>
               </div>
             </div>
           </div>
-        )}
-        {showInfo ? (
+
           <div className={styles.previousRoutesSection}>
-            <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
+            <h2 className={styles.sectionTitle}>
+              {acceptedRoute
+                ? ""
+                : matchingRoutes.length > 0
+                ? "Rutas Disponibles"
+                : "Busca tu ruta"}
+            </h2>
+
             <div className={styles.cardsGrid}>
-              {previousRoutes.length > 0 ? (
-                previousRoutes.map(rutaData => (
-                  <RutaAnteriorCard
-                    routeData={rutaData}
-                    onEstablecerRuta={() => { console.log("soy yo guacho", previousRoutes); }}
-                  />
-                ))
-              ) : (
-                <div className={styles.infoMessage}>No tienes viajes anteriores</div>
+              {acceptedRoute ? null : (
+                <>
+                  {loadingRoutes && (
+                    <div className={styles.loadingMessage}>
+                      Buscando rutas disponibles...
+                    </div>
+                  )}
+
+                  {!loadingRoutes && searchMessage && (
+                    <div className={styles.infoMessage}>{searchMessage}</div>
+                  )}
+
+                  {matchingRoutes.map((ruta) => {
+                    const rutaconductor = ruta.rutaconductorviaje?.[0];
+                    const usuario = rutaconductor?.conductor?.usuario || {};
+                    const conductorNombre =
+                      usuario.nombrecompleto ||
+                      usuario.codigoestudiantil ||
+                      "Sin nombre";
+                    const fetchDireccion = async () => {
+                      const direccion = await getAddressFromCoords(
+                        ruta.salidalatitud,
+                        ruta.salidalongitud
+                      );
+                      setOrigen(direccion);
+
+                      const direcciondestino = await getAddressFromCoords(
+                        ruta.paradalatitud,
+                        ruta.paradalongitud
+                      );
+                      setDestino(direcciondestino);
+                    };
+
+                    fetchDireccion();
+
+                    return (
+                      <div key={ruta.idruta} className={styles.routeCard}>
+                        <div className={styles.driverInfo}>
+                          <UserCircle2
+                            size={36}
+                            className={styles.driverAvatar}
+                          />
+                          <div className={styles.driverText}>
+                            <span className={styles.driverName}>
+                              {conductorNombre}
+                            </span>
+                            <span className={styles.driverLocation}>
+                              <MapPin
+                                size={16}
+                                className={styles.locationIconSmall}
+                              />
+                              <span className={styles.ubicationSpan}>
+                                Punto de partida:{" "}
+                              </span>
+                              {origen
+                                ? origen.slice(
+                                    0,
+                                    origen.length <= 30
+                                      ? origen.length
+                                      : origen.length - 10
+                                  ) + "..."
+                                : "Cargando..."}
+                            </span>
+                            <span className={styles.driverLocation}>
+                              <MapPin
+                                size={16}
+                                className={styles.locationIconSmall}
+                              />
+                              <span className={styles.ubicationSpan}>
+                                Destino:{" "}
+                              </span>
+                              {destino
+                                ? destino.slice(
+                                    0,
+                                    destino.length <= 30
+                                      ? destino.length
+                                      : destino.length - 10
+                                  ) + "..."
+                                : "Cargando..."}
+                            </span>
+                          </div>
+                        </div>
+                        <div className={styles.routeDetails}>
+                          <div className={styles.detailItem}>
+                            <Clock color={"#aa00ff"} size={16} />
+                            <span>Hora de salida: {ruta.horadesalida}</span>
+                          </div>
+                          <div className={styles.detailItem}>
+                            <Armchair color={"#aa00ff"} size={16} />
+                            <span>
+                              Asientos Disponibles: {ruta.asientosdisponibles}
+                            </span>
+                          </div>
+                          <div className={styles.detailItem}>
+                            <Route color={"#aa00ff"} size={16} />
+                            <span>
+                              Distancia de la ruta: {ruta.distancia.toFixed(1)}{" "}
+                              km
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          className={styles.detailsButton}
+                          onClick={() => openTripDetailDialog(ruta)}
+                        >
+                          <MoreVertical size={20} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
               )}
             </div>
           </div>
-        ) : (
-          <div>
-          </div>
-        )}
-      </div>
-    </LoadScript>
+
+          {selectedRoute && (
+            <TripDetailDialog
+              open={isTripDetailDialogOpen}
+              onOpenChange={setIsTripDetailDialogOpen}
+              tripId={selectedRoute.idruta}
+              driverData={{
+                nombre:
+                  selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                    ?.nombrecompleto ||
+                  selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                    ?.codigoestudiantil ||
+                  "Sin nombre",
+                avatarUrl:
+                  selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                    ?.urlAvatar,
+              }}
+              routeData={{
+                origen: origen,
+                destino: destino,
+                horadesalida: selectedRoute.horadesalida,
+                fecha: selectedRoute.fecha,
+                tipoderuta: selectedRoute.tipoderuta,
+                distancia: selectedRoute.distancia,
+                asientosdisponibles: selectedRoute.asientosdisponibles,
+              }}
+              vehicleData={{
+                color: selectedRoute.vehiculo?.color,
+                marca: selectedRoute.vehiculo?.marca,
+                modelo: selectedRoute.vehiculo?.modelo,
+                placa:
+                  selectedRoute.vehiculo?.vehiculopesado?.placa ??
+                  selectedRoute.vehiculo?.vehiculoligero?.nserie ??
+                  "—",
+                tipovehiculo:
+                  selectedRoute.vehiculo?.vehiculopesado?.tipovehiculo ??
+                  selectedRoute.vehiculo?.vehiculoligero?.tipo ??
+                  "—",
+                numeroasientos: selectedRoute.vehiculo?.numeroasientos,
+              }}
+              onAcceptTrip={handleAcceptRoute}
+            />
+          )}
+
+          {showQrModal && acceptedRoute && (
+            <div className={styles.modalOverlay} onClick={handleCloseQrModal}>
+              <div
+                className={styles.modalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className={styles.modalHeader}>
+                  <h3 className={styles.modalTitle}>Código QR del Viaje</h3>
+                  <button
+                    onClick={handleCloseQrModal}
+                    className={styles.closeModalButton}
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className={styles.modalBody}>
+                  <QRCode
+                    value={objetoString} // Aquí pasas la cadena serializada
+                    size={250}
+                    color="black"
+                    level="Q"
+                    className={styles.qrImageModal}
+                  />
+                  <p className={styles.qrHelpText}>
+                    Escanea este QR en la App movil para ver la información de
+                    tu viaje.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          {showInfo ? (
+            <div className={styles.previousRoutesSection}>
+              <h2 className={styles.sectionTitle}>Viajes anteriores</h2>
+              <div className={styles.cardsGrid}>
+                {previousRoutes.length > 0 ? (
+                  previousRoutes.map((rutaData, index) => (
+                    <RutaAnteriorCard
+                      key={index}
+                      routeData={rutaData}
+                      onEstablecerRuta={() => getInfoRutaAnterior(rutaData)}
+                    />
+                  ))
+                ) : (
+                  <div className={styles.infoMessage}>
+                    No tienes viajes anteriores
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div></div>
+          )}
+          {showConfirmModal && (
+            <div className={styles.modalOverlayOpen}>
+              <div
+                className={styles.confirmModalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className={styles.modalCloseButton}
+                >
+                  <X size={28} />
+                </button>
+                <h3>¿Estás seguro de cancelar el viaje?</h3>
+                <div className={styles.confirmModalActions}>
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className={styles.confirmModalButton}
+                  >
+                    Volver
+                  </button>
+                  <button
+                    onClick={handleCancelTripInfo}
+                    className={styles.confirmModalButtonCancelar}
+                  >
+                    Cancelar viaje
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isDesactive && (
+            <div className={styles.modalOverlayOpen}>
+              <div
+                className={styles.confirmModalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <TicketX size={40} color={"#aa00ff"} />
+                <h3>&nbsp;El conductor a cancelado la ruta.</h3>
+                <div className={styles.confirmModalActions}>
+                  <button
+                    onClick={() => {
+                      setIsDesactive(false);
+                      window.location.reload();
+                    }}
+                    className={styles.confirmModalButton}
+                  >
+                    Volver
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 };
+
+//CODIGO PARA DECODIFICAR EN REACT NATIVE EN LA APP DEL CELULAR
+/* const jsonString = atob(scannedText);        // Decodifica Base64
+const objeto = JSON.parse(jsonString);
+console.log(objeto); */
 
 export default TravelPage;

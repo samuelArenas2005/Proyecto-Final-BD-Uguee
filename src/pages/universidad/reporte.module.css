@@ -1,0 +1,342 @@
+/* /reports/styles.module.css */
+
+/* --- Contenedor Principal --- */
+.pageContainer {
+    display: flex;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #F8F9FA;
+    min-height: calc(100vh - 70px); /* Ajusta 70px a la altura de tu NAV */
+}
+
+
+.collapseButton {
+    background: #6a1b9a;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+
+.sidebarNav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebarItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    color: #e1bee7; /* Color de íconos y texto inactivo */
+    font-weight: 500;
+}
+
+.sidebarItem:hover {
+    background-color: #5E35B1;
+    color: #fff;
+}
+
+.sidebarItem.active {
+    background-color: #7E57C2; /* Morado más brillante para el item activo */
+    color: #fff;
+    font-weight: 600;
+}
+
+/* --- Contenido Principal --- */
+.mainContent {
+    flex-grow: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+}
+
+.reportContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.reportTitle {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.searchFilterBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #E0E0E0;
+    width: 400px;
+}
+
+.searchBox input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.9rem;
+    background: transparent;
+}
+
+.contentBody {
+    flex-grow: 1;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.chartWrapper {
+    width: 100%;
+    height: 450px; /* Altura fija para los contenedores de gráficas */
+}
+
+.downloadButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #9333EA; /* Morado de los botones */
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 2rem auto 0 auto;
+    transition: background-color 0.2s;
+}
+
+.downloadButton:hover {
+    background-color: #7e22ce;
+}
+
+/* --- Estilos específicos de vistas --- */
+
+/* Desempeño de Conductores */
+.driverList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.driverCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 12px;
+}
+
+.driverInfo {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.driverAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.driverName {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.driverRatings {
+    display: flex;
+    gap: 2rem;
+}
+
+.ratingLabel {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+    margin: 0 0 0.25rem 0;
+}
+
+.ratingValue {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Reporte de Conductores (Empty State) */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    gap: 1.5rem;
+    color: #888;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* --- Contenedor Principal --- */
+.pageContainer {
+    display: flex;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #F8F9FA;
+    min-height: calc(100vh - 70px);
+}
+
+/* --- Barra Lateral (Sidebar) --- */
+.sidebar {
+    width: 280px; /* Ancho cuando está abierta */
+    height: 600px;
+    flex-shrink: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    /* Efecto de degradado y forma */
+    background: linear-gradient(180deg, #581c87 0%, #7e22ce 100%);
+    border-radius: 0 24px 24px 0;
+    box-shadow: 4px 0px 20px -5px rgba(0, 0, 0, 0.2);
+    /* Transición suave para el colapso */
+    transition: width 0.3s ease-in-out;
+    position: relative;
+    z-index: 10;
+}
+
+/* Estilo cuando la barra lateral está colapsada */
+.sidebar.collapsed {
+    width: 90px; /* Ancho cuando está cerrada */
+}
+
+.sidebarHeader {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+    padding-right: 0.5rem;
+}
+
+.collapseButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.3s;
+}
+
+.collapseButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Icono dentro del botón de colapso */
+.collapseIcon {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Rotación del ícono cuando la barra está colapsada */
+.sidebar.collapsed .collapseIcon {
+    transform: rotate(180deg);
+}
+
+.analysisTitle {
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #ffffff;
+    padding: 0 1rem;
+    margin-bottom: 0.5rem;
+    white-space: nowrap; /* Evita que el texto se rompa durante la animación */
+    overflow: hidden;
+}
+
+.sidebarNav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebarItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    color: #e1bee7;
+    font-weight: 500;
+    white-space: nowrap; /* Evita que el texto se rompa */
+    overflow: hidden;
+}
+
+/* Centrar el ícono cuando está colapsado */
+.sidebar.collapsed .sidebarItem {
+    justify-content: center;
+    padding: 0.8rem;
+}
+
+.sidebarItem:hover {
+    background-color: #5E35B1;
+    color: #fff;
+}
+
+/* Nuevo estilo para el item activo, más vibrante */
+.sidebarItem.active {
+    background-color: #d946ef; /* Magenta/Fucsia vibrante */
+    color: #fff;
+    font-weight: 600;
+}
+
+/* --- Contenido Principal --- */
+.mainContent {
+    flex-grow: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+    /* Transición para que se ajuste suavemente */
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* --- [NUEVO] Estilo para el ícono de usuario --- */
+.driverAvatarIconWrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #f3e8ff; /* Un lila muy claro */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}

@@ -1,28 +1,60 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput,Button,Switch,ScrollView} from 'react-native';
-import { Camera } from 'lucide-react-native';
+// App.js
+import 'react-native-get-random-values';
+import 'react-native-gesture-handler'; 
+import React, { useCallback, useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import * as Font from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { enableScreens } from 'react-native-screens';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import WelcomeScreen from './src/screens/WelcomeScreen';
+import LoginScreen   from './src/screens/LoginScreen';
+import MapScreen     from './src/screens/MapScreen';
+
+enableScreens();
+
+const Poppins = {
+  'Poppins-Regular': require('./assets/Poppins-Regular.ttf'),
+  'Poppins-Bold':    require('./assets/Poppins-Bold.ttf'),
+};
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Hola miguel xd</Text>
-      <TextInput placeholder="Escribe aquí" style={{ borderWidth: 1, padding: 5 }} />
-      <Switch value={true} onValueChange={(val) => console.log(val)} />
-      <Button title="Presiona aquí" onPress={() => alert("¡Hola!")} />
-      <Camera color="red" size={48} />;
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-      <StatusBar style="auto" />
-    </View>
+  const loadResourcesAndDataAsync = useCallback(async () => {
+    try {
+      await SplashScreen.preventAutoHideAsync();
+      await Font.loadAsync(Poppins);
+      setFontsLoaded(true);
+    } finally {
+      await SplashScreen.hideAsync();
+    }
+  }, []);
+
+  useEffect(() => { loadResourcesAndDataAsync(); }, [loadResourcesAndDataAsync]);
+  if (!fontsLoaded) return null;
+
+  return (
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={styles.flex} pointerEvents="box-none">
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="Login"   component={LoginScreen} />
+            <Stack.Screen name="Home"    component={MapScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap:20,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  flex: { flex: 1 },
 });

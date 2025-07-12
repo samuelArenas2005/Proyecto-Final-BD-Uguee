@@ -1,6 +1,6 @@
 // components/FileField.jsx
 
-function FileField({ label, name, file, onFileChange, accept, previewUrl }) {
+function FileField({ label, name, file, onFileChange, accept, previewUrl,required=true }) {
   return (
     <div className="rd-field">
       <label>{label}</label>
@@ -10,8 +10,8 @@ function FileField({ label, name, file, onFileChange, accept, previewUrl }) {
           id={`file-${name}`}
           name={name}
           accept={accept}
-          required
           onChange={onFileChange}
+          required={required}
         />
         <label htmlFor={`file-${name}`} className="custom-file-button">
           Elegir archivo

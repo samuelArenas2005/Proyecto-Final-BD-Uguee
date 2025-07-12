@@ -1,6 +1,7 @@
 import FormField from "./components/FormField";
 import FileField from "./components/FileField";
 import MultiFileField from "./components/MultiFileField";
+import ComboField from "./components/ComboField";
 import { useLogin } from "../../context/LoginContext";
 import { useState } from "react";
 
@@ -17,8 +18,8 @@ function RegisterUniversity({ handleChange }) {
     colorsecundario: "",
     urllmglogo: "",
     sede: "",
-    calle: "",
-    numerolugar: "",
+    via_principal: "",
+    placa: "",
     ciudad: "",
     estado: "pendiente",
   };
@@ -33,6 +34,20 @@ function RegisterUniversity({ handleChange }) {
   const [files, setFiles] = useState(initialFiles); // Estado para los archivos
   const [previewUrl, setPreviewUrl] = useState(""); // Nuevo estado para el preview
   const [infoMsg, setInfoMsg] = useState(""); // Mensaje de éxito o error
+
+  const colorOptions = [
+    { label: "Violeta", value: "#b86fc6" },
+    { label: "Rosa", value: "#f7b6d2" },
+    { label: "Rojo", value: "#ff0000" },
+    { label: "Naranja", value: "#ff9900" },
+    { label: "Amarillo", value: "#ffe600" },
+    { label: "Gris", value: "#bdbdbd" },
+    { label: "Negro", value: "#000000" },
+    { label: "Blanco", value: "#ffffff" },
+    { label: "Verde", value: "#00b050" },
+    { label: "Azul", value: "#0070c0" },
+    { label: "Marrón", value: "#a97c50" },
+  ];
 
   const { createUniversity, submitting } = useLogin();
 
@@ -95,7 +110,7 @@ function RegisterUniversity({ handleChange }) {
 
         {/* Email y Password */}
         <FormField
-          label="Email"
+          label="Email *"
           type="email"
           name="email"
           value={userData.email}
@@ -104,7 +119,7 @@ function RegisterUniversity({ handleChange }) {
           onChange={(e) => handleChange(e, setUserData)}
         />
         <FormField
-          label="Contraseña"
+          label="Contraseña *"
           type="password"
           name="password"
           minLength={6}
@@ -116,7 +131,7 @@ function RegisterUniversity({ handleChange }) {
 
         {/* Campos de la universidad */}
         <FormField
-          label="Nombre oficial de la Universidad"
+          label="Nombre oficial de la Universidad *"
           name="nombre"
           value={formData.nombre}
           required
@@ -125,7 +140,7 @@ function RegisterUniversity({ handleChange }) {
         />
         <div className="rd-two-col">
           <FormField
-            label="Sede"
+            label="Sede *"
             name="sede"
             value={formData.sede}
             required
@@ -133,54 +148,59 @@ function RegisterUniversity({ handleChange }) {
             onChange={(e) => handleChange(e, setFormData)}
           />
           <FormField
-            label="Calle"
-            name="calle"
-            value={formData.calle}
-            required
-            placeholder="12"
-            onChange={(e) => handleChange(e, setFormData)}
-          />
-        </div>
-        <div className="rd-two-col">
-          <FormField
-            label="Número lugar"
-            name="numerolugar"
-            value={formData.numerolugar}
-            required
-            placeholder="12-34"
-            onChange={(e) => handleChange(e, setFormData)}
-          />
-          <FormField
-            label="Ciudad"
+            label="Ciudad *"
             name="ciudad"
             value={formData.ciudad}
             required
-            placeholder="Ciudad de México"
+            placeholder="Cali"
             onChange={(e) => handleChange(e, setFormData)}
           />
         </div>
         <div className="rd-two-col">
           <FormField
-            label="Color principal"
+            label="Via principal *"
+            name="via_principal"
+            value={formData.via_principal}
+            required
+            placeholder="Cl 38"
+            onChange={(e) => handleChange(e, setFormData)}
+            pattern="^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+ [0-9]+( [a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)*$"
+            title="Debe ser una palabra, un espacio, un número, y opcionalmente más palabras separadas por espacio. Ejemplo: Cl 38 Sur, Av 5 Norte, Cra 10"
+          />
+          <FormField
+            label="Placa de la direccion *"
+            name="placa"
+            value={formData.placa}
+            required
+            placeholder="12-34"
+            onChange={(e) => handleChange(e, setFormData)}
+            pattern="^[0-9]+[a-zA-Z]?-[0-9]+[a-zA-Z]?$"
+            title="Debe ser un número, opcionalmente una letra, un guion, seguido de otro número y opcionalmente una letra. Ejemplo: 123A-45 o 123-45B o 123-45"
+          />
+        </div>
+        <div className="rd-two-col">
+          <ComboField
+            label="Color principal *"
             name="colorprincipal"
             value={formData.colorprincipal}
             required
-            placeholder="Azul"
+            placeholder="Selecciona un color"
             onChange={(e) => handleChange(e, setFormData)}
+            options={colorOptions}
           />
-          <FormField
-            label="Color secundario"
+          <ComboField
+            label="Color secundario *"
             name="colorsecundario"
             value={formData.colorsecundario}
             required
-            placeholder="Blanco"
+            placeholder="Selecciona un color"
             onChange={(e) => handleChange(e, setFormData)}
+            options={colorOptions}
           />
         </div>
         <FileField
-          label="Logo de la universidad (PNG o JPG)"
+          label="Logo de la universidad (PNG o JPG) *"
           type="file"
-          id="file-upload"
           name="logo"
           file={files.logo}
           accept=".png,.jpg,.jpeg,image/png,image/jpeg"
@@ -192,7 +212,7 @@ function RegisterUniversity({ handleChange }) {
           previewUrl={previewUrl}
         />
         <MultiFileField
-          label="Documentos de Soporte (PDF)"
+          label="Documentos de Soporte (PDF) *"
           name="certificados"
           files={files.certificados} // Le pasamos el estado actual.
           onFilesChange={handleFileCertificadoChange} // Le pasamos la función para actualizar el estado.

@@ -1,8 +1,42 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './reporteVia.module.css';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
-import L from 'leaflet';
+
+import {
+  GoogleMap,
+  LoadScript,
+  MarkerF,
+  InfoWindowF,useJsApiLoader
+} from '@react-google-maps/api';
+
+/**
+ * Juan Manuel Ampudia
+ * con MarkerF y InfoWindoWf puedes colocar marcas en el mapa, cuya ubicacion se puede ver en la
+ * tabla de pqrs de nuestra base de datos, abria entonces que mirar que reportes son del tipo 
+ * trafico en la via o choques etc....
+ * este tambien tiene una latitud y longitud para obtener las coordenadas
+ * 
+ * Si te vas a page/universidad/monitero.jsx puedes encontrar un ejemplo que utiliza las marcas y las ventanas
+ * ahi le explico a daniel como obtener la informacion, sin embargo mas abajo de estas puedes encotnrar en el elemento
+ * googleMap el uso de MarkerF e INfoWindowF y como establecerles una ubicacion e incluso un icono
+ * 
+ * asi mismo sera para el componente googleMap de aca, asi entonces deberas crear un arreglo de objeto literal 
+ * que contenga la inforamcion que requieres desde la base de datos, si acaso me preguntas...
+ * 
+ * a y pon mapCenter en la ubicacion actual del conductor, para obtener info del conductor lo puedes hacer con auth.user, mira en 
+ * conductor.jsx ejemplos o preguntale alguna IA.
+ * 
+ * para iconos como trafico o choques si quieres descargalos de canva y lo pones en la carpeta public con el resto de archivos(procura que
+ * se la public de la pagina web y no de la carpeta mobile)
+ */
+
+const apigoogle = import.meta.env.VITE_APIS_GOOGLE; 
+const mapCustomStyles = [
+  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+];
+/* const libraries = ['places'];
+const DEFAULT_CENTER = { lat: 4.624335, lng: -74.063644 }; */
 
 // Iconos de Lucide React
 import {
@@ -14,54 +48,29 @@ import {
   X as XIcon
 } from 'lucide-react';
 
-// --- IMPORTANTE: Importa tu imagen de onda aquí ---
-// Ejemplo: Asegúrate de tener esta imagen en tu proyecto
-import waveImage from '../../../public/wave.svg'; // CAMBIA ESTO por tu imagen real
-
-// Configuración para evitar problemas con el icono por defecto de Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
-
-const trafficIconHtml = `
-  <div style="
-    background-color: #6A0DAD;
-    color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    border: 2px solid white;
-  ">!</div>
-`;
-
-const customTrafficIcon = new L.DivIcon({
-  html: trafficIconHtml,
-  className: '',
-  iconSize: [30, 30],
-  iconAnchor: [15, 15]
-});
+import waveImage from '../../../public/wave.svg'; 
 
 const DetailedTravelPage = () => {
-  const mapCenter = [3.3984, -76.5215];
+  const libraries = ['places'];
+  const mapCenter = { lat: 4.624335, lng: -74.063644 }; 
   const trafficMarkerPosition = [3.3950, -76.5050];
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: apigoogle,
+    libraries: libraries,
+  });
+
+   if (!isLoaded) {
+    return <div>Cargando el mapa</div>;
+  }
 
   return (
     <div className={styles.pageOverlay}>
          <img src={waveImage} alt="Ola decorativa" className={styles.waveBg} />
       <div className={styles.modalContainer}>
-        {/* Ola decorativa usando la etiqueta <img> */}
-       
         
-        <Link to="/conductor/viaje" className={styles.closeButton}>
+        <Link to="/conductor" className={styles.closeButton}>
           <XIcon size={30} /> {/* Tamaño ligeramente ajustado si es necesario */}
         </Link>
 
@@ -107,24 +116,17 @@ const DetailedTravelPage = () => {
               Reportes en la vía
             </button>
             <div className={styles.mapView}>
-              <MapContainer 
-                center={mapCenter} 
-                zoom={14} 
-                className={styles.mapContainer}
-                zoomControl={false}
+              <GoogleMap
+                center={mapCenter}
+                zoom={16}
+                mapContainerClassName={styles.mapContainer}
+                options={{
+                  styles: mapCustomStyles,
+                  disableDefaultUI: true,
+                  zoomControl: true
+                }}
               >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <ZoomControl position="bottomright" />
-                <Marker position={trafficMarkerPosition} icon={customTrafficIcon}>
-                  <Popup>
-                    <span style={{fontWeight: 'bold'}}>Tráfico en la zona</span><br/>
-                    Hay congestión vehicular en esta área.
-                  </Popup>
-                </Marker>
-              </MapContainer>
+              </GoogleMap>
             </div>
           </div>
         </div>
