@@ -186,7 +186,7 @@ const TravelPage = () => {
         setUniversityStatus(universityData.estado);
         setIsUniversityActive(universityData.estado === "activo");
 
-        // If university is not active, don't check user status
+    
         if (universityData.estado !== "activo") {
           setIsUserActive(false);
           return;
@@ -267,7 +267,6 @@ const TravelPage = () => {
 
   const fetchPreviousRoutes = async (userId) => {
     console.log("Estoy en el fetch");
-    console.log("Sexooooooooooo");
 
     const { data: historicalTripsAll, error } = await supabase
       .from("pasajeroviaje")
@@ -574,7 +573,7 @@ const TravelPage = () => {
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
       const dentroDeNMin = Math.abs(diffMs) <= umbralN;
       const asientosDisponibles = ruta.asientosdisponibles;
-      const viajeEnCurso = ruta.rutaconductorviaje.at(-1).viaje.estadodelviaje;
+      /* const viajeEnCurso = ruta.rutaconductorviaje.at(-1).viaje.estadodelviaje; */
       return (
         distSalida <= RADIUS_METERS &&
         distDestino <= RADIUS_METERS &&
@@ -679,7 +678,6 @@ const TravelPage = () => {
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     let intervalId;
     const fetchStatus = async () => {
-      console.log("me llamo muchas veces");
       console.log("hola soy idviajeActual ", idViajeActual);
       const { data, error } = await supabase
         .from("pasajeroviaje")
@@ -687,7 +685,7 @@ const TravelPage = () => {
         .eq("idviaje", idViajeActual)
         .single();
 
-      await sleep(2000);
+      await sleep(10000);
 
       if (data === null || error) {
         setIsDesactive(true);
@@ -965,7 +963,8 @@ const TravelPage = () => {
                           <div>
                             <p className={styles.label}>Placa</p>
                             <p className={styles.value}>
-                              {acceptedRoute?.vehiculo?.vehiculoligero.nserie}
+                              {/* {acceptedRoute?.vehiculo?.vehiculoligero?.nserie ?? 'vehiculo ligero'} */}
+                              123
                             </p>
                           </div>
                         </div>
@@ -974,7 +973,8 @@ const TravelPage = () => {
                           <div>
                             <p className={styles.label}>Tipo</p>
                             <p className={styles.value}>
-                              {acceptedRoute?.vehiculo?.vehiculoligero.tipo}
+                              {/* {acceptedRoute?.vehiculo?.vehiculoligero.tipo ?? 'vehiculo ligerio'} */}
+                              vehiculo ligero
                             </p>
                           </div>
                         </div>
@@ -1045,8 +1045,8 @@ const TravelPage = () => {
               {acceptedRoute
                 ? ""
                 : matchingRoutes.length > 0
-                ? "Rutas Disponibles"
-                : "Busca tu ruta"}
+                  ? "Rutas Disponibles"
+                  : "Busca tu ruta"}
             </h2>
 
             <div className={styles.cardsGrid}>
@@ -1106,11 +1106,11 @@ const TravelPage = () => {
                               </span>
                               {origen
                                 ? origen.slice(
-                                    0,
-                                    origen.length <= 30
-                                      ? origen.length
-                                      : origen.length - 10
-                                  ) + "..."
+                                  0,
+                                  origen.length <= 30
+                                    ? origen.length
+                                    : origen.length - 10
+                                ) + "..."
                                 : "Cargando..."}
                             </span>
                             <span className={styles.driverLocation}>
@@ -1123,11 +1123,11 @@ const TravelPage = () => {
                               </span>
                               {destino
                                 ? destino.slice(
-                                    0,
-                                    destino.length <= 30
-                                      ? destino.length
-                                      : destino.length - 10
-                                  ) + "..."
+                                  0,
+                                  destino.length <= 30
+                                    ? destino.length
+                                    : destino.length - 10
+                                ) + "..."
                                 : "Cargando..."}
                             </span>
                           </div>
