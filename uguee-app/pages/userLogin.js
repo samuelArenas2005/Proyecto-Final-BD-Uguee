@@ -6,17 +6,33 @@ import {
   TouchableOpacity, 
   TextInput,
   ScrollView,
+  ActivityIndicator,
   StatusBar
 } from 'react-native';
 import Title from '../Layouts/Title';
 import WaveDeco from '../Layouts/Wave';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { supabase } from '../supabase';
 
 
 
 const UserLogin = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState('');
+
+
+  const handleLogin = async () => {
+    setLoading(true);
+    const { error: err } = await supabase.auth.signInWithPassword({ email, password: password });
+    setLoading(false);
+    if (err) navigation.replace('PassengerHomeScreen'); //setError(err.message);
+    else navigation.replace('PassengerHomeScreen');
+  };
+
 
   return (
     <ScrollView 
@@ -60,9 +76,11 @@ const UserLogin = ({ navigation }) => {
                     />
                 </View>
 
+                {error && <Text style={styles.errorText}>{error}</Text>}
+
                 {/* Botón de Ingresar */}
-                <TouchableOpacity style={styles.loginButton} onPress={() => alert('Intentando ingresar...')}>
-                    <Text style={styles.loginButtonText}>INGRESAR</Text>
+                <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+                    <Text style={styles.loginButtonText} >INGRESAR</Text>
                 </TouchableOpacity>
 
                 {/* Botón de Ayuda */}

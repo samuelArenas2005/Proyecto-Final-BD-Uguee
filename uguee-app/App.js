@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, StatusBar } from 'react-native';
+import 'react-native-reanimated';
 import Wave from 'react-native-waves';
 import homeImage from './assets/homeImage.png';
 import Title from './Layouts/Title.js';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // 1. Importaciones de React Navigation
 import { NavigationContainer } from '@react-navigation/native';
@@ -10,7 +12,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // 2. Importar las pantallas
 import userLoginPage from './pages/userLogin.js'; 
-import driverLoginPage from './pages/driverLogin.js'; 
+import driverLoginPage from './pages/DriverLogin.js'; 
+import PassengerHomeScreen from './pages/PassengerHomeScreen.js'; 
+import DriverHomeScreen from './pages/DriverHomeScreen.js'; 
+import QRScannerScreen from './pages/QRScannerScreen.js'; // Importa la pantalla del escáner QR
+
 
 // 3. Crear el "Stack Navigator"
 const Stack = createNativeStackNavigator();
@@ -65,19 +71,24 @@ const App = () => {
   StatusBar.setHidden(true);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator 
-        // Opcional: para ocultar la barra de título que añade por defecto
-        screenOptions={{ headerShown: false }}
-      >
-        {/* Define las pantallas que puede manejar este navegador */}
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="userLogin" component={userLoginPage} />
-        <Stack.Screen name="driverLogin" component={driverLoginPage} />
-        {/* Aquí podrías añadir más pantallas, como: */}
-        {/* <Stack.Screen name="DriverLogin" component={DriverLoginPage} /> */}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator 
+          // Opcional: para ocultar la barra de título que añade por defecto
+          screenOptions={{ headerShown: false }}
+        >
+          {/* Define las pantallas que puede manejar este navegador */}
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="userLogin" component={userLoginPage} />
+          <Stack.Screen name="driverLogin" component={driverLoginPage} />
+          <Stack.Screen name="PassengerHomeScreen" component={PassengerHomeScreen} />
+          <Stack.Screen name="DriverHomeScreen" component={DriverHomeScreen} />
+          <Stack.Screen name="QRScannerScreen" component={QRScannerScreen} />
+          {/* Aquí podrías añadir más pantallas, como: */}
+          {/* <Stack.Screen name="DriverLogin" component={DriverLoginPage} /> */}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 };
 

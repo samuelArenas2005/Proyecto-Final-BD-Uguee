@@ -27,7 +27,6 @@ const styles = StyleSheet.create({
         right: 0,            // ...a derecha
         height: 100,         // Altura del contenedor de la ola
         width: '100%',
-        backgroundColor: 'green',
         // Es importante que no tenga flex: 1
         pointerEvents: 'box-none', // Permite que los toques "atraviesen" este contenedor
         zIndex: 0, // Asegura que la ola esté detrás de otros elementos
