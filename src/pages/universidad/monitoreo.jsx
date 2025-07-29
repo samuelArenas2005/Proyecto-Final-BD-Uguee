@@ -20,6 +20,20 @@ recuerda que solo puede mostrar la info de la universidad a la que pertenece no 
 hay estudiantes de otras universidad :D
 */
 
+
+
+export default function UserMonitorPage() {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_APIS_GOOGLE // Asegúrate que tu API Key esté configurada
+  });
+
+  const [selectedTrip, setSelectedTrip] = useState(null);
+
+
+
+const [activeTrips, setActiveTrips] = useState();
+
 // --- Configuración y Datos ---
 const containerStyle = { width: '100%', height: '100%' };
 const center = { lat: 3.3762, lng: -76.5323 };
@@ -32,15 +46,93 @@ const trips = [
 ];
 
 // Estilo de mapa monocromático para lograr el aspecto de la imagen de referencia
+const fetchPreviousRoutes = async () => {
+  const { data: activeTripsAll, error } = await supabase
+    .from('rutaConductorViaje')
+    .select(`
+      idRuta,
+      idViaje,
+      idConductor,
+      ruta (
+        salidaLatitud,
+        paradaLongitud,
+        salidalongitud,
+        paradalatitud,
+        horadesalida,
+        idruta
+      ),
+      viaje (
+        estadoDelViaje,
+        ubicacionActualLatitud,
+        ubicacionActualLongitud,
+        pasajeroviaje (
+          pasajero (
+            nombre
+          )
+        )
+      ),
+      conductor (
+        usuario (
+          nombreCompleto
+        )
+      )
+    `);
+
+  console.log("hola daniel ,", activeTripsAll);
+
+  if (error || !activeTripsAll) {
+    console.error("Error al obtener viajes activos:", error);
+    return;
+  }
+
+  const activeFilteredTrips = activeTripsAll.filter(
+    (trip) => trip.viaje.estadoDelViaje === "encurso"
+  );
+
+  if (activeFilteredTrips.length === 0) {
+    console.log("No hay viajes activos.");
+    return;
+  }
+
+  setActiveTrips(
+    activeFilteredTrips.map((trip) => ({
+      id: trip.ruta.idruta,
+      position:{lat:ubicacionActualLatitud,
+        lng:ubicacionActualLongitud},
+      destination: getAddressFromCoords(trip.ruta.paradalatitud,trip.ruta.paradalongitud),
+      driverName: trip.conductor.usuario.nombreCompleto ,
+      passengerNames: trip.viaje?.pasajeroviaje?.map(p => p.pasajero?.nombre) || []
+    }))
+  );
+
+  console.log("Número de viajes activos: ", activeFilteredTrips.length);
+};
+
+  async function getAddressFromCoords(lat, lng) {
+    const apiKey = import.meta.env.VITE_APIS_GOOGLE;
+    const endpoint = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+
+    try {
+      const response = await fetch(endpoint);
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.results.length > 0) {
+        return data.results[0].formatted_address;
+      } else {
+        console.warn('No se encontró una dirección para estas coordenadas.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error al obtener dirección:', error);
+      return null;
+    }
+  }
 
 
-export default function UserMonitorPage() {
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_APIS_GOOGLE // Asegúrate que tu API Key esté configurada
-  });
 
-  const [selectedTrip, setSelectedTrip] = useState(null);
+
+
+
 
   // Muestra un mensaje de carga mientras la API de Google Maps se inicializa
   if (!isLoaded) {
@@ -76,7 +168,7 @@ export default function UserMonitorPage() {
             }}
           >
             {/* Mapeo de los viajes para crear un marcador por cada uno */}
-            {trips.map((trip) => (
+            {activeTrips.map((trip) => (
               <MarkerF
                 key={trip.id}
                 position={trip.position}

@@ -737,6 +737,20 @@ const TravelPage = () => {
     setSearchMessage("Tu viaje ha sido cancelado. Puedes buscar uno nuevo.");
   };
 
+
+function imagen(urlData) {
+  const { data, error } = supabase.storage
+    .from("publico")
+    .getPublicUrl(urlData);
+
+  if (error) {
+    console.error("Error obteniendo URL pública:", error);
+    return null;
+  }
+
+  return data.publicUrl;
+}
+
   async function getAddressFromCoords(lat, lng) {
     const apiKey = import.meta.env.VITE_APIS_GOOGLE;
     const endpoint = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
@@ -880,9 +894,9 @@ const TravelPage = () => {
                     <div className={styles.section}>
                       <div className={styles.driverInfo}>
                         <img
-                          src={
-                            acceptedRoute.rutaconductorviaje[0].conductor
-                              .usuario.urlAvatar
+                          src={ imagen(acceptedRoute.rutaconductorviaje[0].conductor
+                              .usuario.urlAvatar)
+                            
                           }
                           alt={
                             acceptedRoute.rutaconductorviaje[0].conductor
@@ -1178,8 +1192,8 @@ const TravelPage = () => {
                     ?.codigoestudiantil ||
                   "Sin nombre",
                 avatarUrl:
-                  selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
-                    ?.urlAvatar,
+                  imagen (selectedRoute.rutaconductorviaje?.[0]?.conductor?.usuario
+                    ?.urlAvatar)
               }}
               routeData={{
                 origen: origen,
