@@ -22,7 +22,7 @@ export const LoginContextProvider = ({ children }) => {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       // AQUÍ ESTÁ EL CAMBIO: \w\s-. se convierte en \w\s-.
-      .replace(/[^\w\s-.]/g, "") // Se eliminan caracteres no deseados, PERO se conserva el punto.
+      .replace(/[^\w\s\-.]/g, "") // Se eliminan caracteres no deseados, PERO se conserva el punto.
       .trim()
       .replace(/\s+/g, "-");
 
@@ -68,6 +68,7 @@ export const LoginContextProvider = ({ children }) => {
       });
     if (logoError) {
       setSubmitting(false);
+      console.error("Error al subir el logo:", logoError);
       throw logoError;
     }
 

@@ -573,7 +573,7 @@ const TravelPage = () => {
       const distDestino = getDistanceMeters(destCoords, destinoRuta);
       const dentroDeNMin = Math.abs(diffMs) <= umbralN;
       const asientosDisponibles = ruta.asientosdisponibles;
-      /* const viajeEnCurso = ruta.rutaconductorviaje.at(-1).viaje.estadodelviaje; */
+      const viajeEnCurso = ruta.rutaconductorviaje.at(-1).viaje.estadodelviaje;
       return (
         distSalida <= RADIUS_METERS &&
         distDestino <= RADIUS_METERS &&
