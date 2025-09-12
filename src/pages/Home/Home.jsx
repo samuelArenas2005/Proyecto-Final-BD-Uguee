@@ -43,7 +43,7 @@ const Home = () => {
           </div>
           <p className={styles.mainSubtitle}>Conectando Estudiantes Universitarios</p>
           <p className={styles.subtitle}>Ir a clase jamás había sido tan fácil.</p>
-          <Link to="/prueba" className={styles.ctaButton}>
+          <Link to="/login" className={styles.ctaButton}>
             Explorar Rutas
           </Link>
         </div>
